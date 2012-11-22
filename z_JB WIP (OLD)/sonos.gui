@@ -1,0 +1,57 @@
+<gui>
+  <properties>
+    <project>Sonos</project>
+    <designer>CommandFusion</designer>
+    <size>
+      <portrait width="768" height="1024" />
+      <landscape width="1024" height="768" />
+    </size>
+    <imagefolder>
+    </imagefolder>
+    <debug loaderrors="0" connectionerrors="0" />
+    <devices>
+      <device name="CommandFusion iPhone 4">5AE0AE1AD7C838CFAE3BA26D23ED0712</device>
+      <device name="CommandFusion Archos5">D5652759DCC69DEC2503149E48959E55</device>
+      <device name="CommandFusion Black iPad2">4A10D1837F75AF1FC608D8C964A47900</device>
+      <device name="CommandFusion White iPad2">A65B95A392D915326B24CC37C7A88537</device>
+    </devices>
+  </properties>
+  <systems>
+    <system name="SSDP Notification" ip="0.0.0.0" port="3400" protocol="tcp" alwayson="1" offlinequeue="1" accept="1" acceptBroadcasts="0" ssl="0" maxconnections="100" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <cmd name="SendHTTPOK">HTTP1.1/ 200 OK\x0D\x0AContent-Type: text/html\x0D\x0AContent-Length: 0\x0D\x0A\x0D\x0A</cmd>
+      <fb name="SSDP Notification Feedback" regex="(.*)" />
+    </system>
+    <system name="SSDP Discovery" ip="239.255.255.250" origin="45535" port="1900" protocol="udp" alwayson="1" offlinequeue="0" accept="1" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="SSDP Discovery Feedback" regex="." />
+    </system>
+    <system name="SSDP Subscription" ip="192.168.1.146" origin="45501" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="SSDP Subscription Feedback" regex="." />
+    </system>
+  </systems>
+  <themes>
+    <theme type="background" name=".bg_portrait"><![CDATA[ background-image: url(bg_portrait.png); background-repeat: no-repeat;]]></theme>
+    <theme type="button" name=".btn_single[state='0']"><![CDATA[padding: 0px 20px 0px 20px; -webkit-border-image: url(btn_single_off.png) 0 20 0 20; text-shadow: rgba(0,0,0,1) 0px 1px 1px; color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_single[state='1']"><![CDATA[padding: 0px 20px 0px 20px; -webkit-border-image: url(btn_single_on.png) 0 20 0 20; text-shadow: rgba(53,202,244,1) 0px 0px 3px; color: #9DCEFF; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+  </themes>
+  <scripts>
+    <script name="sonos-discovery.js" />
+    <script name="main.js" />
+  </scripts>
+  <page name="Startup" j="0" transition="" subtype="" time="0" ease="">
+    <portrait t="bg_portrait">
+      <btn j="0" x="68" y="59" w="100" h="43" t="btn_single" flip="None" sim="1" l="0" s="1" js="sonosd.transportEventPlay(&quot;Play&quot;);">
+        <inactive s="0">PLAY</inactive>
+        <active s="0">PLAY</active>
+      </btn>
+      <btn j="0" x="188" y="59" w="100" h="43" t="btn_single" flip="None" sim="1" l="0" s="1" js="sonosd.transportEventPlay(&quot;Stop&quot;);">
+        <inactive s="0">STOP</inactive>
+        <active s="0">STOP</active>
+      </btn>
+      <btn j="0" x="308" y="59" w="100" h="43" t="btn_single" flip="None" sim="1" l="0" s="1" js="sonosd.transportEventPlay(&quot;Pause&quot;);">
+        <inactive s="0">PAUSE</inactive>
+        <active s="0">PAUSE</active>
+      </btn>
+    </portrait>
+    <landscape />
+  </page>
+</gui>
