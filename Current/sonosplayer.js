@@ -4,6 +4,7 @@
  AUTHOR:	Simon Post
  CONTACT:	simon.post@mac.com
  VERSION:	v0.0.1
+ VERSION:	v0.0.1 Now being codeveloped through github
 
  =========================================================================
  HELP:
