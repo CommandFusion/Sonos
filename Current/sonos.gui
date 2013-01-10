@@ -120,7 +120,12 @@
     </system>
     <system name="Loopback" ip="127.0.0.1" port="10210" protocol="udp" alwayson="1" offlinequeue="1" accept="1" acceptBroadcasts="1" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
       <cmd name="QueueListEnd" js="sonosGUI.queueListEnd()" jsSendsCommand="True" />
+      <cmd name="changeZoneVolume" js="sonosGUI.changeZoneVolume(data);" jsSendsCommand="True">[join]:[sliderval]</cmd>
+      <cmd name="ShowSonosVolumeSubPage" js="sonosGUI.mainVolumePress(data);" jsSendsCommand="True">[sliderval]</cmd>
+      <cmd name="sonosMainVolumeDrag" js="sonosGUI.mainVolumeDrag(data);" jsSendsCommand="True">[sliderval]</cmd>
+      <cmd name="MusicSourceListEnd" js="sonosGUI.musicSourceListEnd()" jsSendsCommand="True" />
     </system>
+    <system name="SendToSpotify" ip="spotify.west.sonos-ws-eu.com" port="80" protocol="tcp" alwayson="0" offlinequeue="0" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0" />
   </systems>
   <themes>
     <theme type="button" name=".newtheme_1[state='0']"><![CDATA[padding: 0px 0px 0px 0px;  filter: Alpha(Opacity=100); -moz-opacity:1; opacity: 1; background-color: Green; color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
@@ -245,6 +250,18 @@
     <theme type="button" name=".icon_crossfade[state='1']"><![CDATA[padding: 0px 0px 0px 0px; color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
     <theme type="text" name=".white_med_left"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 0px 1px 0px; color: White; font-size: 14px; font-family: 'Arial'; text-align: left; vertical-align: middle; font-weight: bold; font-style: none; text-decoration: none; display: table-cell;]]></theme>
     <theme type="text" name=".grey_med_left"><![CDATA[ text-shadow: rgba(0,0,0,0.78) 0px 1px 0px; color: #DDDDDD; font-size: 14px; font-family: 'Arial'; text-align: left; vertical-align: middle; font-weight: bold; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="text" name=".nowplayingtitle"><![CDATA[ color: Black; font-size: 12px; font-family: 'Verdana'; text-align: left; vertical-align: top; font-weight: bold; font-style: none; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="text" name=".nowplayingdetail"><![CDATA[ color: Gray; font-size: 12px; font-family: 'Verdana'; text-align: left; vertical-align: top; font-weight: bold; font-style: italics; text-decoration: none; display: table-cell;]]></theme>
+    <theme type="button" name=".transport_default[state='0']"><![CDATA[padding: 0px 0px 0px 0px; color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".transport_default[state='1']"><![CDATA[padding: 0px 0px 0px 0px; color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_rect_01[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(xe images\buttons\general\btn-rect-01-i.png); color: #868686; font-size: 18px; font-family: 'Arial'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".btn_rect_01[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(xe images\buttons\general\btn-rect-01-a.png); color: #C5C5C5; font-size: 18px; font-family: 'Arial'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="background" name=".l_tactical"><![CDATA[ background-image: url(iPad_background_1024X768_landscape.png); background-repeat: no-repeat;]]></theme>
+    <theme type="gauge" name=".h_vol[state='0']"><![CDATA[ background-image: url(gauge_horizontal_round_300X40.png);]]></theme>
+    <theme type="gauge" name=".h_vol[state='1']"><![CDATA[ background-image: url(gauge_horizontal_round_300X40_active.png);]]></theme>
+    <theme type="button" name=".Mute[state='0']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(images\buttons\transports_grey_mute_off_25.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="button" name=".Mute[state='1']"><![CDATA[padding: 0px 0px 0px 0px; background-image: url(images\buttons\transports_grey_mute_on_25.png); color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
+    <theme type="text" name=".left_lightblue_16pt_b"><![CDATA[ color: #B2D0E6; font-size: 14px; font-family: 'Arial'; text-align: left; vertical-align: middle; font-weight: bold; font-style: none; text-decoration: none; display: table-cell;]]></theme>
   </themes>
   <tokens>
     <token name="servers" value="" persist="1" />
@@ -260,6 +277,7 @@
     <script name="sonosdiscovery.js" />
     <script name="utilities.js" />
     <script name="main.js" />
+    <script name="musicsource.js" />
   </scripts>
   <page name="Player" j="0" transition="fade" subtype="None" time="0.5" ease="easeIn" start="1">
     <portrait t="bg_portrait_statusbar">
@@ -323,27 +341,9 @@
       <subpage name="popup_shuffle" x="269" y="251" j="8" transition1="fade" subtype1="None" time1="0.1" ease1="" transition2="fade" subtype2="None" time2="0.3" ease2="" clickthrough="0" topmost="1" v="1" l="0" />
     </portrait>
     <landscape t="bg_landscape_statusbar">
-      <btn j="10" x="405" y="21" w="53" h="65" t="transport_playpause" flip="None" sim="2" l="0" s="1" js="JRiver.player.doPlayback(&quot;PlayPause&quot;);">
-        <inactive s="0">
-        </inactive>
-        <active s="0">
-        </active>
-      </btn>
       <subpage name="volume" x="0" y="20" j="0" transition1="" subtype1="" time1="0" ease1="" transition2="" subtype2="" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
       <list j="41" x="0" y="129" w="259" h="592" headerSub="" titleSub="zone_group_coordinator_list" contentSub="zone_group_member_list" footerSub="zone_group_music_list" orientation="v" l="0" swipedelete="0" />
-      <btn j="12" x="472" y="21" w="53" h="65" t="transport_next" flip="None" sim="1" l="0" s="1" js="JRiver.player.doPlayback(&quot;Next&quot;);">
-        <inactive s="0">
-        </inactive>
-        <active s="0">
-        </active>
-      </btn>
-      <btn j="11" x="339" y="21" w="53" h="65" t="transport_prev" flip="None" sim="1" l="0" s="1" js="JRiver.player.doPlayback(&quot;Previous&quot;);">
-        <inactive s="0">
-        </inactive>
-        <active s="0">
-        </active>
-      </btn>
-      <btn j="17" x="611" y="86" w="59" h="43" t="back" flip="None" sim="1" l="0" s="1" js="JRiver.player.browseBack();">
+      <btn j="17" x="611" y="86" w="59" h="43" t="back" flip="None" sim="1" l="0" s="1" js="sonosGUI.musicSourceBack();">
         <inactive s="0">back</inactive>
         <active s="0">back</active>
       </btn>
@@ -360,30 +360,30 @@
       <subpage name="popup_playmode" x="318" y="238" j="5" transition1="fade" subtype1="None" time1="0.1" ease1="" transition2="fade" subtype2="None" time2="0.3" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
       <subpage name="now_playing" x="258" y="130" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
       <subpage name="now_playing_details" x="262" y="166" j="0" transition1="" subtype1="" time1="0" ease1="" transition2="" subtype2="" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
-      <btn j="14" x="874" y="77" w="50" h="57" t="icon_repeat" flip="None" sim="2" l="0" s="1" js="showPopup(&quot;d7&quot;);">
+      <btn j="14" x="874" y="77" w="50" h="57" t="icon_repeat" flip="None" sim="2" l="0" s="1" js="sonosGUI.repeatPress();">
         <inactive s="0">
         </inactive>
         <active s="0">
         </active>
       </btn>
-      <btn j="15" x="925" y="77" w="50" h="57" t="icon_shuffle" flip="None" sim="2" l="0" s="1" js="showPopup(&quot;d8&quot;);">
+      <btn j="15" x="925" y="77" w="50" h="57" t="icon_shuffle" flip="None" sim="2" l="0" s="1" js="sonosGUI.shufflePress();">
         <inactive s="0">
         </inactive>
         <active s="0">
         </active>
       </btn>
-      <btn j="13" x="262" y="29" w="50" h="50" t="icon_mute" flip="None" sim="2" l="0" s="0" js="showPopup(&quot;d7&quot;);">
+      <btn j="13" x="262" y="29" w="50" h="50" t="icon_mute" flip="None" sim="2" l="0" s="0" js="sonosGUI.mainMutePress();">
         <inactive s="0">
         </inactive>
         <active s="0">
         </active>
       </btn>
       <list j="48" x="260" y="406" w="348" h="316" headerSub="" titleSub="" contentSub="queue_item_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="QueueListEnd" listEndOffset="1" />
-      <list j="0" x="609" y="129" w="375" h="592" headerSub="" titleSub="" contentSub="music_source_item_single_list" footerSub="" orientation="v" l="0" swipedelete="0" />
+      <list j="65" x="609" y="129" w="375" h="592" headerSub="" titleSub="" contentSub="music_source_item_single_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="MusicSourceListEnd" listEndOffset="1" />
       <img x="0" y="720" w="1020" h="48" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">field_middle.png</img>
       <txt j="0" x="667" y="89" w="175" h="39" t="title_center" wrap="True" l="0">Music Source</txt>
       <txt j="0" x="3" y="88" w="255" h="39" t="title_center" wrap="True" l="0">Zones</txt>
-      <btn j="40" x="830" y="82" w="60" h="60" t="icon_crossfade" flip="None" sim="2" l="0" s="0" js="showPopup(&quot;d7&quot;);">
+      <btn j="40" x="830" y="82" w="60" h="60" t="icon_crossfade" flip="None" sim="2" l="0" s="0" js="sonosGUI.crossFadePress();">
         <inactive s="0">
           <img x="-10" y="-10" w="70" h="70">transports_grey_shuffle2_off_20.png</img>
         </inactive>
@@ -393,6 +393,53 @@
       </btn>
       <txt j="0" x="263" y="90" w="347" h="39" t="title_center" wrap="True" l="0">Now Playing</txt>
       <subpage name="queue_actions" x="0" y="0" j="50" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <btn j="10" x="364" y="28" w="46" h="47" t="transport_default" flip="None" sim="2" l="0" s="0" js="sonosGUI.playPress();">
+        <inactive s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_play_off_20.png</img>
+        </inactive>
+        <active s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_play_on_20.png</img>
+        </active>
+      </btn>
+      <btn j="11" x="321" y="29" w="46" h="47" t="transport_default" flip="None" sim="1" l="0" s="0" js="sonosGUI.prevPress();">
+        <inactive s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_skip_prev_off_20.png</img>
+        </inactive>
+        <active s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_skip_prev_on_20.png</img>
+        </active>
+      </btn>
+      <btn j="56" x="405" y="28" w="46" h="47" t="transport_default" flip="None" sim="2" l="0" s="0" js="sonosGUI.pausePress();">
+        <inactive s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_pause_off_20.png</img>
+        </inactive>
+        <active s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_pause_on_20.png</img>
+        </active>
+      </btn>
+      <btn j="57" x="445" y="28" w="46" h="47" t="transport_default" flip="None" sim="2" l="0" s="0" js="sonosGUI.stopPress();">
+        <inactive s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_stop_off_20.png</img>
+        </inactive>
+        <active s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_stop_on_20.png</img>
+        </active>
+      </btn>
+      <btn j="12" x="494" y="28" w="46" h="47" t="transport_default" flip="None" sim="1" l="0" s="0" js="sonosGUI.nextPress();">
+        <inactive s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_skip_next_off_20.png</img>
+        </inactive>
+        <active s="0">
+          <img x="-5" y="-5" w="60" h="60">transports_grey_skip_next_on_20.png</img>
+        </active>
+      </btn>
+      <subpage name="popup_zones_vol" x="100" y="100" j="62" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <btn j="9999" x="841" y="33" w="133" h="37" t="" flip="None" sim="1" l="0" s="1" js="sonosGUI.testSonosCall();">
+        <inactive s="0">
+        </inactive>
+        <active s="0">
+        </active>
+      </btn>
     </landscape>
   </page>
   <page name="Settings" j="0" transition="fade" subtype="None" time="0.3" ease="easeIn">
@@ -448,8 +495,6 @@
   </subpage>
   <subpage name="now_playing" w="350" h="295" clip="1">
     <img x="0" y="0" w="350" h="36" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_sidebar_title.png</img>
-    <img x="0" y="36" w="350" h="259" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_nowplaying_bg.png</img>
-    <img x="0" y="36" w="350" h="259" j="100" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_nowplaying_bg.png</img>
     <txt j="0" x="7" y="0" w="126" h="36" t="sidebar_subtitle_left" wrap="False" l="0">NOW PLAYING</txt>
     <img x="182" y="0" w="77" h="36" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_rotate_info.png</img>
     <btn j="0" x="0" y="0" w="350" h="295" t="blank" flip="None" sim="0" l="0" s="1" js="CF.setJoin(&quot;d13&quot;, &quot;{{1-[@d13]}}&quot;);">
@@ -460,21 +505,9 @@
     </btn>
   </subpage>
   <subpage name="volume" w="260" h="65" clip="1">
-    <btn j="18" x="3" y="0" w="38" h="65" t="vol_down" flip="None" sim="1" l="0" s="1" js="JRiver.player.setVolume(-0.10, 1);">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
     <img x="50" y="24" w="12" h="21" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">vol_slider_left.png</img>
     <img x="198" y="24" w="12" h="21" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">vol_slider_right.png</img>
-    <btn j="19" x="222" y="0" w="38" h="65" t="vol_up" flip="None" sim="1" l="0" s="1" js="JRiver.player.setVolume(0.10, 1);">
-      <inactive s="0">
-      </inactive>
-      <active s="0">
-      </active>
-    </btn>
-    <slider j="21" d="20" x="62" y="24" w="136" h="21" min="0" max="100" decimals="0" unit="decimal" t="vol" sim="1" l="0">
+    <slider j="21" d="20" x="62" y="24" w="136" h="21" min="0" max="100" decimals="0" pressCmd="ShowSonosVolumeSubPage" dragCmd="sonosMainVolumeDrag" unit="decimal" t="vol" sim="1" l="0">
       <indicator state="0" offsetX="0" offsetY="1" x="0" y="0" w="0" h="0" t="">vol_indicator.png</indicator>
       <indicator state="1" offsetX="0" offsetY="1" zoom="100" />
     </slider>
@@ -902,23 +935,23 @@
     <img x="0" y="0" w="389" h="100" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_top_noarrow_bg.png</img>
     <img x="0" y="100" w="389" h="91" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_middle_bg.png</img>
     <img x="0" y="191" w="389" h="100" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_bottom_bg.png</img>
-    <btn j="0" x="41" y="18" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="JRiver.player.doPlayOption(0);cancelPopups();">
+    <btn j="0" x="41" y="18" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.playNowMusicSourceAction();">
       <inactive s="0">Play Now</inactive>
       <active s="0">Play Now</active>
     </btn>
-    <btn j="0" x="41" y="66" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="JRiver.player.doPlayOption(1);cancelPopups();">
-      <inactive s="0">Play Now and Clear Playlist</inactive>
-      <active s="0">Play Now and Clear Playlist</active>
-    </btn>
-    <btn j="0" x="41" y="162" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="JRiver.player.doPlayOption(3);cancelPopups();">
-      <inactive s="0">Add to End</inactive>
-      <active s="0">Add to End</active>
-    </btn>
-    <btn j="0" x="41" y="114" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="JRiver.player.doPlayOption(2);cancelPopups();">
+    <btn j="0" x="41" y="66" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.playNextMusicSourceAction();">
       <inactive s="0">Play Next</inactive>
       <active s="0">Play Next</active>
     </btn>
-    <btn j="0" x="41" y="210" w="320" h="43" t="setting_button_red" flip="None" sim="1" l="0" s="1" js="cancelPopups();">
+    <btn j="0" x="41" y="162" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.replaceQueueMusicSourceAction();">
+      <inactive s="0">Replace Queue</inactive>
+      <active s="0">Replace Queue</active>
+    </btn>
+    <btn j="0" x="41" y="114" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.addQueueMusicSourceAction();">
+      <inactive s="0">Add to Queue</inactive>
+      <active s="0">Add to Queue</active>
+    </btn>
+    <btn j="5" x="41" y="210" w="320" h="43" t="setting_button_red" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Cancel</inactive>
       <active s="0">Cancel</active>
     </btn>
@@ -959,22 +992,22 @@
   </subpage>
   <subpage name="now_playing_details" w="350" h="254" clip="1">
     <img x="0" y="0" w="140" h="140" j="54" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_nowplaying_overlay.png</img>
-    <txt j="53" x="142" y="25" w="208" h="23" t="grey_med_left" wrap="True" l="0">Song Name</txt>
-    <txt j="41" x="142" y="0" w="208" h="25" t="white_med_left" wrap="True" l="0">Track [1/100]</txt>
+    <txt j="53" x="142" y="25" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Song Name</txt>
+    <txt j="41" x="142" y="0" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Track [1/100]</txt>
     <img x="10" y="177" w="11" h="57" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">slider_h_thin_left.png</img>
-    <img x="238" y="197" w="11" h="57" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">slider_h_thin_right.png</img>
-    <slider j="49" d="50" x="21" y="177" w="314" h="57" min="0" max="382" decimals="0" unit="decimal" t="slider_h_thin" sim="1" l="0">
+    <img x="335" y="177" w="11" h="57" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">slider_h_thin_right.png</img>
+    <slider j="22" d="0" x="21" y="177" w="314" h="57" min="0" max="382" decimals="0" unit="decimal" t="slider_h_thin" sim="0" l="0">
       <indicator state="0" offsetX="0" offsetY="0" x="0" y="0" w="0" h="0" t="">slider_thin_indicator.png</indicator>
       <indicator state="1" offsetX="0" offsetY="0" zoom="100" />
     </slider>
-    <txt j="50" x="12" y="212" w="61" h="25" t="item_med_left" wrap="False" l="0">00:00</txt>
-    <txt j="51" x="281" y="212" w="58" h="25" t="item_med_right" wrap="False" l="0">00:00</txt>
-    <txt j="25" x="142" y="75" w="208" h="23" t="grey_med_left" wrap="True" l="0">Artist Name</txt>
-    <txt j="0" x="142" y="50" w="208" h="25" t="white_med_left" wrap="True" l="0">Artist</txt>
-    <txt j="24" x="142" y="120" w="208" h="23" t="grey_med_left" wrap="True" l="0">Album Name</txt>
-    <txt j="45" x="142" y="95" w="208" h="25" t="white_med_left" wrap="True" l="0">Album</txt>
-    <txt j="55" x="0" y="173" w="350" h="23" t="grey_med_left" wrap="True" l="0">Song Name - Artist</txt>
-    <txt j="47" x="0" y="148" w="350" h="25" t="white_med_left" wrap="True" l="0">Next</txt>
+    <txt j="27" x="12" y="212" w="61" h="25" t="item_med_left" wrap="False" l="0">00:00</txt>
+    <txt j="26" x="281" y="212" w="58" h="25" t="item_med_right" wrap="False" l="0">00:00</txt>
+    <txt j="25" x="142" y="75" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Artist Name</txt>
+    <txt j="0" x="142" y="50" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Artist</txt>
+    <txt j="24" x="142" y="120" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Album Name</txt>
+    <txt j="45" x="142" y="95" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Album</txt>
+    <txt j="55" x="0" y="173" w="350" h="23" t="nowplayingdetail" wrap="True" l="0">Song Name - Artist</txt>
+    <txt j="47" x="0" y="148" w="350" h="25" t="nowplayingtitle" wrap="True" l="0">Next</txt>
   </subpage>
   <subpage name="configure_commandfusion" w="764" h="682" clip="1">
     <txt j="0" x="30" y="50" w="279" h="30" t="setting_title" wrap="False" l="0">Powered by CommandFusion</txt>
@@ -1047,11 +1080,11 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
     </txt>
   </subpage>
   <subpage name="music_source_item_single_list" w="348" h="44" clip="1">
-    <btn j="36" x="45" y="0" w="303" h="43" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
-      <inactive s="35">Music Source</inactive>
-      <active s="35">Music Source</active>
+    <btn j="67" x="45" y="0" w="303" h="43" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.selectMusicSource(join, list, listIndex);">
+      <inactive s="68">Music Source</inactive>
+      <active s="68">Music Source</active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="39" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
+    <img x="1" y="0" w="48" h="44" j="66" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
   </subpage>
   <subpage name="music_source_item_double_list" w="348" h="44" clip="1">
     <btn j="36" x="45" y="0" w="303" h="21" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
@@ -1081,11 +1114,44 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <active s="0">Cancel</active>
     </btn>
   </subpage>
+  <subpage name="zoneVolSlider" w="250" h="50" clip="1">
+    <slider j="60" d="59" x="52" y="21" w="182" h="24" min="0" max="100" decimals="0" pressCmd="changeZoneVolume" dragCmd="changeZoneVolume" releaseCmd="changeZoneVolume" unit="decimal" t="vol" sim="1" l="0">
+      <indicator state="0" offsetX="0" offsetY="0" x="0" y="0" w="0" h="0" t="">vol_slider.png</indicator>
+      <indicator state="1" offsetX="0" offsetY="0" x="0" y="0" w="0" h="0" t="">vol_slider.png</indicator>
+    </slider>
+    <btn j="58" x="0" y="9" w="40" h="40" t="Mute" flip="None" sim="2" l="0" s="0" js="sonosGUI.changeZoneMute(join, list, listIndex);">
+      <inactive s="0">
+        <img x="-10" y="-10" w="60" h="60">transports_grey_mute_off_20.png</img>
+      </inactive>
+      <active s="0">
+        <img x="-10" y="-10" w="60" h="60">transports_grey_mute_on_20.png</img>
+      </active>
+    </btn>
+    <txt j="63" x="51" y="1" w="194" h="14" t="left_lightblue_16pt_b" wrap="False" l="0">Room Name</txt>
+    <txt j="64" x="198" y="3" w="27" h="12" t="" wrap="False" l="0">
+    </txt>
+  </subpage>
   <subpage name="popup_zones" w="296" h="410" clip="1" t="popup_zones">
     <list j="46" x="29" y="72" w="239" h="298" headerSub="" titleSub="" contentSub="popup_zones_listitem" footerSub="" orientation="v" l="0" swipedelete="0" />
     <img x="0" y="0" w="296" h="410" j="0" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_zones_overlay.png</img>
     <txt j="0" x="23" y="28" w="250" h="45" t="popup_title" wrap="False" l="0">Zones</txt>
-    <btn j="42" x="198" y="35" w="60" h="30" t="setting_title_button" flip="None" sim="2" l="0" s="1" js="cancelPopups();">
+    <btn j="42" x="198" y="35" w="60" h="30" t="setting_title_button" flip="None" sim="2" l="0" s="1">
+      <inactive s="0">Done</inactive>
+      <active s="0">Done</active>
+    </btn>
+  </subpage>
+  <subpage name="popup_zonevol" w="280" h="600" clip="0" t="l_tactical">
+    <list j="61" x="14" y="41" w="250" h="559" headerSub="" titleSub="" contentSub="zoneVolSlider" footerSub="" orientation="v" l="0" swipedelete="0" />
+    <btn j="62" x="66" y="2" w="135" h="34" t="btn_rect_01" flip="None" sim="2" l="0" s="1" js="sonosGUI.mainVolumeRelease();">
+      <inactive s="0">Done</inactive>
+      <active s="0">Done</active>
+    </btn>
+  </subpage>
+  <subpage name="popup_zones_vol" w="296" h="410" clip="1" t="popup_zones">
+    <list j="61" x="29" y="72" w="239" h="298" headerSub="" titleSub="" contentSub="zoneVolSlider" footerSub="" orientation="v" l="0" swipedelete="0" />
+    <img x="0" y="0" w="296" h="410" j="0" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_zones_overlay.png</img>
+    <txt j="0" x="23" y="28" w="250" h="45" t="popup_title" wrap="False" l="0">Volume</txt>
+    <btn j="62" x="198" y="35" w="60" h="30" t="setting_title_button" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Done</inactive>
       <active s="0">Done</active>
     </btn>

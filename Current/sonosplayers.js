@@ -31,7 +31,7 @@ var SonosPlayers = function (params) {
 		var sonosDiscover = new SonosDiscovery();
 		sonosDiscover.init();
 		sonosDiscover.SonosDiscoveredCallback = function (sonosDiscovered) {
-			CF.log("Found Sonos Zone within SonosPlayers.js: " + sonosDiscovered.roomName);
+			//CF.log("Found Sonos Zone within SonosPlayers.js: " + sonosDiscovered.roomName);
 			//CF.logObject(sonosDiscovered);
 			var sonosObj = new SonosPlayer();
 			sonosObj.init(sonosDiscovered, self.notificationSystemNumber);

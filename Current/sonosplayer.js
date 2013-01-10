@@ -51,6 +51,7 @@ var SonosPlayer = function () {
 		currentNotifyMessage         :"", // holds the current notification message being processed
 		GUINotificationEventCallback :null,
 		zoneQueueReturnedCallback    :null,
+        getPositionInfoCallback: sonosGUI.updateNowPlayingGUI,
 		roomName                     :"",
 		zoneType                     :"",
 		RINCON                       :"",
@@ -60,7 +61,7 @@ var SonosPlayer = function () {
 		sonosIconPath                :"",
 		modelName                    :"",
 		notificationSystemNumber     :0,
-		zoneGroupNotificationCallback:sonosGUI.processNotificationEvent, // used to point to the CF system that is handling notification messages for this player
+        zoneGroupNotificationCallback:sonosGUI.processNotificationEvent, // used to point to the CF system that is handling notification messages for this player
 		queueNumberReturned          :0,
 		queueRowsToReturn            :50,
 		currentTrackAlbumArtAddr     :"",
@@ -75,11 +76,19 @@ var SonosPlayer = function () {
 		nextTrackArtist              :"",
 		repeat                       :0,
 		shuffle                      :0,
-		zoneGroupMusicNowPLaying     :0
+		zoneGroupMusicNowPLaying     :0,
+        trackDurationSecs: 0,
+        trackCurrentPosSecs: 0,
+        volume: 0,
+        mute:0,
+        priorVolume: 0
+        //trackCurrentPosStr: "",
+        //trackCurrentSliderVal: 0,
+        //trackCurrentTime: ""
 	}
 
 	self.init = function (sonosPlayer, systemNumber) {
-		CF.log("SonosPlayer: Init called with systemNumber of: " + self.notificationSystemNumber);
+		//CF.log("SonosPlayer: Init called with systemNumber of: " + systemNumber);
 		// setup the player information
 		self.roomName = sonosPlayer.roomName;
 		self.zoneType = sonosPlayer.zoneType;
@@ -151,7 +160,7 @@ var SonosPlayer = function () {
 
 
 	self.parseFeedbackSubscription = function (regex, data) {
-		CF.log("SonosDiscovery Subscription Returned:\n" + data);
+		//CF.log("SonosDiscovery Subscription Returned:\n" + data);
 	};
 
 	self.onProcessNotifyEvent = function (theSystem, feedback) {
@@ -164,26 +173,33 @@ var SonosPlayer = function () {
 		if (self.notifyMsgQueue.length != 0 && !self.parseUnderway) {
 			self.parseUnderway = true;
 			self.currentNotifyMessage = self.notifyMsgQueue.shift();
+            //CF.log("notify message is: " + self.currentNotifyMessage);
 			var description = self.currentNotifyMessage.substring(self.currentNotifyMessage.indexOf("NOTIFY /") + 8, self.currentNotifyMessage.indexOf("HTTP") - 1);
-			CF.log("parsing notify event for player - " + self.roomName + " of type:" + description);
-			switch (description) {
+			//CF.log("parsing notify event for player - " + self.roomName + " of type:" + description);
+            var findRINCON = /RINCON_[A-Z0-9]{17}/;  //  get RINCON which is unique ID of componenet
+            // CF.log("Notify RINCON is:" + findRINCON.exec(self.currentNotifyMessage) + " and this RINCON is: " + self.RINCON);
+            if (findRINCON.exec(self.currentNotifyMessage) != self.RINCON) {
+                CF.log("Got extraneous Notify from :" + findRINCON.exec(self.currentNotifyMessage) + " and this RINCON is: " + self.RINCON);
+            }
+            else {
+                switch (description) {
 				case "Alarm Clock":            //self.parseAlarmClock(response);
-					CF.log("Got a alarm clock event");
+					//CF.log("Got a alarm clock event");
 					break;
 				case "Music Services":        //self.parseMusicServices(response);
-					CF.log("Got a music service event");
+					//CF.log("Got a music service event");
 					break;
 				case "Audio In":            //self.parseAudioIn(response);
-					CF.log("Got a audio in event");
+					//CF.log("Got a audio in event");
 					break;
 				case "Device Properties":    //self.parseDeviceProperties(response);
-					CF.log("Got a device properties event");
+					//CF.log("Got a device properties event");
 					break;
 				case "System Properties":    //self.parseSystemProperties(response);
-					CF.log("Got a system properties event");
+					//CF.log("Got a system properties event");
 					break;
 				case "Zone Group":
-					CF.log("Got a zone group event");
+					//CF.log("Got a zone group event");
 					//self.currentNotifyMessage = '<e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><ZoneGroupState>&lt;ZoneGroups&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5828A1C401400&quot; ID=&quot;RINCON_000E5828A1C401400:79&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5828A1C401400&quot; Location=&quot;http://192.168.1.90:1400/xml/device_description.xml&quot; ZoneName=&quot;Record Player&quot; Icon=&quot;x-rincon-roomicon:den&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;55&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5855842601400&quot; ID=&quot;RINCON_000E5855842601400:23&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5855842601400&quot; Location=&quot;http://192.168.1.75:1400/xml/device_description.xml&quot; ZoneName=&quot;Office&quot; Icon=&quot;x-rincon-roomicon:office&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; ChannelMapSet=&quot;RINCON_000E5855842601400:LF,RF;RINCON_000E58980FE001400:SW,SW&quot; BootSeq=&quot;13&quot;/&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58980FE001400&quot; Location=&quot;http://192.168.1.62:1400/xml/device_description.xml&quot; ZoneName=&quot;Office&quot; Icon=&quot;x-rincon-roomicon:office&quot; Invisible=&quot;1&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; ChannelMapSet=&quot;RINCON_000E5855842601400:LF,RF;RINCON_000E58980FE001400:SW,SW&quot; BootSeq=&quot;15&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E585445BA01400&quot; ID=&quot;RINCON_000E585445BA01400:10&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E585445BA01400&quot; Location=&quot;http://192.168.1.65:1400/xml/device_description.xml&quot; ZoneName=&quot;Lauren Room&quot; Icon=&quot;x-rincon-roomicon:living&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;17&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5828228801400&quot; ID=&quot;RINCON_000E5828228801400:216&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5828228801400&quot; Location=&quot;http://192.168.1.67:1400/xml/device_description.xml&quot; ZoneName=&quot;Kitchen&quot; Icon=&quot;x-rincon-roomicon:kitchen&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;101&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5828A20201400&quot; ID=&quot;RINCON_000E58283BD401400:187&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5828A20201400&quot; Location=&quot;http://192.168.1.74:1400/xml/device_description.xml&quot; ZoneName=&quot;Master Bed&quot; Icon=&quot;x-rincon-roomicon:masterbedroom&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;101&quot;/&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58283BD401400&quot; Location=&quot;http://192.168.1.77:1400/xml/device_description.xml&quot; ZoneName=&quot;Bathroom&quot; Icon=&quot;x-rincon-roomicon:bathroom&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;114&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E58289F2E01400&quot; ID=&quot;RINCON_000E58289F2E01400:111&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58289F2E01400&quot; Location=&quot;http://192.168.1.76:1400/xml/device_description.xml&quot; ZoneName=&quot;Dining Room&quot; Icon=&quot;x-rincon-roomicon:dining&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;103&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E58283AC801400&quot; ID=&quot;RINCON_000E58283AC801400:112&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58283AC801400&quot; Location=&quot;http://192.168.1.73:1400/xml/device_description.xml&quot; ZoneName=&quot;TV Room&quot; Icon=&quot;x-rincon-roomicon:tvroom&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;105&quot;/&gt;&lt;/ZoneGroup&gt;&lt;/ZoneGroups&gt;</ZoneGroupState></e:property></e:propertyset>';
 					//self.currentNotifyMessage = Utils.unescape(self.currentNotifyMessage);
 					self.currentNotifyMessage = Utils.unescape(self.currentNotifyMessage);
@@ -192,24 +208,25 @@ var SonosPlayer = function () {
 					}
 					break;
 				case "Group Management":    //self.parseGroupManagement(response);
-					CF.log("Got a group management event");
+					//CF.log("Got a group management event");
 					break;
 				case "Content Directory":
-					CF.log("Got a content directory notify event");
+					//CF.log("Got a content directory notify event");
 					break;
 				case "Render Control":
-					CF.log("got a render control event");
-					//self.parseRenderControl();
+					//CF.log("got a render control event");
+					self.parseRenderControl();
 					break;
 				case "Connection Manager":    //self.parseConnectionManager(response);
 					break;
 				case "Transport Event":
-					CF.log("got a transport control event");
+					//CF.log("got a transport control event");
 					self.parseTransportEvent();  // see transport event area
 					break;
 				default:
 					CF.log("Invalid Response Type");
 			}
+            }
 			// Clear the flag saying we have finished processing the notification message
 			self.parseUnderway = false;
 			// Recall the notification routine to see if there are any more messages to deal with
@@ -321,7 +338,8 @@ var SonosPlayer = function () {
 				break;
 		}
 		// Do the call back to the GUI so we can update the UI.  The reasons we call
-		if (self.zoneGroupNotificationCallback !== null) {
+        //self.getPositionInfo();
+        if (self.zoneGroupNotificationCallback !== null) {
 			if (self.transportState === self.priorTransportState) {
 				self.zoneGroupNotificationCallback("TransportEvent", self.RINCON);  // process this message in the GUI layer
 			}
@@ -349,6 +367,49 @@ var SonosPlayer = function () {
 
 	};
 
+    /*
+     ===============================================================================
+
+
+     =========================================================================
+     NOTES:
+
+     The following handles render control changes, ie volume and mute
+
+     =========================================================================
+     */
+
+    self.parseRenderControl = function () {
+        //CF.log("Render control event was: " + self.currentNotifyMessage);
+        var response = Utils.unescapeLight(self.currentNotifyMessage.substr(self.currentNotifyMessage.indexOf("<e:propertyset")));
+        response = Utils.unescape(response);
+        //response = Utils.unescape(response);
+        var i =0, j = 0;
+        i = response.indexOf("<Volume", j);
+        if (i >= 0) {
+            j = response.indexOf("/>", i);
+            self.priorVolume = self.volume;
+            self.volume = parseInt(self.extractTag(response.substring(i,j), 'val="', '"'));
+            //CF.log("Setting volume for: " + self.roomName + " and Volume is: " + self.volume)
+        }
+        i = response.indexOf("<Mute", j);
+        if (i >= 0) {
+            // self.zoneMutes = 0;
+            j = response.indexOf("/>", i);
+            var mute = parseInt(self.extractTag(response.substring(i,j), 'val="', '"'));
+            self.mute = mute;
+            //CF.log("Setting mute for: " + self.roomName + "and mute is: " + self.mute)
+        }
+        /*if (self.priorVolume != self.volume) {
+            self.receiveSonosVolumeChange(self.discoveredDevicesDetails[self.notifyingZone]);
+        }*/
+        if (self.zoneGroupNotificationCallback !== null) {
+            //CF.log("Got heere");
+            self.zoneGroupNotificationCallback("VolumeChangeEvent", self.RINCON);  // process this message in the GUI layer
+        }
+        //self.calcMuteAndZoneVolumeDetails();
+        //self.displayMuteAndVolUI();
+    }
 
 	/*
 	 ===============================================================================
@@ -364,11 +425,11 @@ var SonosPlayer = function () {
 
 	self.addZoneToGroup = function (zoneCoordinator) {
 		CF.log("zoneCoordinator is: " + zoneCoordinator);
-		self.AVTransportSetAVTransportURI("", self.host, 0, "x-rincon:" + zoneCoordinator, "")
+		self.AVTransportSetAVTransportURI("", 0, "x-rincon:" + zoneCoordinator, "");
 	}
 
 	self.removeZoneFromGroup = function () {
-		self.AVTransportBecomeCoordinatorOfStandaloneGroup("", self.host, 0)
+		self.AVTransportBecomeCoordinatorOfStandaloneGroup("", 0);
 	};
 
 	/*
@@ -385,7 +446,7 @@ var SonosPlayer = function () {
 
 	self.getQueueForCurrentZone = function () {
 		CF.log("Host is: " + self.host)
-		self.ContentDirectoryBrowse(self.processGetQueueForCurrentZone, self.host, "Q:0", "BrowseDirectChildren", "dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI", self.queueNumberReturned, self.queueRowsToReturn, "")
+		self.ContentDirectoryBrowse(self.processGetQueueForCurrentZone, "Q:0", "BrowseDirectChildren", "dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI", self.queueNumberReturned, self.queueRowsToReturn, "");
 
 	};
 	self.resetQueueNumberReturned = function () {
@@ -422,6 +483,7 @@ var SonosPlayer = function () {
 			joinData.push({s35:title, s37:artist, s39:art, s49:trackNo});
 		}
 		//CF.listAdd("l48", joinData);
+        self.getPositionInfo();
 		self.queueNumberReturned = self.queueNumberReturned + parseInt(response.NumberReturned);
 		if (self.zoneQueueReturnedCallback !== null) {
 			self.zoneQueueReturnedCallback(joinData);  // process the queue
@@ -430,8 +492,8 @@ var SonosPlayer = function () {
 	};
 
 	self.transportEventSeekTrackNumber = function (trackNumber) {
-		self.AVTransportSeek("", self.host, 0, "TRACK_NR", trackNumber)
-		self.AVTransportPlay("", self.host, 0, 1)
+		self.AVTransportSeek("", 0, "TRACK_NR", trackNumber);
+		self.AVTransportPlay("", 0, 1);
 
 	}
 
@@ -439,28 +501,125 @@ var SonosPlayer = function () {
 
 	self.transportEventRemoveTrackNumber = function (trackNumber) {
 		self.queueNumberReturned = 0;
-		self.AVTransportRemoveTrackFromQueue(self.getQueueForCurrentZone, self.host, 0, "Q:0/" + trackNumber, 0)
+		self.AVTransportRemoveTrackFromQueue(self.getQueueForCurrentZone, 0, "Q:0/" + trackNumber, 0);
 
 	}
 
 	self.resetPlayerToOwnQueue = function (zoneCoordinator) {
-		self.AVTransportSetAVTransportURI("", self.Host, 0, "x-rincon-queue:" + zoneCoordinator + "#0", "");
+		self.AVTransportSetAVTransportURI("", 0, "x-rincon-queue:" + zoneCoordinator + "#0", "");
 	}
 
 
-	/*
-	 ===============================================================================
+    /*
+     ===============================================================================
 
 
-	 =========================================================================
-	 NOTES:
+     =========================================================================
+     NOTES:
 
-	 Sends SOAP calls
+     Gets the current position info and updates the various player variables.  Used by the UI to make sure
+     the current playing position etc is up to date
 
-	 =========================================================================
-	 */
-	self.sendSoapRequest = function (url, host, xml, soapAction, callback) {
-		url = host + url;
+     =========================================================================
+     */
+
+    self.getPositionInfo = function() {
+        self.AVTransportGetPositionInfo(self.processGetPositionInfo, 0);
+    };
+
+    //callback(  {"Track": xmlDoc.getElementsByTagName("Track")[0].textContent, "TrackDuration": xmlDoc.getElementsByTagName("TrackDuration")[0].textContent, "TrackMetaData": xmlDoc.getElementsByTagName("TrackMetaData")[0].textContent, "TrackURI": xmlDoc.getElementsByTagName("TrackURI")[0].textContent, "RelTime": xmlDoc.getElementsByTagName("RelTime")[0].textContent, "AbsTime": xmlDoc.getElementsByTagName("AbsTime")[0].textContent, "RelCount": xmlDoc.getElementsByTagName("RelCount")[0].textContent, "AbsCount": xmlDoc.getElementsByTagName("AbsCount")[0].textContent} )
+
+    self.processGetPositionInfo = function(response) {
+        var body = response.TrackMetaData;
+        //CF.log("get posinfo body is :" + body);
+        var xotree = new XML.ObjTree();
+        var dumper = new JKL.Dumper();
+        //CF.log("parseString is: " + parseString);
+        var tree = xotree.parseXML(response.TrackMetaData);
+        //CF.log("JSON version is: " + dumper.dump(tree));
+        if (self.extractTag(body, "<r:streamContent>", "</r:streamContent>") == "" && (body.indexOf("application/octet-stream") == -1)) {
+            /*CF.log("Get position info track metadata is: "+ response.TrackMetaData);
+             CF.log("Get position info track  is: "+ response.Track);
+             CF.log("Get position info track duration  is: "+ response.TrackDuration);
+             CF.log("Get position info TrackURI is: "+ response.TrackURI);
+             CF.log("Get position info track RelTime is: "+ response.RelTime);
+             CF.log("Get position info track AbsTime is: "+ response.AbsTime);
+             CF.log("Get position info track RelCount is: "+ response.RelCount);
+             CF.log("Get position info track AbsCount is: "+ response.AbsCount);*/
+            var durationSeconds = self.turnSonosTimeToSecs(response.TrackDuration);
+            var currentSeconds = self.turnSonosTimeToSecs(response.RelTime);
+            /*CF.setJoin("a12", currentSeconds/durationSeconds*65536)
+            CF.setJoin("s550", response.RelTime.substr(2));
+            CF.setJoin("s551", self.turnSecondstoSonosString(durationSeconds-currentSeconds));*/
+            var artist = "", title = "", art ="", album = "";
+            artist = self.extractTag(body, "<dc:creator>", "</dc:creator>");
+            if (artist == "") { // artise will come back as "" if there is nothing playing
+                artist = "None";
+                title = "None";
+                art = "";
+                album = "None"
+            }
+            else {
+                title = self.extractTag(body, "<dc:title>", "</dc:title>");
+                art = self.host + Utils.unescape(self.extractTag(body, "<upnp:albumArtURI>", "</upnp:albumArtURI>"));
+                album = self.extractTag(body,"<upnp:album>", "</upnp:album>")
+            }
+            self.currentTrackAlbumArtAddr = art;
+            self.currentTrackName = title;
+            self.currentTrackAlbum = album;
+            self.currentTrackArtist = artist;
+            self.trackDurationSecs = parseInt(durationSeconds);
+            self.trackCurrentPosSecs = parseInt(currentSeconds);
+            //self.trackCurrentPosStr = response.RelTime.substr(2);
+            //self.trackCurrentSliderVal = currentSeconds/durationSeconds*65536;
+            //self.trackCurrentTime = self.turnSecondstoSonosString(durationSeconds-currentSeconds);
+        }
+        else {
+            /*CF.setJoin("a12", 0)
+            CF.setJoin("s550", "0:00:00");
+            CF.setJoin("s551", "0:00:00");*/
+            album = self.extractTag(body, "<r:streamContent>", "</r:streamContent>");
+            //self.positionSliderVal = 0;
+            self.trackDurationSecs = 0;
+            self.trackCurrentPosSecs = 0;
+            self.currentTrackAlbum = album;
+        }
+
+        if (self.getPositionInfoCallback !== null) {
+            self.getPositionInfoCallback();  // process the queue
+        }
+
+        /*self.updateNowPlaying(self.nowPlayingZoneCoordinatorIndex);
+        if (self.discoveredDevicesDetails[self.nowPlayingZoneCoordinatorIndex].transportState =="PLAYING") {
+            self.timeGetPositionInfo = setTimeout(function() { self.getPositionInfo(); }, 5000);
+        }*/
+    }
+
+    self.turnSonosTimeToSecs = function (strTime) {
+        var seconds = 0;
+        strTime = strTime.split(":");
+        seconds = parseInt(strTime[0]) * 3600 + parseInt(strTime[1]*60) + parseInt(strTime[2]);
+        return seconds
+
+    }
+
+
+
+
+
+    /*
+    ===============================================================================
+
+
+    =========================================================================
+    NOTES:
+
+    Sends SOAP calls
+
+    =========================================================================
+    */
+	self.sendSoapRequest = function (url, xml, soapAction, callback) {
+		url = self.host + url;
 		CF.log("url is: " + url + " and SOAP Action is: " + soapAction);
 		var response = CF.request(url, "POST", {"SOAPAction":soapAction}, xml, function (status, headers, body) {
 			if (status == 200) {
@@ -506,19 +665,19 @@ var SonosPlayer = function () {
 	 =========================================================================
 	 */
 
-	self.AlarmClockSetFormat = function (callback, host, DesiredTimeFormat, DesiredDateFormat) {
+	self.AlarmClockSetFormat = function (callback, DesiredTimeFormat, DesiredDateFormat) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#SetFormat';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetFormat xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><DesiredTimeFormat>' + DesiredTimeFormat + '</DesiredTimeFormat><DesiredDateFormat>' + DesiredDateFormat + '</DesiredDateFormat></u:SetFormat></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AlarmClockGetFormat = function (callback, host) {
+	self.AlarmClockGetFormat = function (callback) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#GetFormat';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetFormat xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"></u:GetFormat></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -532,19 +691,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AlarmClockSetTimeZone = function (callback, host, Index, AutoAdjustDst) {
+	self.AlarmClockSetTimeZone = function (callback, Index, AutoAdjustDst) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#SetTimeZone';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetTimeZone xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><Index>' + Index + '</Index><AutoAdjustDst>' + AutoAdjustDst + '</AutoAdjustDst></u:SetTimeZone></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AlarmClockGetTimeZone = function (callback, host) {
+	self.AlarmClockGetTimeZone = function (callback) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#GetTimeZone';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetTimeZone xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"></u:GetTimeZone></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -558,11 +717,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AlarmClockGetTimeZoneAndRule = function (callback, host) {
+	self.AlarmClockGetTimeZoneAndRule = function (callback) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#GetTimeZoneAndRule';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetTimeZoneAndRule xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"></u:GetTimeZoneAndRule></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -576,11 +735,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AlarmClockGetTimeZoneRule = function (callback, host, Index) {
+	self.AlarmClockGetTimeZoneRule = function (callback, Index) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#GetTimeZoneRule';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetTimeZoneRule xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><Index>' + Index + '</Index></u:GetTimeZoneRule></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -594,19 +753,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AlarmClockSetTimeServer = function (callback, host, DesiredTimeServer) {
+	self.AlarmClockSetTimeServer = function (callback, DesiredTimeServer) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#SetTimeServer';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetTimeServer xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><DesiredTimeServer>' + DesiredTimeServer + '</DesiredTimeServer></u:SetTimeServer></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AlarmClockGetTimeServer = function (callback, host) {
+	self.AlarmClockGetTimeServer = function (callback) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#GetTimeServer';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetTimeServer xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"></u:GetTimeServer></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -620,19 +779,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AlarmClockSetTimeNow = function (callback, host, DesiredTime, TimeZoneForDesiredTime) {
+	self.AlarmClockSetTimeNow = function (callback, DesiredTime, TimeZoneForDesiredTime) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#SetTimeNow';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetTimeNow xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><DesiredTime>' + DesiredTime + '</DesiredTime><TimeZoneForDesiredTime>' + TimeZoneForDesiredTime + '</TimeZoneForDesiredTime></u:SetTimeNow></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AlarmClockGetHouseholdTimeAtStamp = function (callback, host, TimeStamp) {
+	self.AlarmClockGetHouseholdTimeAtStamp = function (callback, TimeStamp) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#GetHouseholdTimeAtStamp';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetHouseholdTimeAtStamp xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><TimeStamp>' + TimeStamp + '</TimeStamp></u:GetHouseholdTimeAtStamp></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -646,11 +805,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AlarmClockGetTimeNow = function (callback, host) {
+	self.AlarmClockGetTimeNow = function (callback) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#GetTimeNow';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetTimeNow xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"></u:GetTimeNow></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -664,11 +823,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AlarmClockCreateAlarm = function (callback, host, StartLocalTime, Duration, Recurrence, Enabled, RoomUUID, ProgramURI, ProgramMetaData, PlayMode, Volume, IncludeLinkedZones) {
+	self.AlarmClockCreateAlarm = function (callback, StartLocalTime, Duration, Recurrence, Enabled, RoomUUID, ProgramURI, ProgramMetaData, PlayMode, Volume, IncludeLinkedZones) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#CreateAlarm';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:CreateAlarm xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><StartLocalTime>' + StartLocalTime + '</StartLocalTime><Duration>' + Duration + '</Duration><Recurrence>' + Recurrence + '</Recurrence><Enabled>' + Enabled + '</Enabled><RoomUUID>' + RoomUUID + '</RoomUUID><ProgramURI>' + ProgramURI + '</ProgramURI><ProgramMetaData>' + ProgramMetaData + '</ProgramMetaData><PlayMode>' + PlayMode + '</PlayMode><Volume>' + Volume + '</Volume><IncludeLinkedZones>' + IncludeLinkedZones + '</IncludeLinkedZones></u:CreateAlarm></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -682,27 +841,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AlarmClockUpdateAlarm = function (callback, host, ID, StartLocalTime, Duration, Recurrence, Enabled, RoomUUID, ProgramURI, ProgramMetaData, PlayMode, Volume, IncludeLinkedZones) {
+	self.AlarmClockUpdateAlarm = function (callback, ID, StartLocalTime, Duration, Recurrence, Enabled, RoomUUID, ProgramURI, ProgramMetaData, PlayMode, Volume, IncludeLinkedZones) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#UpdateAlarm';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:UpdateAlarm xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><ID>' + ID + '</ID><StartLocalTime>' + StartLocalTime + '</StartLocalTime><Duration>' + Duration + '</Duration><Recurrence>' + Recurrence + '</Recurrence><Enabled>' + Enabled + '</Enabled><RoomUUID>' + RoomUUID + '</RoomUUID><ProgramURI>' + ProgramURI + '</ProgramURI><ProgramMetaData>' + ProgramMetaData + '</ProgramMetaData><PlayMode>' + PlayMode + '</PlayMode><Volume>' + Volume + '</Volume><IncludeLinkedZones>' + IncludeLinkedZones + '</IncludeLinkedZones></u:UpdateAlarm></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AlarmClockDestroyAlarm = function (callback, host, ID) {
+	self.AlarmClockDestroyAlarm = function (callback, ID) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#DestroyAlarm';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:DestroyAlarm xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><ID>' + ID + '</ID></u:DestroyAlarm></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AlarmClockListAlarms = function (callback, host) {
+	self.AlarmClockListAlarms = function (callback) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#ListAlarms';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ListAlarms xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"></u:ListAlarms></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -716,19 +875,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AlarmClockSetDailyIndexRefreshTime = function (callback, host, DesiredDailyIndexRefreshTime) {
+	self.AlarmClockSetDailyIndexRefreshTime = function (callback, DesiredDailyIndexRefreshTime) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#SetDailyIndexRefreshTime';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetDailyIndexRefreshTime xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"><DesiredDailyIndexRefreshTime>' + DesiredDailyIndexRefreshTime + '</DesiredDailyIndexRefreshTime></u:SetDailyIndexRefreshTime></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AlarmClockGetDailyIndexRefreshTime = function (callback, host) {
+	self.AlarmClockGetDailyIndexRefreshTime = function (callback) {
 		var url = '/AlarmClock/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AlarmClock:1#GetDailyIndexRefreshTime';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetDailyIndexRefreshTime xmlns:u="urn:schemas-upnp-org:service:AlarmClock:1"></u:GetDailyIndexRefreshTime></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -742,11 +901,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.MusicServicesGetSessionId = function (callback, host, ServiceId, Username) {
+	self.MusicServicesGetSessionId = function (callback, ServiceId, Username) {
 		var url = '/MusicServices/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:MusicServices:1#GetSessionId';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetSessionId xmlns:u="urn:schemas-upnp-org:service:MusicServices:1"><ServiceId>' + ServiceId + '</ServiceId><Username>' + Username + '</Username></u:GetSessionId></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -760,11 +919,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.MusicServicesListAvailableServices = function (callback, host) {
+	self.MusicServicesListAvailableServices = function (callback) {
 		var url = '/MusicServices/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:MusicServices:1#ListAvailableServices';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ListAvailableServices xmlns:u="urn:schemas-upnp-org:service:MusicServices:1"></u:ListAvailableServices></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -778,11 +937,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AudioInStartTransmissionToGroup = function (callback, host, CoordinatorID) {
+	self.AudioInStartTransmissionToGroup = function (callback, CoordinatorID) {
 		var url = '/AudioIn/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AudioIn:1#StartTransmissionToGroup';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:StartTransmissionToGroup xmlns:u="urn:schemas-upnp-org:service:AudioIn:1"><CoordinatorID>' + CoordinatorID + '</CoordinatorID></u:StartTransmissionToGroup></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -796,27 +955,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AudioInStopTransmissionToGroup = function (callback, host, CoordinatorID) {
+	self.AudioInStopTransmissionToGroup = function (callback, CoordinatorID) {
 		var url = '/AudioIn/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AudioIn:1#StopTransmissionToGroup';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:StopTransmissionToGroup xmlns:u="urn:schemas-upnp-org:service:AudioIn:1"><CoordinatorID>' + CoordinatorID + '</CoordinatorID></u:StopTransmissionToGroup></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AudioInSetAudioInputAttributes = function (callback, host, DesiredName, DesiredIcon) {
+	self.AudioInSetAudioInputAttributes = function (callback, DesiredName, DesiredIcon) {
 		var url = '/AudioIn/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AudioIn:1#SetAudioInputAttributes';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetAudioInputAttributes xmlns:u="urn:schemas-upnp-org:service:AudioIn:1"><DesiredName>' + DesiredName + '</DesiredName><DesiredIcon>' + DesiredIcon + '</DesiredIcon></u:SetAudioInputAttributes></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AudioInGetAudioInputAttributes = function (callback, host) {
+	self.AudioInGetAudioInputAttributes = function (callback) {
 		var url = '/AudioIn/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AudioIn:1#GetAudioInputAttributes';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetAudioInputAttributes xmlns:u="urn:schemas-upnp-org:service:AudioIn:1"></u:GetAudioInputAttributes></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -830,19 +989,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AudioInSetLineInLevel = function (callback, host, DesiredLeftLineInLevel, DesiredRightLineInLevel) {
+	self.AudioInSetLineInLevel = function (callback, DesiredLeftLineInLevel, DesiredRightLineInLevel) {
 		var url = '/AudioIn/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AudioIn:1#SetLineInLevel';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetLineInLevel xmlns:u="urn:schemas-upnp-org:service:AudioIn:1"><DesiredLeftLineInLevel>' + DesiredLeftLineInLevel + '</DesiredLeftLineInLevel><DesiredRightLineInLevel>' + DesiredRightLineInLevel + '</DesiredRightLineInLevel></u:SetLineInLevel></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AudioInGetLineInLevel = function (callback, host) {
+	self.AudioInGetLineInLevel = function (callback) {
 		var url = '/AudioIn/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AudioIn:1#GetLineInLevel';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetLineInLevel xmlns:u="urn:schemas-upnp-org:service:AudioIn:1"></u:GetLineInLevel></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -856,27 +1015,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AudioInSelectAudio = function (callback, host, ObjectID) {
+	self.AudioInSelectAudio = function (callback, ObjectID) {
 		var url = '/AudioIn/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AudioIn:1#SelectAudio';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SelectAudio xmlns:u="urn:schemas-upnp-org:service:AudioIn:1"><ObjectID>' + ObjectID + '</ObjectID></u:SelectAudio></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesSetLEDState = function (callback, host, DesiredLEDState) {
+	self.DevicePropertiesSetLEDState = function (callback, DesiredLEDState) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#SetLEDState';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetLEDState xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><DesiredLEDState>' + DesiredLEDState + '</DesiredLEDState></u:SetLEDState></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesGetLEDState = function (callback, host) {
+	self.DevicePropertiesGetLEDState = function (callback) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#GetLEDState';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetLEDState xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetLEDState></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -890,19 +1049,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.DevicePropertiesSetInvisible = function (callback, host, DesiredInvisible) {
+	self.DevicePropertiesSetInvisible = function (callback, DesiredInvisible) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#SetInvisible';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetInvisible xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><DesiredInvisible>' + DesiredInvisible + '</DesiredInvisible></u:SetInvisible></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesGetInvisible = function (callback, host) {
+	self.DevicePropertiesGetInvisible = function (callback) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#GetInvisible';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetInvisible xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetInvisible></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -916,51 +1075,51 @@ var SonosPlayer = function () {
 	}
 
 
-	self.DevicePropertiesAddBondedZones = function (callback, host, ChannelMapSet) {
+	self.DevicePropertiesAddBondedZones = function (callback, ChannelMapSet) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#AddBondedZones';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:AddBondedZones xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><ChannelMapSet>' + ChannelMapSet + '</ChannelMapSet></u:AddBondedZones></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesRemoveBondedZones = function (callback, host, ChannelMapSet) {
+	self.DevicePropertiesRemoveBondedZones = function (callback, ChannelMapSet) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#RemoveBondedZones';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RemoveBondedZones xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><ChannelMapSet>' + ChannelMapSet + '</ChannelMapSet></u:RemoveBondedZones></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesCreateStereoPair = function (callback, host, ChannelMapSet) {
+	self.DevicePropertiesCreateStereoPair = function (callback, ChannelMapSet) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#CreateStereoPair';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:CreateStereoPair xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><ChannelMapSet>' + ChannelMapSet + '</ChannelMapSet></u:CreateStereoPair></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesSeparateStereoPair = function (callback, host, ChannelMapSet) {
+	self.DevicePropertiesSeparateStereoPair = function (callback, ChannelMapSet) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#SeparateStereoPair';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SeparateStereoPair xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><ChannelMapSet>' + ChannelMapSet + '</ChannelMapSet></u:SeparateStereoPair></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesSetZoneAttributes = function (callback, host, DesiredZoneName, DesiredIcon) {
+	self.DevicePropertiesSetZoneAttributes = function (callback, DesiredZoneName, DesiredIcon) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#SetZoneAttributes';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetZoneAttributes xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><DesiredZoneName>' + DesiredZoneName + '</DesiredZoneName><DesiredIcon>' + DesiredIcon + '</DesiredIcon></u:SetZoneAttributes></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesGetZoneAttributes = function (callback, host) {
+	self.DevicePropertiesGetZoneAttributes = function (callback) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneAttributes';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetZoneAttributes xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneAttributes></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -974,11 +1133,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.DevicePropertiesGetHouseholdID = function (callback, host) {
+	self.DevicePropertiesGetHouseholdID = function (callback) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#GetHouseholdID';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetHouseholdID xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetHouseholdID></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -992,11 +1151,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.DevicePropertiesGetZoneInfo = function (callback, host) {
+	self.DevicePropertiesGetZoneInfo = function (callback) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#GetZoneInfo';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetZoneInfo xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetZoneInfo></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1010,19 +1169,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.DevicePropertiesSetAutoplayLinkedZones = function (callback, host, IncludeLinkedZones) {
+	self.DevicePropertiesSetAutoplayLinkedZones = function (callback, IncludeLinkedZones) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#SetAutoplayLinkedZones';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetAutoplayLinkedZones xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><IncludeLinkedZones>' + IncludeLinkedZones + '</IncludeLinkedZones></u:SetAutoplayLinkedZones></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesGetAutoplayLinkedZones = function (callback, host) {
+	self.DevicePropertiesGetAutoplayLinkedZones = function (callback) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#GetAutoplayLinkedZones';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetAutoplayLinkedZones xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetAutoplayLinkedZones></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1036,19 +1195,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.DevicePropertiesSetAutoplayRoomUUID = function (callback, host, RoomUUID) {
+	self.DevicePropertiesSetAutoplayRoomUUID = function (callback, RoomUUID) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#SetAutoplayRoomUUID';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetAutoplayRoomUUID xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><RoomUUID>' + RoomUUID + '</RoomUUID></u:SetAutoplayRoomUUID></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesGetAutoplayRoomUUID = function (callback, host) {
+	self.DevicePropertiesGetAutoplayRoomUUID = function (callback) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#GetAutoplayRoomUUID';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetAutoplayRoomUUID xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetAutoplayRoomUUID></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1062,19 +1221,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.DevicePropertiesSetAutoplayVolume = function (callback, host, Volume) {
+	self.DevicePropertiesSetAutoplayVolume = function (callback, Volume) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#SetAutoplayVolume';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetAutoplayVolume xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><Volume>' + Volume + '</Volume></u:SetAutoplayVolume></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesGetAutoplayVolume = function (callback, host) {
+	self.DevicePropertiesGetAutoplayVolume = function (callback) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#GetAutoplayVolume';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetAutoplayVolume xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetAutoplayVolume></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1088,27 +1247,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.DevicePropertiesImportSetting = function (callback, host, SettingID, SettingURI) {
+	self.DevicePropertiesImportSetting = function (callback, SettingID, SettingURI) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#ImportSetting';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ImportSetting xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><SettingID>' + SettingID + '</SettingID><SettingURI>' + SettingURI + '</SettingURI></u:ImportSetting></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesSetUseAutoplayVolume = function (callback, host, UseVolume) {
+	self.DevicePropertiesSetUseAutoplayVolume = function (callback, UseVolume) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#SetUseAutoplayVolume';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetUseAutoplayVolume xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"><UseVolume>' + UseVolume + '</UseVolume></u:SetUseAutoplayVolume></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.DevicePropertiesGetUseAutoplayVolume = function (callback, host) {
+	self.DevicePropertiesGetUseAutoplayVolume = function (callback) {
 		var url = '/DeviceProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:DeviceProperties:1#GetUseAutoplayVolume'
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetUseAutoplayVolume xmlns:u="urn:schemas-upnp-org:service:DeviceProperties:1"></u:GetUseAutoplayVolume></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1122,27 +1281,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.SystemPropertiesSetString = function (callback, host, VariableName, StringValue) {
+	self.SystemPropertiesSetString = function (callback, VariableName, StringValue) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#SetString';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetString xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><VariableName>' + VariableName + '</VariableName><StringValue>' + StringValue + '</StringValue></u:SetString></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.SystemPropertiesSetStringX = function (callback, host, VariableName, StringValue) {
+	self.SystemPropertiesSetStringX = function (callback, VariableName, StringValue) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#SetStringX';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetStringX xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><VariableName>' + VariableName + '</VariableName><StringValue>' + StringValue + '</StringValue></u:SetStringX></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.SystemPropertiesGetString = function (callback, host, VariableName) {
+	self.SystemPropertiesGetString = function (callback, VariableName) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#GetString';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetString xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><VariableName>' + VariableName + '</VariableName></u:GetString></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1156,11 +1315,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.SystemPropertiesGetStringX = function (callback, host, VariableName) {
+	self.SystemPropertiesGetStringX = function (callback, VariableName) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#GetStringX';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetStringX xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><VariableName>' + VariableName + '</VariableName></u:GetStringX></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1174,19 +1333,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.SystemPropertiesRemove = function (callback, host, VariableName) {
+	self.SystemPropertiesRemove = function (callback, VariableName) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#Remove';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Remove xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><VariableName>' + VariableName + '</VariableName></u:Remove></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.SystemPropertiesGetWebCode = function (callback, host, AccountType) {
+	self.SystemPropertiesGetWebCode = function (callback, AccountType) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#GetWebCode';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetWebCode xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><AccountType>' + AccountType + '</AccountType></u:GetWebCode></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1200,19 +1359,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.SystemPropertiesProvisionTrialAccount = function (callback, host, AccountType) {
+	self.SystemPropertiesProvisionTrialAccount = function (callback, AccountType) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#ProvisionTrialAccount';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ProvisionTrialAccount xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><AccountType>' + AccountType + '</AccountType></u:ProvisionTrialAccount></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.SystemPropertiesProvisionCredentialedTrialAccountX = function (callback, host, AccountType, AccountID, AccountPassword) {
+	self.SystemPropertiesProvisionCredentialedTrialAccountX = function (callback, AccountType, AccountID, AccountPassword) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#ProvisionCredentialedTrialAccountX';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ProvisionCredentialedTrialAccountX xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><AccountType>' + AccountType + '</AccountType><AccountID>' + AccountID + '</AccountID><AccountPassword>' + AccountPassword + '</AccountPassword></u:ProvisionCredentialedTrialAccountX></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1226,59 +1385,59 @@ var SonosPlayer = function () {
 	}
 
 
-	self.SystemPropertiesMigrateTrialAccountX = function (callback, host, TargetAccountType, TargetAccountID, TargetAccountPassword) {
+	self.SystemPropertiesMigrateTrialAccountX = function (callback, TargetAccountType, TargetAccountID, TargetAccountPassword) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#MigrateTrialAccountX';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:MigrateTrialAccountX xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><TargetAccountType>' + TargetAccountType + '</TargetAccountType><TargetAccountID>' + TargetAccountID + '</TargetAccountID><TargetAccountPassword>' + TargetAccountPassword + '</TargetAccountPassword></u:MigrateTrialAccountX></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.SystemPropertiesAddAccountX = function (callback, host, AccountType, AccountID, AccountPassword) {
+	self.SystemPropertiesAddAccountX = function (callback, AccountType, AccountID, AccountPassword) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#AddAccountX';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:AddAccountX xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><AccountType>' + AccountType + '</AccountType><AccountID>' + AccountID + '</AccountID><AccountPassword>' + AccountPassword + '</AccountPassword></u:AddAccountX></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.SystemPropertiesAddAccountWithCredentialsX = function (callback, host, AccountType, AccountToken, AccountKey) {
+	self.SystemPropertiesAddAccountWithCredentialsX = function (callback, AccountType, AccountToken, AccountKey) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#AddAccountWithCredentialsX';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:AddAccountWithCredentialsX xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><AccountType>' + AccountType + '</AccountType><AccountToken>' + AccountToken + '</AccountToken><AccountKey>' + AccountKey + '</AccountKey></u:AddAccountWithCredentialsX></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.SystemPropertiesRemoveAccount = function (callback, host, AccountType, AccountID) {
+	self.SystemPropertiesRemoveAccount = function (callback, AccountType, AccountID) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#RemoveAccount';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RemoveAccount xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><AccountType>' + AccountType + '</AccountType><AccountID>' + AccountID + '</AccountID></u:RemoveAccount></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.SystemPropertiesEditAccountPasswordX = function (callback, host, AccountType, AccountID, NewAccountPassword) {
+	self.SystemPropertiesEditAccountPasswordX = function (callback, AccountType, AccountID, NewAccountPassword) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#EditAccountPasswordX';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:EditAccountPasswordX xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><AccountType>' + AccountType + '</AccountType><AccountID>' + AccountID + '</AccountID><NewAccountPassword>' + NewAccountPassword + '</NewAccountPassword></u:EditAccountPasswordX></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.SystemPropertiesEditAccountMd = function (callback, host, AccountType, AccountID, NewAccountMd) {
+	self.SystemPropertiesEditAccountMd = function (callback, AccountType, AccountID, NewAccountMd) {
 		var url = '/SystemProperties/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:SystemProperties:1#EditAccountMd';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:EditAccountMd xmlns:u="urn:schemas-upnp-org:service:SystemProperties:1"><AccountType>' + AccountType + '</AccountType><AccountID>' + AccountID + '</AccountID><NewAccountMd>' + NewAccountMd + '</NewAccountMd></u:EditAccountMd></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ZoneGroupTopologyCheckForUpdate = function (callback, host, UpdateType, CachedOnly, Version) {
+	self.ZoneGroupTopologyCheckForUpdate = function (callback, UpdateType, CachedOnly, Version) {
 		var url = '/ZoneGroupTopology/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ZoneGroupTopology:1#CheckForUpdate';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:CheckForUpdate xmlns:u="urn:schemas-upnp-org:service:ZoneGroupTopology:1"><UpdateType>' + UpdateType + '</UpdateType><CachedOnly>' + CachedOnly + '</CachedOnly><Version>' + Version + '</Version></u:CheckForUpdate></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1292,27 +1451,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ZoneGroupTopologyBeginSoftwareUpdate = function (callback, host, UpdateURL, Flags) {
+	self.ZoneGroupTopologyBeginSoftwareUpdate = function (callback, UpdateURL, Flags) {
 		var url = '/ZoneGroupTopology/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ZoneGroupTopology:1#BeginSoftwareUpdate';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:BeginSoftwareUpdate xmlns:u="urn:schemas-upnp-org:service:ZoneGroupTopology:1"><UpdateURL>' + UpdateURL + '</UpdateURL><Flags>' + Flags + '</Flags></u:BeginSoftwareUpdate></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ZoneGroupTopologyReportUnresponsiveDevice = function (callback, host, DeviceUUID, DesiredAction) {
+	self.ZoneGroupTopologyReportUnresponsiveDevice = function (callback, DeviceUUID, DesiredAction) {
 		var url = '/ZoneGroupTopology/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ZoneGroupTopology:1#ReportUnresponsiveDevice';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ReportUnresponsiveDevice xmlns:u="urn:schemas-upnp-org:service:ZoneGroupTopology:1"><DeviceUUID>' + DeviceUUID + '</DeviceUUID><DesiredAction>' + DesiredAction + '</DesiredAction></u:ReportUnresponsiveDevice></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ZoneGroupTopologySubmitDiagnostics = function (callback, host) {
+	self.ZoneGroupTopologySubmitDiagnostics = function (callback) {
 		var url = '/ZoneGroupTopology/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ZoneGroupTopology:1#SubmitDiagnostics';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SubmitDiagnostics xmlns:u="urn:schemas-upnp-org:service:ZoneGroupTopology:1"></u:SubmitDiagnostics></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1326,11 +1485,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.GroupManagementAddMember = function (callback, host, MemberID) {
+	self.GroupManagementAddMember = function (callback, MemberID) {
 		var url = '/GroupManagement/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:GroupManagement:1#AddMember';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:AddMember xmlns:u="urn:schemas-upnp-org:service:GroupManagement:1"><MemberID>' + MemberID + '</MemberID></u:AddMember></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1344,27 +1503,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.GroupManagementRemoveMember = function (callback, host, MemberID) {
+	self.GroupManagementRemoveMember = function (callback, MemberID) {
 		var url = '/GroupManagement/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:GroupManagement:1#RemoveMember';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RemoveMember xmlns:u="urn:schemas-upnp-org:service:GroupManagement:1"><MemberID>' + MemberID + '</MemberID></u:RemoveMember></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.GroupManagementReportTrackBufferingResult = function (callback, host, MemberID, ResultCode) {
+	self.GroupManagementReportTrackBufferingResult = function (callback, MemberID, ResultCode) {
 		var url = '/GroupManagement/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:GroupManagement:1#ReportTrackBufferingResult';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ReportTrackBufferingResult xmlns:u="urn:schemas-upnp-org:service:GroupManagement:1"><MemberID>' + MemberID + '</MemberID><ResultCode>' + ResultCode + '</ResultCode></u:ReportTrackBufferingResult></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ContentDirectoryGetSearchCapabilities = function (callback, host) {
+	self.ContentDirectoryGetSearchCapabilities = function (callback) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#GetSearchCapabilities';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetSearchCapabilities xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"></u:GetSearchCapabilities></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1378,11 +1537,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryGetSortCapabilities = function (callback, host) {
+	self.ContentDirectoryGetSortCapabilities = function (callback) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#GetSortCapabilities';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetSortCapabilities xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"></u:GetSortCapabilities></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1396,11 +1555,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryGetSystemUpdateID = function (callback, host) {
+	self.ContentDirectoryGetSystemUpdateID = function (callback) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#GetSystemUpdateID';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetSystemUpdateID xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"></u:GetSystemUpdateID></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1414,11 +1573,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryGetAlbumArtistDisplayOption = function (callback, host) {
+	self.ContentDirectoryGetAlbumArtistDisplayOption = function (callback) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#GetAlbumArtistDisplayOption';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetAlbumArtistDisplayOption xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"></u:GetAlbumArtistDisplayOption></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1432,11 +1591,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryGetLastIndexChange = function (callback, host) {
+	self.ContentDirectoryGetLastIndexChange = function (callback) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#GetLastIndexChange';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetLastIndexChange xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"></u:GetLastIndexChange></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1450,11 +1609,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryBrowse = function (callback, host, ObjectID, BrowseFlag, Filter, StartingIndex, RequestedCount, SortCriteria) {
+	self.ContentDirectoryBrowse = function (callback, ObjectID, BrowseFlag, Filter, StartingIndex, RequestedCount, SortCriteria) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#Browse';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>' + ObjectID + '</ObjectID><BrowseFlag>' + BrowseFlag + '</BrowseFlag><Filter>' + Filter + '</Filter><StartingIndex>' + StartingIndex + '</StartingIndex><RequestedCount>' + RequestedCount + '</RequestedCount><SortCriteria>' + SortCriteria + '</SortCriteria></u:Browse></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1468,11 +1627,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryFindPrefix = function (callback, host, ObjectID, Prefix) {
+	self.ContentDirectoryFindPrefix = function (callback, ObjectID, Prefix) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#FindPrefix';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:FindPrefix xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>' + ObjectID + '</ObjectID><Prefix>' + Prefix + '</Prefix></u:FindPrefix></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1486,11 +1645,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryGetAllPrefixLocations = function (callback, host, ObjectID) {
+	self.ContentDirectoryGetAllPrefixLocations = function (callback, ObjectID) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#GetAllPrefixLocations';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetAllPrefixLocations xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>' + ObjectID + '</ObjectID></u:GetAllPrefixLocations></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1504,11 +1663,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryCreateObject = function (callback, host, ContainerID, Elements) {
+	self.ContentDirectoryCreateObject = function (callback, ContainerID, Elements) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#CreateObject';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:CreateObject xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ContainerID>' + ContainerID + '</ContainerID><Elements>' + Elements + '</Elements></u:CreateObject></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1522,43 +1681,43 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryUpdateObject = function (callback, host, ObjectID, CurrentTagValue, NewTagValue) {
+	self.ContentDirectoryUpdateObject = function (callback, ObjectID, CurrentTagValue, NewTagValue) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#UpdateObject';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:UpdateObject xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>' + ObjectID + '</ObjectID><CurrentTagValue>' + CurrentTagValue + '</CurrentTagValue><NewTagValue>' + NewTagValue + '</NewTagValue></u:UpdateObject></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ContentDirectoryDestroyObject = function (callback, host, ObjectID) {
+	self.ContentDirectoryDestroyObject = function (callback, ObjectID) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#DestroyObject';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:DestroyObject xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>' + ObjectID + '</ObjectID></u:DestroyObject></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ContentDirectoryRefreshShareIndex = function (callback, host, AlbumArtistDisplayOption) {
+	self.ContentDirectoryRefreshShareIndex = function (callback, AlbumArtistDisplayOption) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#RefreshShareIndex';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RefreshShareIndex xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><AlbumArtistDisplayOption>' + AlbumArtistDisplayOption + '</AlbumArtistDisplayOption></u:RefreshShareIndex></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ContentDirectoryRequestResort = function (callback, host, SortOrder) {
+	self.ContentDirectoryRequestResort = function (callback, SortOrder) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#RequestResort';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RequestResort xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><SortOrder>' + SortOrder + '</SortOrder></u:RequestResort></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ContentDirectoryGetShareIndexInProgress = function (callback, host) {
+	self.ContentDirectoryGetShareIndexInProgress = function (callback) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#GetShareIndexInProgress';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetShareIndexInProgress xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"></u:GetShareIndexInProgress></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1572,11 +1731,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectoryGetBrowseable = function (callback, host) {
+	self.ContentDirectoryGetBrowseable = function (callback) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#GetBrowseable';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetBrowseable xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"></u:GetBrowseable></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1590,19 +1749,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ContentDirectorySetBrowseable = function (callback, host, Browseable) {
+	self.ContentDirectorySetBrowseable = function (callback, Browseable) {
 		var url = '/MediaServer/ContentDirectory/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#SetBrowseable';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetBrowseable xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><Browseable>' + Browseable + '</Browseable></u:SetBrowseable></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ConnectionManagerGetProtocolInfo = function (callback, host) {
+	self.ConnectionManagerGetProtocolInfo = function (callback) {
 		var url = '/MediaServer/ConnectionManager/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ConnectionManager:1#GetProtocolInfo';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetProtocolInfo xmlns:u="urn:schemas-upnp-org:service:ConnectionManager:1"></u:GetProtocolInfo></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1616,11 +1775,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ConnectionManagerGetCurrentConnectionIDs = function (callback, host) {
+	self.ConnectionManagerGetCurrentConnectionIDs = function (callback) {
 		var url = '/MediaServer/ConnectionManager/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ConnectionManager:1#GetCurrentConnectionIDs';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetCurrentConnectionIDs xmlns:u="urn:schemas-upnp-org:service:ConnectionManager:1"></u:GetCurrentConnectionIDs></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1634,11 +1793,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ConnectionManagerGetCurrentConnectionInfo = function (callback, host, ConnectionID) {
+	self.ConnectionManagerGetCurrentConnectionInfo = function (callback, ConnectionID) {
 		var url = '/MediaServer/ConnectionManager/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ConnectionManager:1#GetCurrentConnectionInfo';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetCurrentConnectionInfo xmlns:u="urn:schemas-upnp-org:service:ConnectionManager:1"><ConnectionID>' + ConnectionID + '</ConnectionID></u:GetCurrentConnectionInfo></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1652,11 +1811,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlGetMute = function (callback, host, InstanceID, Channel) {
+	self.RenderingControlGetMute = function (callback, InstanceID, Channel) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetMute';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetMute xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel></u:GetMute></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1670,19 +1829,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlSetMute = function (callback, host, InstanceID, Channel, DesiredMute) {
+	self.RenderingControlSetMute = function (callback, InstanceID, Channel, DesiredMute) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetMute';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetMute xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel><DesiredMute>' + DesiredMute + '</DesiredMute></u:SetMute></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlResetBasicEQ = function (callback, host, InstanceID) {
+	self.RenderingControlResetBasicEQ = function (callback, InstanceID) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#ResetBasicEQ';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ResetBasicEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID></u:ResetBasicEQ></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1696,19 +1855,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlResetExtEQ = function (callback, host, InstanceID, EQType) {
+	self.RenderingControlResetExtEQ = function (callback, InstanceID, EQType) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#ResetExtEQ';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ResetExtEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><EQType>' + EQType + '</EQType></u:ResetExtEQ></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlGetVolume = function (callback, host, InstanceID, Channel) {
+	self.RenderingControlGetVolume = function (callback, InstanceID, Channel) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolume';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel></u:GetVolume></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1722,19 +1881,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlSetVolume = function (callback, host, InstanceID, Channel, DesiredVolume) {
+	self.RenderingControlSetVolume = function (callback, InstanceID, Channel, DesiredVolume) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetVolume';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel><DesiredVolume>' + DesiredVolume + '</DesiredVolume></u:SetVolume></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlSetRelativeVolume = function (callback, host, InstanceID, Channel, Adjustment) {
+	self.RenderingControlSetRelativeVolume = function (callback, InstanceID, Channel, Adjustment) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetRelativeVolume';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetRelativeVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel><Adjustment>' + Adjustment + '</Adjustment></u:SetRelativeVolume></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1748,11 +1907,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlGetVolumeDB = function (callback, host, InstanceID, Channel) {
+	self.RenderingControlGetVolumeDB = function (callback, InstanceID, Channel) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolumeDB';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetVolumeDB xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel></u:GetVolumeDB></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1766,19 +1925,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlSetVolumeDB = function (callback, host, InstanceID, Channel, DesiredVolume) {
+	self.RenderingControlSetVolumeDB = function (callback, InstanceID, Channel, DesiredVolume) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetVolumeDB';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetVolumeDB xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel><DesiredVolume>' + DesiredVolume + '</DesiredVolume></u:SetVolumeDB></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlGetVolumeDBRange = function (callback, host, InstanceID, Channel) {
+	self.RenderingControlGetVolumeDBRange = function (callback, InstanceID, Channel) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolumeDBRange';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetVolumeDBRange xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel></u:GetVolumeDBRange></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1792,11 +1951,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlGetBass = function (callback, host, InstanceID) {
+	self.RenderingControlGetBass = function (callback, InstanceID) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetBass';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetBass xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetBass></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1810,19 +1969,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlSetBass = function (callback, host, InstanceID, DesiredBass) {
+	self.RenderingControlSetBass = function (callback, InstanceID, DesiredBass) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetBass';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetBass xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><DesiredBass>' + DesiredBass + '</DesiredBass></u:SetBass></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlGetTreble = function (callback, host, InstanceID) {
+	self.RenderingControlGetTreble = function (callback, InstanceID) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetTreble';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetTreble xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetTreble></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1836,19 +1995,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlSetTreble = function (callback, host, InstanceID, DesiredTreble) {
+	self.RenderingControlSetTreble = function (callback, InstanceID, DesiredTreble) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetTreble';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetTreble xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><DesiredTreble>' + DesiredTreble + '</DesiredTreble></u:SetTreble></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlGetEQ = function (callback, host, InstanceID, EQType) {
+	self.RenderingControlGetEQ = function (callback, InstanceID, EQType) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetEQ';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><EQType>' + EQType + '</EQType></u:GetEQ></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1862,19 +2021,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlSetEQ = function (callback, host, InstanceID, EQType, DesiredValue) {
+	self.RenderingControlSetEQ = function (callback, InstanceID, EQType, DesiredValue) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetEQ';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetEQ xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><EQType>' + EQType + '</EQType><DesiredValue>' + DesiredValue + '</DesiredValue></u:SetEQ></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlGetLoudness = function (callback, host, InstanceID, Channel) {
+	self.RenderingControlGetLoudness = function (callback, InstanceID, Channel) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetLoudness';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetLoudness xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel></u:GetLoudness></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1888,19 +2047,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlSetLoudness = function (callback, host, InstanceID, Channel, DesiredLoudness) {
+	self.RenderingControlSetLoudness = function (callback, InstanceID, Channel, DesiredLoudness) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetLoudness';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetLoudness xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel><DesiredLoudness>' + DesiredLoudness + '</DesiredLoudness></u:SetLoudness></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlGetSupportsOutputFixed = function (callback, host, InstanceID) {
+	self.RenderingControlGetSupportsOutputFixed = function (callback, InstanceID) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetSupportsOutputFixed';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetSupportsOutputFixed xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetSupportsOutputFixed></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1914,11 +2073,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlGetOutputFixed = function (callback, host, InstanceID) {
+	self.RenderingControlGetOutputFixed = function (callback, InstanceID) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetOutputFixed';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetOutputFixed xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetOutputFixed></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1932,19 +2091,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlSetOutputFixed = function (callback, host, InstanceID, DesiredFixed) {
+	self.RenderingControlSetOutputFixed = function (callback, InstanceID, DesiredFixed) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetOutputFixed';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetOutputFixed xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><DesiredFixed>' + DesiredFixed + '</DesiredFixed></u:SetOutputFixed></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlGetHeadphoneConnected = function (callback, host, InstanceID) {
+	self.RenderingControlGetHeadphoneConnected = function (callback, InstanceID) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#GetHeadphoneConnected';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetHeadphoneConnected xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetHeadphoneConnected></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1958,11 +2117,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlRampToVolume = function (callback, host, InstanceID, Channel, RampType, DesiredVolume, ResetVolumeAfter, ProgramURI) {
+	self.RenderingControlRampToVolume = function (callback, InstanceID, Channel, RampType, DesiredVolume, ResetVolumeAfter, ProgramURI) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#RampToVolume';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RampToVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel><RampType>' + RampType + '</RampType><DesiredVolume>' + DesiredVolume + '</DesiredVolume><ResetVolumeAfter>' + ResetVolumeAfter + '</ResetVolumeAfter><ProgramURI>' + ProgramURI + '</ProgramURI></u:RampToVolume></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -1976,27 +2135,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.RenderingControlRestoreVolumePriorToRamp = function (callback, host, InstanceID, Channel) {
+	self.RenderingControlRestoreVolumePriorToRamp = function (callback, InstanceID, Channel) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#RestoreVolumePriorToRamp';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RestoreVolumePriorToRamp xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><Channel>' + Channel + '</Channel></u:RestoreVolumePriorToRamp></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.RenderingControlSetChannelMap = function (callback, host, InstanceID, ChannelMap) {
+	self.RenderingControlSetChannelMap = function (callback, InstanceID, ChannelMap) {
 		var url = '/MediaRenderer/RenderingControl/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:RenderingControl:1#SetChannelMap';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetChannelMap xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1"><InstanceID>' + InstanceID + '</InstanceID><ChannelMap>' + ChannelMap + '</ChannelMap></u:SetChannelMap></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.ConnectionManagerGetProtocolInfo = function (callback, host) {
+	self.ConnectionManagerGetProtocolInfo = function (callback) {
 		var url = '/MediaRenderer/ConnectionManager/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ConnectionManager:1#GetProtocolInfo';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetProtocolInfo xmlns:u="urn:schemas-upnp-org:service:ConnectionManager:1"></u:GetProtocolInfo></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2010,11 +2169,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ConnectionManagerGetCurrentConnectionIDs = function (callback, host) {
+	self.ConnectionManagerGetCurrentConnectionIDs = function (callback) {
 		var url = '/MediaRenderer/ConnectionManager/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ConnectionManager:1#GetCurrentConnectionIDs';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetCurrentConnectionIDs xmlns:u="urn:schemas-upnp-org:service:ConnectionManager:1"></u:GetCurrentConnectionIDs></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2028,11 +2187,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.ConnectionManagerGetCurrentConnectionInfo = function (callback, host, ConnectionID) {
+	self.ConnectionManagerGetCurrentConnectionInfo = function (callback, ConnectionID) {
 		var url = '/MediaRenderer/ConnectionManager/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:ConnectionManager:1#GetCurrentConnectionInfo';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetCurrentConnectionInfo xmlns:u="urn:schemas-upnp-org:service:ConnectionManager:1"><ConnectionID>' + ConnectionID + '</ConnectionID></u:GetCurrentConnectionInfo></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2046,20 +2205,20 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportSetAVTransportURI = function (callback, host, InstanceID, CurrentURI, CurrentURIMetaData) {
+	self.AVTransportSetAVTransportURI = function (callback, InstanceID, CurrentURI, CurrentURIMetaData) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><CurrentURI>' + Utils.escape(CurrentURI) + '</CurrentURI><CurrentURIMetaData>' + Utils.escape(CurrentURIMetaData) + '</CurrentURIMetaData></u:SetAVTransportURI></s:Body></s:Envelope>';
 		CF.log("SOAPBody for SetURI is:" + SOAPBody);
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportAddURIToQueue = function (callback, host, InstanceID, EnqueuedURI, EnqueuedURIMetaData, DesiredFirstTrackNumberEnqueued, EnqueueAsNext) {
+	self.AVTransportAddURIToQueue = function (callback, InstanceID, EnqueuedURI, EnqueuedURIMetaData, DesiredFirstTrackNumberEnqueued, EnqueueAsNext) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:AddURIToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><EnqueuedURI>' + Utils.escape(EnqueuedURI) + '</EnqueuedURI><EnqueuedURIMetaData>' + Utils.escape(EnqueuedURIMetaData) + '</EnqueuedURIMetaData><DesiredFirstTrackNumberEnqueued>' + DesiredFirstTrackNumberEnqueued + '</DesiredFirstTrackNumberEnqueued><EnqueueAsNext>' + EnqueueAsNext + '</EnqueueAsNext></u:AddURIToQueue></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.log("SOAPBody for AddURI is:" + SOAPBody);
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
@@ -2074,11 +2233,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportAddMultipleURIsToQueue = function (callback, host, InstanceID, UpdateID, NumberOfURIs, EnqueuedURIs, EnqueuedURIsMetaData, ContainerURI, ContainerMetaData, DesiredFirstTrackNumberEnqueued, EnqueueAsNext) {
+	self.AVTransportAddMultipleURIsToQueue = function (callback, InstanceID, UpdateID, NumberOfURIs, EnqueuedURIs, EnqueuedURIsMetaData, ContainerURI, ContainerMetaData, DesiredFirstTrackNumberEnqueued, EnqueueAsNext) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#AddMultipleURIsToQueue';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:AddMultipleURIsToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><UpdateID>' + UpdateID + '</UpdateID><NumberOfURIs>' + NumberOfURIs + '</NumberOfURIs><EnqueuedURIs>' + EnqueuedURIs + '</EnqueuedURIs><EnqueuedURIsMetaData>' + EnqueuedURIsMetaData + '</EnqueuedURIsMetaData><ContainerURI>' + ContainerURI + '</ContainerURI><ContainerMetaData>' + ContainerMetaData + '</ContainerMetaData><DesiredFirstTrackNumberEnqueued>' + DesiredFirstTrackNumberEnqueued + '</DesiredFirstTrackNumberEnqueued><EnqueueAsNext>' + EnqueueAsNext + '</EnqueueAsNext></u:AddMultipleURIsToQueue></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2092,27 +2251,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportReorderTracksInQueue = function (callback, host, InstanceID, StartingIndex, NumberOfTracks, InsertBefore, UpdateID) {
+	self.AVTransportReorderTracksInQueue = function (callback, InstanceID, StartingIndex, NumberOfTracks, InsertBefore, UpdateID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#ReorderTracksInQueue';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ReorderTracksInQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><StartingIndex>' + StartingIndex + '</StartingIndex><NumberOfTracks>' + NumberOfTracks + '</NumberOfTracks><InsertBefore>' + InsertBefore + '</InsertBefore><UpdateID>' + UpdateID + '</UpdateID></u:ReorderTracksInQueue></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportRemoveTrackFromQueue = function (callback, host, InstanceID, ObjectID, UpdateID) {
+	self.AVTransportRemoveTrackFromQueue = function (callback, InstanceID, ObjectID, UpdateID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#RemoveTrackFromQueue';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RemoveTrackFromQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><ObjectID>' + ObjectID + '</ObjectID><UpdateID>' + UpdateID + '</UpdateID></u:RemoveTrackFromQueue></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportRemoveTrackRangeFromQueue = function (callback, host, InstanceID, UpdateID, StartingIndex, NumberOfTracks) {
+	self.AVTransportRemoveTrackRangeFromQueue = function (callback, InstanceID, UpdateID, StartingIndex, NumberOfTracks) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#RemoveTrackRangeFromQueue';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RemoveTrackRangeFromQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><UpdateID>' + UpdateID + '</UpdateID><StartingIndex>' + StartingIndex + '</StartingIndex><NumberOfTracks>' + NumberOfTracks + '</NumberOfTracks></u:RemoveTrackRangeFromQueue></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2126,19 +2285,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportRemoveAllTracksFromQueue = function (callback, host, InstanceID) {
+	self.AVTransportRemoveAllTracksFromQueue = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#RemoveAllTracksFromQueue';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RemoveAllTracksFromQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:RemoveAllTracksFromQueue></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportSaveQueue = function (callback, host, InstanceID, Title, ObjectID) {
+	self.AVTransportSaveQueue = function (callback, InstanceID, Title, ObjectID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#SaveQueue';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SaveQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><Title>' + Title + '</Title><ObjectID>' + ObjectID + '</ObjectID></u:SaveQueue></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2152,19 +2311,19 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportBackupQueue = function (callback, host, InstanceID) {
+	self.AVTransportBackupQueue = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#BackupQueue';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:BackupQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:BackupQueue></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportGetMediaInfo = function (callback, host, InstanceID) {
+	self.AVTransportGetMediaInfo = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#GetMediaInfo';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetMediaInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetMediaInfo></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2178,11 +2337,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportGetTransportInfo = function (callback, host, InstanceID) {
+	self.AVTransportGetTransportInfo = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#GetTransportInfo';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetTransportInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetTransportInfo></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2196,11 +2355,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportGetPositionInfo = function (callback, host, InstanceID) {
+	self.AVTransportGetPositionInfo = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#GetPositionInfo';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetPositionInfo xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetPositionInfo></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2214,11 +2373,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportGetDeviceCapabilities = function (callback, host, InstanceID) {
+	self.AVTransportGetDeviceCapabilities = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#GetDeviceCapabilities';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetDeviceCapabilities xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetDeviceCapabilities></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2232,11 +2391,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportGetTransportSettings = function (callback, host, InstanceID) {
+	self.AVTransportGetTransportSettings = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#GetTransportSettings';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetTransportSettings xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetTransportSettings></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2250,11 +2409,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportGetCrossfadeMode = function (callback, host, InstanceID) {
+	self.AVTransportGetCrossfadeMode = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#GetCrossfadeMode';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetCrossfadeMode xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetCrossfadeMode></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2268,107 +2427,107 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportStop = function (callback, host, InstanceID) {
+	self.AVTransportStop = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#Stop';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Stop xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:Stop></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportPlay = function (callback, host, InstanceID, Speed) {
+	self.AVTransportPlay = function (callback, InstanceID, Speed) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#Play';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Play xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><Speed>' + Speed + '</Speed></u:Play></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportPause = function (callback, host, InstanceID) {
+	self.AVTransportPause = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#Pause';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Pause xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:Pause></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportSeek = function (callback, host, InstanceID, Unit, Target) {
+	self.AVTransportSeek = function (callback, InstanceID, Unit, Target) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#Seek';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Seek xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><Unit>' + Unit + '</Unit><Target>' + Target + '</Target></u:Seek></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportNext = function (callback, host, InstanceID) {
+	self.AVTransportNext = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#Next';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Next xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:Next></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportNextProgrammedRadioTracks = function (callback, host, InstanceID) {
+	self.AVTransportNextProgrammedRadioTracks = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#NextProgrammedRadioTracks';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:NextProgrammedRadioTracks xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:NextProgrammedRadioTracks></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportPrevious = function (callback, host, InstanceID) {
+	self.AVTransportPrevious = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#Previous';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Previous xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:Previous></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportNextSection = function (callback, host, InstanceID) {
+	self.AVTransportNextSection = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#NextSection';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:NextSection xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:NextSection></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportPreviousSection = function (callback, host, InstanceID) {
+	self.AVTransportPreviousSection = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#PreviousSection';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:PreviousSection xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:PreviousSection></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportSetPlayMode = function (callback, host, InstanceID, NewPlayMode) {
+	self.AVTransportSetPlayMode = function (callback, InstanceID, NewPlayMode) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#SetPlayMode';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetPlayMode xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><NewPlayMode>' + NewPlayMode + '</NewPlayMode></u:SetPlayMode></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportSetCrossfadeMode = function (callback, host, InstanceID, CrossfadeMode) {
+	self.AVTransportSetCrossfadeMode = function (callback, InstanceID, CrossfadeMode) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#SetCrossfadeMode';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetCrossfadeMode xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><CrossfadeMode>' + CrossfadeMode + '</CrossfadeMode></u:SetCrossfadeMode></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportNotifyDeletedURI = function (callback, host, InstanceID, DeletedURI) {
+	self.AVTransportNotifyDeletedURI = function (callback, InstanceID, DeletedURI) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#NotifyDeletedURI';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:NotifyDeletedURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><DeletedURI>' + DeletedURI + '</DeletedURI></u:NotifyDeletedURI></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportGetCurrentTransportActions = function (callback, host, InstanceID) {
+	self.AVTransportGetCurrentTransportActions = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#GetCurrentTransportActions';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetCurrentTransportActions xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetCurrentTransportActions></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2382,59 +2541,59 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportBecomeCoordinatorOfStandaloneGroup = function (callback, host, InstanceID) {
+	self.AVTransportBecomeCoordinatorOfStandaloneGroup = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#BecomeCoordinatorOfStandaloneGroup';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:BecomeCoordinatorOfStandaloneGroup xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:BecomeCoordinatorOfStandaloneGroup></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportBecomeGroupCoordinator = function (callback, host, InstanceID, CurrentCoordinator, CurrentGroupID, OtherMembers, TransportSettings, CurrentURI, CurrentURIMetaData, SleepTimerState, AlarmState, StreamRestartState, CurrentQueueTrackList) {
+	self.AVTransportBecomeGroupCoordinator = function (callback, InstanceID, CurrentCoordinator, CurrentGroupID, OtherMembers, TransportSettings, CurrentURI, CurrentURIMetaData, SleepTimerState, AlarmState, StreamRestartState, CurrentQueueTrackList) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#BecomeGroupCoordinator';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:BecomeGroupCoordinator xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><CurrentCoordinator>' + CurrentCoordinator + '</CurrentCoordinator><CurrentGroupID>' + CurrentGroupID + '</CurrentGroupID><OtherMembers>' + OtherMembers + '</OtherMembers><TransportSettings>' + TransportSettings + '</TransportSettings><CurrentURI>' + CurrentURI + '</CurrentURI><CurrentURIMetaData>' + CurrentURIMetaData + '</CurrentURIMetaData><SleepTimerState>' + SleepTimerState + '</SleepTimerState><AlarmState>' + AlarmState + '</AlarmState><StreamRestartState>' + StreamRestartState + '</StreamRestartState><CurrentQueueTrackList>' + CurrentQueueTrackList + '</CurrentQueueTrackList></u:BecomeGroupCoordinator></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportBecomeGroupCoordinatorAndSource = function (callback, host, InstanceID, CurrentCoordinator, CurrentGroupID, OtherMembers, CurrentURI, CurrentURIMetaData, SleepTimerState, AlarmState, StreamRestartState, CurrentAVTTrackList, CurrentQueueTrackList, CurrentSourceState, ResumePlayback) {
+	self.AVTransportBecomeGroupCoordinatorAndSource = function (callback, InstanceID, CurrentCoordinator, CurrentGroupID, OtherMembers, CurrentURI, CurrentURIMetaData, SleepTimerState, AlarmState, StreamRestartState, CurrentAVTTrackList, CurrentQueueTrackList, CurrentSourceState, ResumePlayback) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#BecomeGroupCoordinatorAndSource';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:BecomeGroupCoordinatorAndSource xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><CurrentCoordinator>' + CurrentCoordinator + '</CurrentCoordinator><CurrentGroupID>' + CurrentGroupID + '</CurrentGroupID><OtherMembers>' + OtherMembers + '</OtherMembers><CurrentURI>' + CurrentURI + '</CurrentURI><CurrentURIMetaData>' + CurrentURIMetaData + '</CurrentURIMetaData><SleepTimerState>' + SleepTimerState + '</SleepTimerState><AlarmState>' + AlarmState + '</AlarmState><StreamRestartState>' + StreamRestartState + '</StreamRestartState><CurrentAVTTrackList>' + CurrentAVTTrackList + '</CurrentAVTTrackList><CurrentQueueTrackList>' + CurrentQueueTrackList + '</CurrentQueueTrackList><CurrentSourceState>' + CurrentSourceState + '</CurrentSourceState><ResumePlayback>' + ResumePlayback + '</ResumePlayback></u:BecomeGroupCoordinatorAndSource></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportChangeCoordinator = function (callback, host, InstanceID, CurrentCoordinator, NewCoordinator, NewTransportSettings) {
+	self.AVTransportChangeCoordinator = function (callback, InstanceID, CurrentCoordinator, NewCoordinator, NewTransportSettings) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#ChangeCoordinator';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ChangeCoordinator xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><CurrentCoordinator>' + CurrentCoordinator + '</CurrentCoordinator><NewCoordinator>' + NewCoordinator + '</NewCoordinator><NewTransportSettings>' + NewTransportSettings + '</NewTransportSettings></u:ChangeCoordinator></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportChangeTransportSettings = function (callback, host, InstanceID, NewTransportSettings, CurrentAVTransportURI) {
+	self.AVTransportChangeTransportSettings = function (callback, InstanceID, NewTransportSettings, CurrentAVTransportURI) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#ChangeTransportSettings';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ChangeTransportSettings xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><NewTransportSettings>' + NewTransportSettings + '</NewTransportSettings><CurrentAVTransportURI>' + CurrentAVTransportURI + '</CurrentAVTransportURI></u:ChangeTransportSettings></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportConfigureSleepTimer = function (callback, host, InstanceID, NewSleepTimerDuration) {
+	self.AVTransportConfigureSleepTimer = function (callback, InstanceID, NewSleepTimerDuration) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#ConfigureSleepTimer';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:ConfigureSleepTimer xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><NewSleepTimerDuration>' + NewSleepTimerDuration + '</NewSleepTimerDuration></u:ConfigureSleepTimer></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportGetRemainingSleepTimerDuration = function (callback, host, InstanceID) {
+	self.AVTransportGetRemainingSleepTimerDuration = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#GetRemainingSleepTimerDuration';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetRemainingSleepTimerDuration xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetRemainingSleepTimerDuration></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2448,27 +2607,27 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportRunAlarm = function (callback, host, InstanceID, AlarmID, LoggedStartTime, Duration, ProgramURI, ProgramMetaData, PlayMode, Volume, IncludeLinkedZones) {
+	self.AVTransportRunAlarm = function (callback, InstanceID, AlarmID, LoggedStartTime, Duration, ProgramURI, ProgramMetaData, PlayMode, Volume, IncludeLinkedZones) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#RunAlarm';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:RunAlarm xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><AlarmID>' + AlarmID + '</AlarmID><LoggedStartTime>' + LoggedStartTime + '</LoggedStartTime><Duration>' + Duration + '</Duration><ProgramURI>' + ProgramURI + '</ProgramURI><ProgramMetaData>' + ProgramMetaData + '</ProgramMetaData><PlayMode>' + PlayMode + '</PlayMode><Volume>' + Volume + '</Volume><IncludeLinkedZones>' + IncludeLinkedZones + '</IncludeLinkedZones></u:RunAlarm></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportStartAutoplay = function (callback, host, InstanceID, ProgramURI, ProgramMetaData, Volume, IncludeLinkedZones, ResetVolumeAfter) {
+	self.AVTransportStartAutoplay = function (callback, InstanceID, ProgramURI, ProgramMetaData, Volume, IncludeLinkedZones, ResetVolumeAfter) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#StartAutoplay';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:StartAutoplay xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><ProgramURI>' + ProgramURI + '</ProgramURI><ProgramMetaData>' + ProgramMetaData + '</ProgramMetaData><Volume>' + Volume + '</Volume><IncludeLinkedZones>' + IncludeLinkedZones + '</IncludeLinkedZones><ResetVolumeAfter>' + ResetVolumeAfter + '</ResetVolumeAfter></u:StartAutoplay></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 
-	self.AVTransportGetRunningAlarmProperties = function (callback, host, InstanceID) {
+	self.AVTransportGetRunningAlarmProperties = function (callback, InstanceID) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#GetRunningAlarmProperties';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:GetRunningAlarmProperties xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID></u:GetRunningAlarmProperties></s:Body></s:Envelope>';
-		var url = host + url;
+		var url = self.host + url;
 		CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
 			if (status == 200) {
 				var parser = new DOMParser();
@@ -2482,11 +2641,11 @@ var SonosPlayer = function () {
 	}
 
 
-	self.AVTransportSnoozeAlarm = function (callback, host, InstanceID, Duration) {
+	self.AVTransportSnoozeAlarm = function (callback, InstanceID, Duration) {
 		var url = '/MediaRenderer/AVTransport/Control';
 		var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#SnoozeAlarm';
 		var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SnoozeAlarm xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><Duration>' + Duration + '</Duration></u:SnoozeAlarm></s:Body></s:Envelope>';
-		self.sendSoapRequest(url, host, SOAPBody, SOAPAction, callback);
+		self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
 	}
 
 	/*

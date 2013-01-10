@@ -23,7 +23,7 @@
 var SonosDiscovery = function (params) {
 
 	var self = {
-		ST                     :"urn:schemas-upnp-org:device:ZonePlayer:1", // ssdp:all if you want to discover any SSDP device.
+		ST                     :"urn:schemas-upnp-org:device:ZonePlayer:1", // ssdp:all if you want to discover any SSDP device.ZonePlayer:1 for just sonos players
 		devices                :[],
 		systemName             :"SSDP Discovery",
 		feedbackName           :"SSDP Discovery Feedback",
@@ -40,8 +40,10 @@ var SonosDiscovery = function (params) {
 
 		// Send the discovery request
 		setTimeout(function () {
-			//CF.send(self.systemName, "M-SEARCH * HTTP/1/1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 1\r\nST: urn:schemas-upnp-org:device:ZonePlayer:1\r\nX-RINCON-HOUSEHOLD: Sonos_0GMKtbphVMYiyQV5QEPMPMp3Gs\r\n\r\n");
-			CF.send(self.systemName, "M-SEARCH * HTTP/1/1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 1\r\nST: " + self.ST + "\r\n\r\n");
+            //CF.send(self.systemName, "M-SEARCH * HTTP/1/1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 1\r\nST: urn:schemas-upnp-org:device:ZonePlayer:1\r\nX-RINCON-HOUSEHOLD: Sonos_0GMKtbphVMYiyQV5QEPMPMp3Gs\r\n\r\n");
+            CF.send(self.systemName, "M-SEARCH * HTTP/1/1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 1\r\nST: urn:schemas-upnp-org:device:ZonePlayer:1\r\nX-RINCON-HOUSEHOLD: HHID_5el6gdNv8jJHyTufy6zwtbngUrk\r\n\r\n");
+
+            //CF.send(self.systemName, "M-SEARCH * HTTP/1/1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 1\r\nST: " + self.ST + "\r\n\r\n");
 		}, 500);
 	};
 
@@ -77,7 +79,7 @@ var SonosDiscovery = function (params) {
 		}
 
 		if (deviceResponse["ST"] == self.ST) {
-			CF.log("FOUND SONOS ZONE - " + deviceResponse["LOCATION"]);
+			//CF.log("FOUND SONOS ZONE - " + deviceResponse["LOCATION"]);
 			self.devices.push(deviceResponse);
 			// Now retrieve the device description from it's XML if one was given
 			if (deviceResponse["LOCATION"]) {
