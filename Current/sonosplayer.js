@@ -480,7 +480,7 @@ var SonosPlayer = function () {
 			title = queueItems[i].childNodes[2].childNodes[0].nodeValue;
 			artist = queueItems[i].childNodes[4].childNodes[0].nodeValue;
 			//CF.log("Artist is: " + artist + " title is: " + title + " art is:" + art + " track no is: " + trackNo);
-			joinData.push({s35:title, s37:artist, s39:art, s49:trackNo});
+			joinData.push({title:title, artist:artist, art:art, trackNo:trackNo});
 		}
 		//CF.listAdd("l48", joinData);
         self.getPositionInfo();

@@ -45,7 +45,7 @@ var SonosMusicSources = function () {
 	    musicSourceDeviceID: "00-0E-58-28-3B-D4:8",
 	    musicSourceProvider: "Sonos",
 	    musicSourceListIndex: 0,
-        musicSourceRowsToReturn: 100,
+        musicSourceRowsToReturn: 30,
         musicSourceNumberReturned: 0,
         currentPlayer: {},
         metaDataHeader: '<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">',

@@ -342,14 +342,14 @@
     </portrait>
     <landscape t="bg_landscape_statusbar">
       <subpage name="volume" x="0" y="20" j="0" transition1="" subtype1="" time1="0" ease1="" transition2="" subtype2="" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
-      <list j="41" x="0" y="129" w="259" h="592" headerSub="" titleSub="zone_group_coordinator_list" contentSub="zone_group_member_list" footerSub="zone_group_music_list" orientation="v" l="0" swipedelete="0" />
+      <list j="10" x="0" y="129" w="259" h="592" headerSub="" titleSub="zone_group_coordinator_list" contentSub="zone_group_member_list" footerSub="zone_group_music_list" orientation="v" l="0" swipedelete="0" />
       <btn j="17" x="611" y="86" w="59" h="43" t="back" flip="None" sim="1" l="0" s="1" js="sonosGUI.musicSourceBack();">
         <inactive s="0">back</inactive>
         <active s="0">back</active>
       </btn>
-      <subpage name="popup_zones" x="728" y="69" j="42" transition1="fade" subtype1="None" time1="0.1" ease1="" transition2="fade" subtype2="None" time2="0.3" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
+      <subpage name="popup_zones" x="728" y="69" j="10001" transition1="fade" subtype1="None" time1="0.1" ease1="" transition2="fade" subtype2="None" time2="0.3" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
       <subpage name="search" x="594" y="20" j="0" transition1="" subtype1="" time1="0" ease1="" transition2="" subtype2="" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
-      <btn j="16" x="982" y="87" w="42" h="43" t="icon_gear" flip="Settings" sim="1" l="0" s="1">
+      <btn j="70" x="982" y="87" w="42" h="43" t="icon_gear" flip="None" sim="2" l="0" s="1">
         <inactive s="0">
         </inactive>
         <active s="0">
@@ -357,7 +357,7 @@
       </btn>
       <slider j="3" d="0" x="993" y="130" w="28" h="585" min="0" max="100" decimals="0" unit="decimal" t="alphaslider" invert="1" sim="1" l="0" />
       <subpage name="popup_cancel_l" x="0" y="0" j="999999" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <subpage name="popup_playmode" x="318" y="238" j="5" transition1="fade" subtype1="None" time1="0.1" ease1="" transition2="fade" subtype2="None" time2="0.3" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
+      <subpage name="popup_playmode" x="318" y="238" j="10000" transition1="fade" subtype1="None" time1="0.1" ease1="" transition2="fade" subtype2="None" time2="0.3" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
       <subpage name="now_playing" x="258" y="130" j="0" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
       <subpage name="now_playing_details" x="262" y="166" j="0" transition1="" subtype1="" time1="0" ease1="" transition2="" subtype2="" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
       <btn j="14" x="874" y="77" w="50" h="57" t="icon_repeat" flip="None" sim="2" l="0" s="1" js="sonosGUI.repeatPress();">
@@ -378,12 +378,12 @@
         <active s="0">
         </active>
       </btn>
-      <list j="48" x="260" y="406" w="348" h="316" headerSub="" titleSub="" contentSub="queue_item_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="QueueListEnd" listEndOffset="1" />
-      <list j="65" x="609" y="129" w="375" h="592" headerSub="" titleSub="" contentSub="music_source_item_single_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="MusicSourceListEnd" listEndOffset="1" />
+      <list j="12" x="260" y="406" w="348" h="316" headerSub="" titleSub="" contentSub="queue_item_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="QueueListEnd" listEndOffset="1" />
+      <list j="13" x="609" y="129" w="375" h="592" headerSub="" titleSub="" contentSub="music_source_item_single_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="MusicSourceListEnd" listEndOffset="1" />
       <img x="0" y="720" w="1020" h="48" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">field_middle.png</img>
       <txt j="0" x="667" y="89" w="175" h="39" t="title_center" wrap="True" l="0">Music Source</txt>
       <txt j="0" x="3" y="88" w="255" h="39" t="title_center" wrap="True" l="0">Zones</txt>
-      <btn j="40" x="830" y="82" w="60" h="60" t="icon_crossfade" flip="None" sim="2" l="0" s="0" js="sonosGUI.crossFadePress();">
+      <btn j="24" x="830" y="82" w="60" h="60" t="icon_crossfade" flip="None" sim="2" l="0" s="0" js="sonosGUI.crossFadePress();">
         <inactive s="0">
           <img x="-10" y="-10" w="70" h="70">transports_grey_shuffle2_off_20.png</img>
         </inactive>
@@ -392,8 +392,8 @@
         </active>
       </btn>
       <txt j="0" x="263" y="90" w="347" h="39" t="title_center" wrap="True" l="0">Now Playing</txt>
-      <subpage name="queue_actions" x="0" y="0" j="50" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <btn j="10" x="364" y="28" w="46" h="47" t="transport_default" flip="None" sim="2" l="0" s="0" js="sonosGUI.playPress();">
+      <subpage name="queue_actions" x="0" y="0" j="10002" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <btn j="10" x="364" y="28" w="46" h="47" t="transport_default" flip="None" sim="1" l="0" s="0" js="sonosGUI.playPress();">
         <inactive s="0">
           <img x="-5" y="-5" w="60" h="60">transports_grey_play_off_20.png</img>
         </inactive>
@@ -409,7 +409,7 @@
           <img x="-5" y="-5" w="60" h="60">transports_grey_skip_prev_on_20.png</img>
         </active>
       </btn>
-      <btn j="56" x="405" y="28" w="46" h="47" t="transport_default" flip="None" sim="2" l="0" s="0" js="sonosGUI.pausePress();">
+      <btn j="21" x="405" y="28" w="46" h="47" t="transport_default" flip="None" sim="1" l="0" s="0" js="sonosGUI.pausePress();">
         <inactive s="0">
           <img x="-5" y="-5" w="60" h="60">transports_grey_pause_off_20.png</img>
         </inactive>
@@ -417,7 +417,7 @@
           <img x="-5" y="-5" w="60" h="60">transports_grey_pause_on_20.png</img>
         </active>
       </btn>
-      <btn j="57" x="445" y="28" w="46" h="47" t="transport_default" flip="None" sim="2" l="0" s="0" js="sonosGUI.stopPress();">
+      <btn j="20" x="445" y="28" w="46" h="47" t="transport_default" flip="None" sim="2" l="0" s="0" js="sonosGUI.stopPress();">
         <inactive s="0">
           <img x="-5" y="-5" w="60" h="60">transports_grey_stop_off_20.png</img>
         </inactive>
@@ -433,13 +433,14 @@
           <img x="-5" y="-5" w="60" h="60">transports_grey_skip_next_on_20.png</img>
         </active>
       </btn>
-      <subpage name="popup_zones_vol" x="100" y="100" j="62" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="popup_zones_vol" x="100" y="100" j="10003" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <btn j="9999" x="841" y="33" w="133" h="37" t="" flip="None" sim="1" l="0" s="1" js="sonosGUI.testSonosCall();">
         <inactive s="0">
         </inactive>
         <active s="0">
         </active>
       </btn>
+      <subpage name="config_sonos" x="200" y="100" j="10004" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
     </landscape>
   </page>
   <page name="Settings" j="0" transition="fade" subtype="None" time="0.3" ease="easeIn">
@@ -482,11 +483,11 @@
     </landscape>
   </page>
   <subpage name="popup_zones_listitem" w="238" h="44" clip="1" t="popup_zones_listitem">
-    <btn j="44" x="0" y="0" w="238" h="44" t="listitem" flip="None" sim="0" l="0" s="1">
-      <inactive s="43">List Item</inactive>
-      <active s="43">List Item</active>
+    <btn j="0" x="0" y="0" w="238" h="44" t="listitem" flip="None" sim="0" l="0" s="1">
+      <inactive s="200">List Item</inactive>
+      <active s="200">List Item</active>
     </btn>
-    <btn j="45" x="169" y="6" w="69" h="27" t="switch" flip="None" sim="2" l="0" s="1" js="sonosGUI.changeZoneGrouping(join, list, listIndex);">
+    <btn j="25" x="169" y="6" w="69" h="27" t="switch" flip="None" sim="2" l="0" s="1" js="sonosGUI.changeZoneGrouping(join, list, listIndex);">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -507,7 +508,7 @@
   <subpage name="volume" w="260" h="65" clip="1">
     <img x="50" y="24" w="12" h="21" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">vol_slider_left.png</img>
     <img x="198" y="24" w="12" h="21" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">vol_slider_right.png</img>
-    <slider j="21" d="20" x="62" y="24" w="136" h="21" min="0" max="100" decimals="0" pressCmd="ShowSonosVolumeSubPage" dragCmd="sonosMainVolumeDrag" unit="decimal" t="vol" sim="1" l="0">
+    <slider j="10" d="0" x="62" y="24" w="136" h="21" min="0" max="100" decimals="0" pressCmd="ShowSonosVolumeSubPage" dragCmd="sonosMainVolumeDrag" unit="decimal" t="vol" sim="1" l="0">
       <indicator state="0" offsetX="0" offsetY="1" x="0" y="0" w="0" h="0" t="">vol_indicator.png</indicator>
       <indicator state="1" offsetX="0" offsetY="1" zoom="100" />
     </slider>
@@ -892,7 +893,7 @@
     <txt j="1003" x="30" y="187" w="678" h="41" t="setting_right" wrap="False" l="0">New Text Object</txt>
     <img x="717" y="200" w="11" h="15" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">setting_arrow.png</img>
     <txt j="0" x="30" y="330" w="279" h="30" t="setting_title" wrap="False" l="0">Version Info</txt>
-    <btn j="0" x="26" y="421" w="711" h="46" t="setting_item" flip="None" sim="1" l="0" s="1">
+    <btn j="0" x="26" y="421" w="133" h="46" t="setting_item" flip="None" sim="1" l="0" s="1">
       <inactive s="0">Check For Update</inactive>
       <active s="0">Check For Update</active>
     </btn>
@@ -951,7 +952,7 @@
       <inactive s="0">Add to Queue</inactive>
       <active s="0">Add to Queue</active>
     </btn>
-    <btn j="5" x="41" y="210" w="320" h="43" t="setting_button_red" flip="None" sim="2" l="0" s="1">
+    <btn j="10000" x="41" y="210" w="320" h="43" t="setting_button_red" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Cancel</inactive>
       <active s="0">Cancel</active>
     </btn>
@@ -991,23 +992,23 @@
     </btn>
   </subpage>
   <subpage name="now_playing_details" w="350" h="254" clip="1">
-    <img x="0" y="0" w="140" h="140" j="54" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_nowplaying_overlay.png</img>
-    <txt j="53" x="142" y="25" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Song Name</txt>
-    <txt j="41" x="142" y="0" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Track [1/100]</txt>
+    <img x="0" y="0" w="140" h="140" j="202" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_nowplaying_overlay.png</img>
+    <txt j="306" x="142" y="25" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Song Name</txt>
+    <txt j="0" x="142" y="0" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Track [1/100]</txt>
     <img x="10" y="177" w="11" h="57" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">slider_h_thin_left.png</img>
     <img x="335" y="177" w="11" h="57" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">slider_h_thin_right.png</img>
-    <slider j="22" d="0" x="21" y="177" w="314" h="57" min="0" max="382" decimals="0" unit="decimal" t="slider_h_thin" sim="0" l="0">
+    <slider j="11" d="0" x="21" y="177" w="314" h="57" min="0" max="382" decimals="0" unit="decimal" t="slider_h_thin" sim="0" l="0">
       <indicator state="0" offsetX="0" offsetY="0" x="0" y="0" w="0" h="0" t="">slider_thin_indicator.png</indicator>
       <indicator state="1" offsetX="0" offsetY="0" zoom="100" />
     </slider>
-    <txt j="27" x="12" y="212" w="61" h="25" t="item_med_left" wrap="False" l="0">00:00</txt>
-    <txt j="26" x="281" y="212" w="58" h="25" t="item_med_right" wrap="False" l="0">00:00</txt>
-    <txt j="25" x="142" y="75" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Artist Name</txt>
+    <txt j="303" x="12" y="212" w="61" h="25" t="item_med_left" wrap="False" l="0">00:00</txt>
+    <txt j="302" x="281" y="212" w="58" h="25" t="item_med_right" wrap="False" l="0">00:00</txt>
+    <txt j="301" x="142" y="75" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Artist Name</txt>
     <txt j="0" x="142" y="50" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Artist</txt>
-    <txt j="24" x="142" y="120" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Album Name</txt>
-    <txt j="45" x="142" y="95" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Album</txt>
-    <txt j="55" x="0" y="173" w="350" h="23" t="nowplayingdetail" wrap="True" l="0">Song Name - Artist</txt>
-    <txt j="47" x="0" y="148" w="350" h="25" t="nowplayingtitle" wrap="True" l="0">Next</txt>
+    <txt j="300" x="142" y="120" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Album Name</txt>
+    <txt j="0" x="142" y="95" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Album</txt>
+    <txt j="307" x="0" y="173" w="350" h="23" t="nowplayingdetail" wrap="True" l="0">Song Name - Artist</txt>
+    <txt j="0" x="0" y="148" w="350" h="25" t="nowplayingtitle" wrap="True" l="0">Next</txt>
   </subpage>
   <subpage name="configure_commandfusion" w="764" h="682" clip="1">
     <txt j="0" x="30" y="50" w="279" h="30" t="setting_title" wrap="False" l="0">Powered by CommandFusion</txt>
@@ -1027,31 +1028,31 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
     </btn>
   </subpage>
   <subpage name="zone_group_coordinator_list" w="259" h="44" clip="1">
-    <btn j="29" x="45" y="0" w="214" h="44" t="sidebar_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.selectZone(join, list, listIndex);">
-      <inactive s="28">Zone Coordinator</inactive>
-      <active s="28">Zone Coordinator</active>
+    <btn j="0" x="45" y="0" w="214" h="44" t="sidebar_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.selectZone(join, list, listIndex);">
+      <inactive s="202">Zone Coordinator</inactive>
+      <active s="202">Zone Coordinator</active>
     </btn>
-    <btn j="31" x="196" y="10" w="61" h="28" t="setting_title_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.groupZones(join, list, listIndex);">
+    <btn j="22" x="196" y="10" w="61" h="28" t="setting_title_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.groupZones(join, list, listIndex);">
       <inactive s="0">Group</inactive>
       <active s="0">Group</active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="30" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
-    <txt j="47" x="67" y="8" w="103" h="14" t="" wrap="False" l="0">
+    <img x="1" y="0" w="48" h="44" j="200" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
+    <txt j="304" x="67" y="8" w="103" h="14" t="" wrap="False" l="0">
     </txt>
   </subpage>
   <subpage name="zone_group_member_list" w="259" h="44" clip="1">
-    <btn j="29" x="45" y="0" w="214" h="44" t="sidebar_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
-      <inactive s="28">Zone Member</inactive>
-      <active s="28">Zone Member</active>
+    <btn j="0" x="45" y="0" w="214" h="44" t="sidebar_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
+      <inactive s="202">Zone Member</inactive>
+      <active s="202">Zone Member</active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="30" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
+    <img x="1" y="0" w="48" h="44" j="200" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
   </subpage>
   <subpage name="zone_group_music_list" w="259" h="30" clip="1">
-    <btn j="34" x="21" y="0" w="211" h="24" t="sidebar_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
-      <inactive s="33">Zone Music Now Playing</inactive>
-      <active s="33">Zone Music Now Playing</active>
+    <btn j="0" x="21" y="0" w="211" h="24" t="sidebar_listitem" flip="None" sim="0" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
+      <inactive s="203">Zone Music Now Playing</inactive>
+      <active s="203">Zone Music Now Playing</active>
     </btn>
-    <btn j="32" x="0" y="0" w="25" h="25" t="zone_button" flip="None" sim="0" l="0" s="0">
+    <btn j="23" x="0" y="0" w="25" h="25" t="zone_button" flip="None" sim="0" l="0" s="0">
       <inactive s="0">
         <img x="0" y="0" w="25" h="25">transports_grey_stop_off_25.png</img>
       </inactive>
@@ -1067,24 +1068,24 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
     </btn>
   </subpage>
   <subpage name="queue_item_list" w="348" h="44" clip="1">
-    <btn j="36" x="45" y="0" w="303" h="21" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.queueActionSelected(join, list, listIndex);">
-      <inactive s="35">Queue Song</inactive>
-      <active s="35">Queue Song</active>
+    <btn j="0" x="45" y="0" w="303" h="21" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.queueActionSelected(join, list, listIndex);">
+      <inactive s="204">Queue Song</inactive>
+      <active s="204">Queue Song</active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="39" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
-    <btn j="38" x="45" y="23" w="303" h="21" t="queue_artist_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.queueActionSelected(join, list, listIndex);">
-      <inactive s="37">Queue Artist</inactive>
-      <active s="37">Queue Artist</active>
+    <img x="1" y="0" w="48" h="44" j="201" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
+    <btn j="0" x="45" y="23" w="303" h="21" t="queue_artist_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.queueActionSelected(join, list, listIndex);">
+      <inactive s="205">Queue Artist</inactive>
+      <active s="205">Queue Artist</active>
     </btn>
-    <txt j="49" x="182" y="16" w="82" h="17" t="" wrap="False" l="0">
+    <txt j="305" x="182" y="16" w="82" h="17" t="" wrap="False" l="0">
     </txt>
   </subpage>
   <subpage name="music_source_item_single_list" w="348" h="44" clip="1">
-    <btn j="67" x="45" y="0" w="303" h="43" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.selectMusicSource(join, list, listIndex);">
-      <inactive s="68">Music Source</inactive>
-      <active s="68">Music Source</active>
+    <btn j="0" x="45" y="0" w="303" h="43" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.selectMusicSource(join, list, listIndex);">
+      <inactive s="201">Music Source</inactive>
+      <active s="201">Music Source</active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="66" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
+    <img x="1" y="0" w="48" h="44" j="203" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
   </subpage>
   <subpage name="music_source_item_double_list" w="348" h="44" clip="1">
     <btn j="36" x="45" y="0" w="303" h="21" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
@@ -1101,25 +1102,25 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
     <img x="0" y="0" w="389" h="100" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_top_noarrow_bg.png</img>
     <img x="0" y="100" w="389" h="74" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_middle_bg.png</img>
     <img x="0" y="191" w="389" h="2" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_bottom_bg.png</img>
-    <btn j="51" x="41" y="18" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.queuePlayTrack();">
+    <btn j="26" x="41" y="18" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.queuePlayTrack();">
       <inactive s="0">Play Track</inactive>
       <active s="0">Play Track</active>
     </btn>
-    <btn j="52" x="41" y="66" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.queueRemoveTrack();">
+    <btn j="27" x="41" y="66" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.queueRemoveTrack();">
       <inactive s="0">Remove Track</inactive>
       <active s="0">Remove Track</active>
     </btn>
-    <btn j="50" x="41" y="115" w="320" h="43" t="setting_button_red" flip="None" sim="2" l="0" s="1">
+    <btn j="10002" x="41" y="115" w="320" h="43" t="setting_button_red" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Cancel</inactive>
       <active s="0">Cancel</active>
     </btn>
   </subpage>
   <subpage name="zoneVolSlider" w="250" h="50" clip="1">
-    <slider j="60" d="59" x="52" y="21" w="182" h="24" min="0" max="100" decimals="0" pressCmd="changeZoneVolume" dragCmd="changeZoneVolume" releaseCmd="changeZoneVolume" unit="decimal" t="vol" sim="1" l="0">
+    <slider j="12" d="0" x="52" y="21" w="182" h="24" min="0" max="100" decimals="0" pressCmd="changeZoneVolume" dragCmd="changeZoneVolume" releaseCmd="changeZoneVolume" unit="decimal" t="vol" sim="1" l="0">
       <indicator state="0" offsetX="0" offsetY="0" x="0" y="0" w="0" h="0" t="">vol_slider.png</indicator>
       <indicator state="1" offsetX="0" offsetY="0" x="0" y="0" w="0" h="0" t="">vol_slider.png</indicator>
     </slider>
-    <btn j="58" x="0" y="9" w="40" h="40" t="Mute" flip="None" sim="2" l="0" s="0" js="sonosGUI.changeZoneMute(join, list, listIndex);">
+    <btn j="28" x="0" y="9" w="40" h="40" t="Mute" flip="None" sim="2" l="0" s="0" js="sonosGUI.changeZoneMute(join, list, listIndex);">
       <inactive s="0">
         <img x="-10" y="-10" w="60" h="60">transports_grey_mute_off_20.png</img>
       </inactive>
@@ -1127,15 +1128,15 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
         <img x="-10" y="-10" w="60" h="60">transports_grey_mute_on_20.png</img>
       </active>
     </btn>
-    <txt j="63" x="51" y="1" w="194" h="14" t="left_lightblue_16pt_b" wrap="False" l="0">Room Name</txt>
-    <txt j="64" x="198" y="3" w="27" h="12" t="" wrap="False" l="0">
+    <txt j="308" x="51" y="1" w="194" h="14" t="left_lightblue_16pt_b" wrap="False" l="0">Room Name</txt>
+    <txt j="309" x="198" y="3" w="27" h="12" t="" wrap="False" l="0">
     </txt>
   </subpage>
   <subpage name="popup_zones" w="296" h="410" clip="1" t="popup_zones">
-    <list j="46" x="29" y="72" w="239" h="298" headerSub="" titleSub="" contentSub="popup_zones_listitem" footerSub="" orientation="v" l="0" swipedelete="0" />
+    <list j="11" x="29" y="72" w="239" h="298" headerSub="" titleSub="" contentSub="popup_zones_listitem" footerSub="" orientation="v" l="0" swipedelete="0" />
     <img x="0" y="0" w="296" h="410" j="0" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_zones_overlay.png</img>
     <txt j="0" x="23" y="28" w="250" h="45" t="popup_title" wrap="False" l="0">Zones</txt>
-    <btn j="42" x="198" y="35" w="60" h="30" t="setting_title_button" flip="None" sim="2" l="0" s="1">
+    <btn j="10001" x="198" y="35" w="60" h="30" t="setting_title_button" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Done</inactive>
       <active s="0">Done</active>
     </btn>
@@ -1148,12 +1149,45 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
     </btn>
   </subpage>
   <subpage name="popup_zones_vol" w="296" h="410" clip="1" t="popup_zones">
-    <list j="61" x="29" y="72" w="239" h="298" headerSub="" titleSub="" contentSub="zoneVolSlider" footerSub="" orientation="v" l="0" swipedelete="0" />
+    <list j="15" x="29" y="72" w="239" h="298" headerSub="" titleSub="" contentSub="zoneVolSlider" footerSub="" orientation="v" l="0" swipedelete="0" />
     <img x="0" y="0" w="296" h="410" j="0" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_zones_overlay.png</img>
     <txt j="0" x="23" y="28" w="250" h="45" t="popup_title" wrap="False" l="0">Volume</txt>
-    <btn j="62" x="198" y="35" w="60" h="30" t="setting_title_button" flip="None" sim="2" l="0" s="1">
+    <btn j="10003" x="198" y="35" w="60" h="30" t="setting_title_button" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Done</inactive>
       <active s="0">Done</active>
     </btn>
+  </subpage>
+  <subpage name="config_sonos" w="352" h="558" clip="1">
+    <img x="0" y="0" w="352" h="91" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_middle_bg.png</img>
+    <btn j="69" x="0" y="47" w="350" h="46" t="setting_item_middle" flip="None" sim="2" l="0" s="1">
+      <inactive s="0">Use auto discovery</inactive>
+      <active s="0">Use auto discovery</active>
+    </btn>
+    <btn j="29" x="272" y="56" w="78" h="29" t="switch" flip="None" sim="2" l="0" s="1">
+      <inactive s="0">
+      </inactive>
+      <active s="0">
+      </active>
+    </btn>
+    <list j="14" x="3" y="141" w="346" h="417" headerSub="" titleSub="" contentSub="player_list" footerSub="" orientation="v" l="0" swipedelete="0" />
+    <btn j="0" x="0" y="95" w="350" h="46" t="setting_item_last" flip="None" sim="0" l="0" s="1">
+      <inactive s="0">Player List:</inactive>
+      <active s="0">Player List:</active>
+    </btn>
+    <btn j="70" x="43" y="0" w="133" h="46" t="setting_item" flip="None" sim="2" l="0" s="1">
+      <inactive s="0">Save</inactive>
+      <active s="0">Save</active>
+    </btn>
+    <btn j="10004" x="212" y="2" w="105" h="43" t="setting_button_red" flip="None" sim="2" l="0" s="1">
+      <inactive s="0">Cancel</inactive>
+      <active s="0">Cancel</active>
+    </btn>
+  </subpage>
+  <subpage name="player_list" w="711" h="46" clip="1">
+    <btn j="0" x="0" y="0" w="711" h="46" t="setting_item_last" flip="None" sim="0" l="0" s="1">
+      <inactive s="0">IP Address</inactive>
+      <active s="0">IP Address</active>
+    </btn>
+    <txt j="310" x="166" y="0" w="533" h="43" t="setting_left" wrap="False" l="0">IP Address</txt>
   </subpage>
 </gui>
