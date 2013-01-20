@@ -62,16 +62,24 @@ var SonosMusicSources = function () {
         //self.getLastFMTopTags();
         //self.getLASTMFRecentStations();
         self.setUpAndDisplayTopMenu();
-
+            self.getSpotifySessionID();
     }
     // Gets the SPotify session ID which is need to communicate with the server
 
     self.getSpotifySessionID = function (){
-        self.currentPlayer.MusicServicesGetSessionId(self.processSpotifySessionID, 9, self.spotifyUserID)
+        CF.getJoin(CF.GlobalTokensJoin, function (j, v, tokens) {
+            self.spotifyUserID = tokens["[spotifyID]"];
+            //CF.log("SpotifyUserID is :" + self.spotifyUserID);
+            self.currentPlayer = sonosGUI.getCurrentPlayer();
+            CF.log("SpotifyUserID is :" + self.spotifyUserID);
+            self.currentPlayer.MusicServicesGetSessionId(self.processSpotifySessionID, 9, self.spotifyUserID)
+        });
+
     }
 
     self.processSpotifySessionID = function(response) {
         self.spotifySessionID = response.SessionId;
+        CF.log("SpotifySessionID is: " + self.spotifySessionID)
     }
 
     self.setUpAndDisplayTopMenu = function (){
@@ -83,7 +91,7 @@ var SonosMusicSources = function () {
     }
 
     self.selectMusicSource = function (join, list, listIndex) {
-		self.currentPlayer = sonosGUI.getCurrentPlayer();
+        self.currentPlayer = sonosGUI.getCurrentPlayer();
         self.getSpotifySessionID();
         //CF.logObject(self.currentPlayer);
         self.musicSourcePressed = true;  // Used to stop any long queues we might be processing

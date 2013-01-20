@@ -79,7 +79,13 @@ var SONOS_GUI = function () {
         joinTxtNowPlayingNextSong:"307",
         joinTxtRoomNameVol:"308",
         joinTxtRINCONVol:"309",
-        joinTxtPlayerIP:"310",
+        joinTxtNowPlayingRoom: "310",
+
+
+        // Input Fields
+
+        joinInpPlayerIP:"400",
+        joinInpSpotifyID:"401",
 
         // Slider Joins
         joinSliderAnalVol:'10',
@@ -106,7 +112,7 @@ var SONOS_GUI = function () {
         // Sub pages used to show the various items in the zone list box, i.e. a zone coordinator, a zone member and the playing info
         subpageZoneGroupCoordinatorList:'zone_group_coordinator_list',
         subpageZoneGroupMemberList:'zone_group_member_list',
-        subpageZoneGroupMusicist:'zone_group_music_list',
+        subpageZoneGroupMusicList:'zone_group_music_list',
 
         // Various other variables used throughout sonosgui
         // playerListGUI:{},
@@ -121,9 +127,15 @@ var SONOS_GUI = function () {
         queueSelectedItemTrackNumber:0, // tracks which item in the queue list was selected
         trackStartTime:0, // track times
         trackCurrentTime:0, /// track times
-        firstZoneDisplayTrue:false, // used to make sure at least one zone has been selected
-        sonosMusicSource:{} // an object read from musicsources.js used for showing these in the UI
-
+        firstZoneDisplayTrue:true, // used to make sure at least one zone has been selected
+        sonosMusicSource:{}, // an object read from musicsources.js used for showing these in the UI
+        autoDiscoveryFlag:true, // holds whether to use autoDiscovery or not before wirtten to a global token
+        autoDiscoveryIPs:[], // used to hold the hardcoded IP address before written to a global token
+        spotifyID:"", //used to hold Spotify ID prior to being written to a global token
+        discoveryComplete: false,
+        notificationObjQueue: [],
+        notificationTypeQueue: [],
+        notificationVar1Queue: []
     };
 
     self.init = function () {
@@ -135,14 +147,29 @@ var SONOS_GUI = function () {
 
         CF.log("Commencing initialisation of Sonos GUI");
         CF.log("Finding Players");
-        var sonosPlayers = new SonosPlayers();
+        CF.watch(CF.GUISuspendedEvent, self.onGUISuspended);
+        CF.watch(CF.GUIResumedEvent, self.onGUIResumed);
+        sonosPlayers = new SonosPlayers();
         sonosPlayers.sonosPlayersCallback = self.setDiscoveredPlayerlist; // sets up the callback to tell the UI when new players are found
         sonosPlayers.init();
-        //  Initiate the music sources handling
-        self.sonosMusicSource = new SonosMusicSources();
-        self.sonosMusicSource.init();
+        self.retrieveSonosConfig();
+
+        // Wait 6 seconds for all the players to be discovered and processed before handling GUUI notification messages
+        setTimeout(function () {
+            self.discoveryOver();
+        }, 10000);
+
+
 
     };
+
+    self.discoveryOver = function () {
+        // Set falg so that we can now process GUI notifications
+        self.discoveryComplete = true;
+        // Call the GUI notificaiton with the last zone group message to set up the zones
+        self.processNotificationEvent("ZoneGroupEvent", self.lastZoneGroupNotifcation);
+
+    }
 
     self.setDiscoveredPlayerlist = function (playerList) {
         // A new player was discovered so the GUI playerlist is set to the list holding all the players
@@ -170,44 +197,53 @@ var SONOS_GUI = function () {
 
     self.processNotificationEvent = function (notificationType, notificationObj, var1) {
         //CF.log("Processing a notifcation in the GUI");
-        switch (notificationType) {
-            // ZoneGroup will be sent by a player when it has received a zone grouping notification change, i.e
-            // there has been a change in the zone grouping that the GUI needs to respond to
-            case "ZoneGroupEvent":
-                //CF.log("Got a zone group event at the GUI level");
-                self.processZoneGroupChange(notificationObj);
-                break;
-            case "VolumeChangeEvent":
-                //CF.log("Got a volume event at the GUI level");
-                self.processVolumeChange(notificationObj);
-                break;
-            case "TransportEvent":
-                //CF.log("Got a transport event at the GUI level");
-                self.processTransportChange(notificationObj);
-                break;
-            case "PlayerTransportStateChange":
-                //CF.log("Got a player state change at the GUI level");
-                self.processTransportChange(notificationObj);
-                break;
-            case "ClearMusicSources":
-                //CF.log("Got a player state change at the GUI level");
-                self.clearMusicSources();
-                break;
-            case "ReplaceMusicSources":
-                //CF.log("Got a player state change at the GUI level");
-                self.replaceMusicSources(notificationObj);
-                break;
-            case "AppendMusicSources":
-                //CF.log("Got a player state change at the GUI level");
-                self.appendMusicSources(notificationObj, var1);
-                break;
-            case "ShowMusicSourceActions":
-                //CF.log("Got a player state change at the GUI level");
-                self.displayMusicSourceActions(notificationObj);
-                break;
+        if (self.discoveryComplete) {
+            switch (notificationType) {
+                // ZoneGroup will be sent by a player when it has received a zone grouping notification change, i.e
+                // there has been a change in the zone grouping that the GUI needs to respond to
+                case "ZoneGroupEvent":
+                    //CF.log("Got a zone group event at the GUI level");
+                    self.processZoneGroupChange(notificationObj);
+                    break;
+                case "VolumeChangeEvent":
+                    //CF.log("Got a volume event at the GUI level");
+                    self.processVolumeChange(notificationObj);
+                    break;
+                case "TransportEvent":
+                    //CF.log("Got a transport event at the GUI level");
+                    self.processTransportChange(notificationObj);
+                    break;
+                case "PlayerTransportStateChange":
+                    //CF.log("Got a player state change at the GUI level");
+                    self.processTransportChange(notificationObj);
+                    break;
+                case "ClearMusicSources":
+                    //CF.log("Got a player state change at the GUI level");
+                    self.clearMusicSources();
+                    break;
+                case "ReplaceMusicSources":
+                    //CF.log("Got a player state change at the GUI level");
+                    self.replaceMusicSources(notificationObj);
+                    break;
+                case "AppendMusicSources":
+                    //CF.log("Got a player state change at the GUI level");
+                    self.appendMusicSources(notificationObj, var1);
+                    break;
+                case "ShowMusicSourceActions":
+                    //CF.log("Got a player state change at the GUI level");
+                    self.displayMusicSourceActions(notificationObj);
+                    break;
 
-            default:
-                CF.log("Invalid GUI notification type");
+                default:
+                    CF.log("Invalid GUI notification type");
+            }
+        }
+        else {
+            // We can ignore all message that arise during discovery from a GUI point of view apart from we need one
+            // zone group message in order to set up the zones.
+            if (notificationType === "ZoneGroupEvent") {
+                self.lastZoneGroupNotifcation = notificationObj;
+            }
         }
     };
 
@@ -295,7 +331,17 @@ var SONOS_GUI = function () {
 
     self.processTransportChange = function (notificationObj) {
         if (self.selectedZoneCoordinator != "Not Set") {
-            CF.log("The zone which got the transport event is: " + self.discoveredPlayerList[notificationObj].roomName);
+            //CF.log("The zone which got the transport event is: " + self.discoveredPlayerList[notificationObj].roomName);
+            if (self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying != 0 ) {
+                CF.log("The transport event was for room: " + self.discoveredPlayerList[notificationObj].roomName + " which has index: " + self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying);
+                CF.setJoin("l" + self.joinListZones + ":" + self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying + ":s" + self.joinBtnTxtZoneMusicText, self.discoveredPlayerList[notificationObj].currentTrackName);
+                if (self.discoveredPlayerList[notificationObj].transportState === "PLAYING") {
+                    CF.setJoin("l" + self.joinListZones + ":" + self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying + ":d" + self.joinBtnZoneMusicPlay, 1);
+                }
+                else {
+                    CF.setJoin("l" + self.joinListZones + ":" + self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying + ":d" + self.joinBtnZoneMusicPlay, 0);
+                }
+            }
             if (self.selectedZoneCoordinator === notificationObj) {
                 self.currentPlayer = self.discoveredPlayerList[self.selectedZoneCoordinator];
                 self.currentPlayer.getPositionInfo();
@@ -303,6 +349,7 @@ var SONOS_GUI = function () {
                 self.updateTimerWithoutGetPosInfo();
                 self.updateNowPlayingGUI();
                 self.updatePlayControls();
+
             }
         }
 
@@ -461,8 +508,23 @@ var SONOS_GUI = function () {
             //CF.log("zoneDisplay is:\n");
             //CF.logObject(self.zoneDisplay);
             self.populateZonesList();
+            // This is various stuff run when the first zone grouping message is received
+            if (self.firstZoneDisplayTrue === true) {
+                // Check to see if the player referenced as the first one in the zone list has actually been discovered yet and if not ignore rest
+                if (typeof self.discoveredPlayerList[self.zoneDisplay[0].coordinatorRINCON] !== "undefined") {
+                    //CF.log("the coordinator for the first zone is: " + self.zoneDisplay[0].coordinatorRINCON);
+                    self.currentPlayer = self.discoveredPlayerList[self.zoneDisplay[0].coordinatorRINCON];
+                    //CF.log("the default player selected is: " + self.currentPlayer.roomName);
+                    CF.getJoin("l" + self.joinListZones + ":0:s" + self.joinBtnTxtZoneList, function (j, v, tokens) {
+                        CF.setJoin("s"+self.joinTxtNowPlayingRoom, v);
+                    });
+                    self.processSelectedZone(self.zoneDisplay[0].coordinatorRINCON);
+                    self.sonosMusicSource = new SonosMusicSources();
+                    self.sonosMusicSource.init();
+                    self.firstZoneDisplayTrue = false;
+                }
+            }
             self.userZoneGroupingUnderway = false;  // allow processing again
-
         }
     }
 
@@ -471,7 +533,7 @@ var SONOS_GUI = function () {
     self.populateZonesList = function () {
         var listCounter = 0;  // Used to count each time we insert into the list so that we can set the number in the list that represents the now playing music item for each player
         CF.listRemove("l" + self.joinListZones);
-        for (var i = 0; i < self.zoneMembers.length; i++) {
+        for (var i = 0; i < self.zoneDisplay.length; i++) {
             if (typeof self.discoveredPlayerList[self.zoneDisplay[i].RINCON] === "undefined") {
                 var zoneIcon = '';
             }
@@ -493,19 +555,46 @@ var SONOS_GUI = function () {
             }
 
             var nextZoneNum = i + 1;
-            if (nextZoneNum < self.zoneMembers.length) {
+            if (nextZoneNum < self.zoneDisplay.length) {
                 if (self.zoneDisplay[nextZoneNum].isFirstOfGroup) {
+                    //CF.logObject(self.zoneDisplay);
+                    self.discoveredPlayerList[self.zoneDisplay[i].coordinatorRINCON].zoneGroupMusicNowPlaying = listCounter;
                     listCounter++;
-                    //self.discoveredPlayerList[self.zoneDisplay[i].coordinatorRINCON].zoneGroupMusicNowPLaying = listCounter;
+                    //CF.log("adding music zone sub page for room");
                     CF.listAdd("l" + self.joinListZones, [
-                        {subpage:self.subpageZoneGroupMusicist}
+                        {subpage:self.subpageZoneGroupMusicList}
                     ])
 
                 }
             }
+            if (i === self.zoneDisplay.length-1 ) {
+                //CF.log("Do final music list");
+                self.discoveredPlayerList[self.zoneDisplay[i].coordinatorRINCON].zoneGroupMusicNowPlaying = listCounter;
+                //CF.log("adding music zone sub page for room");
+                CF.listAdd("l" + self.joinListZones, [
+                    {subpage:self.subpageZoneGroupMusicList}
+                ])
+            }
         }
-
+        self.populateZoneMusicField();
     }
+
+    self.populateZoneMusicField = function () {
+        for (var player in self.discoveredPlayerList) {
+            CF.log("The player is : " + self.discoveredPlayerList[player].roomName + " which has index: " + self.discoveredPlayerList[player].zoneGroupMusicNowPlaying);
+            if (self.discoveredPlayerList[player].zoneGroupMusicNowPlaying != 0 ) {
+                //CF.log("The transport event was for room: " + self.discoveredPlayerList[player].roomName + " which has index: " + self.discoveredPlayerList[player].zoneGroupMusicNowPlaying);
+                CF.setJoin("l" + self.joinListZones + ":" + self.discoveredPlayerList[player].zoneGroupMusicNowPlaying + ":s" + self.joinBtnTxtZoneMusicText, self.discoveredPlayerList[player].currentTrackName);
+                if (self.discoveredPlayerList[player].transportState === "PLAYING") {
+                    CF.setJoin("l" + self.joinListZones + ":" + self.discoveredPlayerList[player].zoneGroupMusicNowPlaying + ":d" + self.joinBtnZoneMusicPlay, 1);
+                }
+                else {
+                    CF.setJoin("l" + self.joinListZones + ":" + self.discoveredPlayerList[player].zoneGroupMusicNowPlaying + ":d" + self.joinBtnZoneMusicPlay, 0);
+                }
+            }
+        }
+    }
+
 
     // Called when a zone is added or removed from the zone grouping in the GUI
 
@@ -537,7 +626,7 @@ var SONOS_GUI = function () {
                     groupFlag = true;
                 }
                 CF.listAdd("l" + self.joinListChangeZoneGrouping, [
-                    {s43:self.zoneMembers[i].roomName, d45:groupFlag}
+                    {s200:self.zoneMembers[i].roomName, d25:groupFlag}
                 ]);
             }
 
@@ -547,26 +636,14 @@ var SONOS_GUI = function () {
     // Handles the functions required when a zone is selected in the GUI
 
     self.selectZone = function (join, list, listIndex) {
-        CF.log("listIndex is: " + listIndex)
+        //CF.log("listIndex is: " + listIndex)
         CF.getJoin("l" + self.joinListZones + ":" + listIndex + ":s" + self.joinTxtZoneCoordinatorHidden, function (j, v, tokens) {
             self.selectedZoneCoordinator = v;
-            self.currentPlayer = self.discoveredPlayerList[self.selectedZoneCoordinator];
-            CF.log("The new zone selected is: " + self.currentPlayer.roomName);
-            CF.listRemove("l" + self.joinListQueue);
-            self.currentPlayer.resetQueueNumberReturned();
-            self.currentPlayer.getQueueForCurrentZone();
-            self.currentPlayer.getPositionInfo();
-            self.trackStartTime = new Date().getTime();
-            //CF.log("The track start time in secs is:" + self.trackStartTime);
-            //self.updateTimerWithGetPosInfo();
-            self.updateTimerWithoutGetPosInfo();
-            self.updateNowPlayingGUI();
-            self.updatePlayControls;
-            self.calcMuteAndZoneVolumeDetails();
-            //self.currentPlayer.getPositionInfo();
-            /*            self.currentPlayer.resetQueueNumberReturned();
-             self.currentPlayer.getQueueForCurrentZone();
-             self.currentPlayer.getPositionInfo();*/
+            self.processSelectedZone(v);
+        });
+
+        CF.getJoin("l" + self.joinListZones + ":" + listIndex + ":s" + self.joinBtnTxtZoneList, function (j, v, tokens) {
+            CF.setJoin("s"+self.joinTxtNowPlayingRoom, v);
         });
 
         /*		self.calcMuteAndZoneVolumeDetails();
@@ -575,6 +652,22 @@ var SONOS_GUI = function () {
          self.getQueueForCurrentZone();*/
         self.firstZoneDisplayTrue = true;
     };
+
+    self.processSelectedZone = function(zone) {
+        //self.selectedZoneCoordinator = v;
+        self.selectedZoneCoordinator = zone;
+
+        self.currentPlayer = self.discoveredPlayerList[self.selectedZoneCoordinator];
+        //CF.log("The new zone selected is: " + self.currentPlayer.roomName);
+        CF.listRemove("l" + self.joinListQueue);
+        self.currentPlayer.resetQueueNumberReturned();
+        self.currentPlayer.getQueueForCurrentZone();
+        self.currentPlayer.getPositionInfo();
+        self.trackStartTime = new Date().getTime();
+        self.firstZoneDisplayTrue = true;
+        self.calcMuteAndZoneVolumeDetails();
+
+    }
 
     // Because retrieving of queue information will be asynchroous have to use a call back from the player when the data
     // is ready
@@ -586,7 +679,6 @@ var SONOS_GUI = function () {
             }
             displayQueue.push({s201:joinData[i].art, s205:joinData[i].artist, s204:joinData[i].title, s305:joinData[i].trackNo});
         }
-
 
 
         CF.listAdd("l" + self.joinListQueue, displayQueue);
@@ -631,7 +723,7 @@ var SONOS_GUI = function () {
         self.masterMute = 0;
         for (var i = 0; i < self.zoneMembers.length; i++) {
             if (self.zoneMembers[i].coordinatorRINCON == self.selectedZoneCoordinator) {
-                CF.log("Adding zone to average: " + self.zoneMembers[i].roomName);
+                //CF.log("Adding zone to average: " + self.zoneMembers[i].roomName);
                 var curZone = self.discoveredPlayerList[self.zoneMembers[i].RINCON];
                 self.masterVolume += parseInt(curZone.volume);
                 self.numZonesInGroup++;
@@ -643,7 +735,7 @@ var SONOS_GUI = function () {
         if (self.masterMute < 1) {
             self.masterMute = 0;  // Make sure it is zero rather than some average between 0 and 1 so we can use it to set UI elements
         }
-        CF.log("The average volume for the zone is: " + self.masterVolume + " and the zone masterMute is: " + self.masterMute);
+        //CF.log("The average volume for the zone is: " + self.masterVolume + " and the zone masterMute is: " + self.masterMute);
         self.displayMuteAndVolUI();
     }
 
@@ -653,7 +745,7 @@ var SONOS_GUI = function () {
         // We will not display the zone volume dialog in this routine as this will be done in the master volume press function
         // This means we can call it anytime we get a content render notify message so that the UI (even if not displayed is always up to date)
         // In any scenario we need to set the master controls
-        CF.log("Displaying the volume UI");
+        //CF.log("Displaying the volume UI");
         CF.setJoin("d" + self.joinBtnMute, self.masterMute); // Set the mute status
         CF.setJoin("a" + self.joinSliderAnalVol, self.masterVolume * 65535 / 100);  // Set the volume slider
         // Next we have to check to see if there is more than one zone and if so set their individualute button and volume slider
@@ -663,7 +755,7 @@ var SONOS_GUI = function () {
             for (var i = 0; i < self.zoneMembers.length; i++) {
                 if (self.zoneMembers[i].coordinatorRINCON == self.selectedZoneCoordinator) {  // i.e. this zone is in the group
                     var curZone = self.discoveredPlayerList[self.zoneMembers[i].RINCON];  // Get the current details for the zone
-                    CF.log("Adding zone: " + curZone.roomName + "to volume listbox with list index: " + k + "and mute: " + curZone.mute);
+                    //CF.log("Adding zone: " + curZone.roomName + "to volume listbox with list index: " + k + "and mute: " + curZone.mute);
                     CF.setJoin("l" + self.joinListZoneVol + ":" + k + ":d" + self.joinBtnZoneMute, curZone.mute);
                     CF.setJoin("l" + self.joinListZoneVol + ":" + k + ":a" + self.joinAnalZoneVolList, curZone.volume * 65535 / 100);
                     k++;
@@ -687,7 +779,7 @@ var SONOS_GUI = function () {
                     var curZone = self.discoveredPlayerList[self.zoneMembers[i].RINCON];
                     // Populate the UI
                     CF.listAdd("l" + self.joinListZoneVol, [
-                        {s63:curZone.roomName, d58:curZone.mute, a60:curZone.volume * 65535 / 100, s64:curZone.RINCON}
+                        {s308:curZone.roomName, d28:curZone.mute, a12:curZone.volume * 65535 / 100, s309:curZone.RINCON}
                     ]);
                     // Set the statring volume of the zone which is needed to do the handling of movement of the master volume slider
                     self.discoveredPlayerList[self.zoneMembers[i].RINCON].startVolume = self.discoveredPlayerList[self.zoneMembers[i].RINCON].volume
@@ -729,7 +821,7 @@ var SONOS_GUI = function () {
                     if (newVol > 100) {
                         newVol = 100
                     }
-                    CF.log("new vol is: " + newVol)
+                    //CF.log("new vol is: " + newVol)
                     curZone.RenderingControlSetVolume("", "0", "Master", newVol);
                 }
             }
@@ -738,13 +830,13 @@ var SONOS_GUI = function () {
     };
 
     /*self.mainVolumeRelease = function (volume) {
-        //CF.log("Got a volume release with volume: " + volume);
-        //CF.setJoin("d128", 0);
-        //CF.listRemove("l14");
-        //self.reEnableZoneNotify();
+     //CF.log("Got a volume release with volume: " + volume);
+     //CF.setJoin("d128", 0);
+     //CF.listRemove("l14");
+     //self.reEnableZoneNotify();
 
 
-    }*/
+     }*/
 
     self.changeZoneVolume = function (data) {
         //CF.log("Zone Volume details are: " + data);
@@ -797,7 +889,7 @@ var SONOS_GUI = function () {
      */
 
     self.queueListEnd = function () {
-        CF.log("Got a queue list end message from GUI");
+        //CF.log("Got a queue list end message from GUI");
         self.currentPlayer.getQueueForCurrentZone();
     };
 
@@ -806,7 +898,7 @@ var SONOS_GUI = function () {
     self.queueActionSelected = function (join, list, listIndex) {
         CF.getJoin("l" + self.joinListQueue + ":" + listIndex + ":s" + self.joinTxTQueueTrackNo, function (join, value, tokens) {
             self.queueSelectedItemTrackNumber = value;
-            CF.log("Selected track in queue is: " + self.queueSelectedItemTrackNumber);
+            //CF.log("Selected track in queue is: " + self.queueSelectedItemTrackNumber);
         });
         CF.setJoin("d" + self.subpageQueueActions, true);
     };
@@ -906,6 +998,108 @@ var SONOS_GUI = function () {
         }
         //self.AVTransportPrevious ("", 0);
     }
+    /*
+     ===============================================================================
+
+
+     =========================================================================
+     NOTES:
+
+     Handles sonos config screen and saving etc
+
+     =========================================================================
+     */
+
+
+    self.setAutoDiscoveryFlag = function () {
+        CF.getJoin("d" + self.joinBtnAutoDiscovery, function (join, value) {
+            // regardless of the join type, the value is always a string
+            // if we want a number, we need to use parseInt() or parseFloat()
+            var num = parseInt(value);
+            if (num === 0) {
+                self.autoDiscoveryFlag = false;
+                //CF.log("Auto Discovery is off");
+            } else {
+                self.autoDiscoveryFlag = true;
+                //CF.log("Auto Discovery is on");
+            }
+        });
+    }
+
+    self.addPlayerIP = function () {
+        CF.listAdd("l" + self.joinListPlayerIPs, [
+            {s400:""}
+        ]);
+    }
+
+    self.saveSonosConfig = function () {
+        //Utils.savePersistentData(self.autoDiscoveryFlag, "[autoDiscoveryFlag]");
+        CF.getJoin("s" + self.joinInpSpotifyID, function (join, value) {
+            // regardless of the join type, the value is always a string
+            // if we want a number, we need to use parseInt() or parseFloat()
+            self.spotifyID = value;
+            //CF.log("spotifyID is:" + value);
+            CF.setToken(CF.GlobalTokensJoin, "[spotifyID]", value);
+            //Utils.savePersistentData(self.spotifyID, "[spotifyID]");
+            self.sonosMusicSource.getSpotifySessionID();
+
+        });
+        CF.setToken(CF.GlobalTokensJoin, "[autoDiscoveryFlag]", self.autoDiscoveryFlag);
+        CF.listContents("l" + self.joinListPlayerIPs, 0, 0, function (items) {
+            CF.log(items);
+            CF.setToken(CF.GlobalTokensJoin, "[playerIPAddresses]", JSON.stringify(items));
+        });
+        CF.setJoin("d"+ self.subpageSonosConfig, 0);
+
+
+    }
+    self.testToken = function () {
+        CF.getJoin(CF.GlobalTokensJoin, function (j, v, tokens) {
+            // read a token named [currentartist]
+            //CF.log("GETTING THE TOKEN");
+            //CF.logObject(tokens);
+            //CF.log(tokens["[spotifyID]"]);
+        });
+    }
+
+
+    self.retrieveSonosConfig = function () {
+        CF.getJoin(CF.GlobalTokensJoin, function (j, v, tokens) {
+            //CF.logObject(tokens);
+            self.spotifyID = tokens["[spotifyID]"];
+            CF.setJoin("s" + self.joinInpSpotifyID, self.spotifyID);
+            self.autoDiscoveryFlag = tokens["[autoDiscoveryFlag]"];
+            CF.setJoin("d" + self.joinBtnAutoDiscovery, self.autoDiscoveryFlag);
+            CF.listRemove("l" + self.joinListPlayerIPs);
+            CF.listAdd("l" + self.joinListPlayerIPs, JSON.parse(tokens["[playerIPAddresses]"]));
+        });
+    }
+
+    self.unSubscribeToPlayers = function () {
+        //CF.log("unsbscribing " + self.zoneMembers.length + " players");
+
+        for (var i = 0; i < self.zoneMembers.length; i++) {
+            curPlayer = self.discoveredPlayerList[self.zoneMembers[i].RINCON];
+            //CF.log("Unsubscribing zone" + curPlayer.roomName);
+            curPlayer.unSubscribeEvents();
+        }
+    }
+
+    self.onGUISuspended = function () {
+        // Even though the call is not executed immediately, it is enqueued for later processing:
+        // the displayed date will be the one generated by the time the app was suspended
+        //self.unSubscribeToPlayers();
+        CF.log("GUI suspended at " + (new Date()));
+    }
+
+    self.onGUIResumed = function () {
+        // Show the time at which the GUI was put back to front
+        //var sonosPlayers = new SonosPlayers();
+        //sonosPlayers.sonosPlayersCallback = self.setDiscoveredPlayerlist; // sets up the callback to tell the UI when new players are found
+        //sonosPlayers.init();
+        CF.log("GUI resumed at " + (new Date()));
+    }
+
 
 
     return self;

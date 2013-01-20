@@ -29,17 +29,17 @@ var SonosPlayer = function () {
 			 { "Service": "/MediaRenderer/AVTransport/Event", "Description": "Transport Event" },
 			 //{ "Service": "/MediaServer/ContentDirectory/Event", "Description": "Content Directory" },
 			 { "Service": "/MediaRenderer/RenderingControl/Event", "Description": "Render Control" }*/
-			{ "Service":"/AlarmClock/Event", "Description":"Alarm Clock" },
-			{ "Service":"/MusicServices/Event", "Description":"Music Services" },
-			{ "Service":"/AudioIn/Event", "Description":"Audio In" },
-			{ "Service":"/DeviceProperties/Event", "Description":"Device Properties" },
-			{ "Service":"/SystemProperties/Event", "Description":"System Properties" },
-			{ "Service":"/ZoneGroupTopology/Event", "Description":"Zone Group" },
-			{ "Service":"/GroupManagement/Event", "Description":"Group Management" },
-			{ "Service":"/MediaServer/ContentDirectory/Event", "Description":"Content Directory" },
-			{ "Service":"/MediaRenderer/RenderingControl/Event", "Description":"Render Control" },
-			{ "Service":"/MediaRenderer/ConnectionManager/Event", "Description":"Connection Manager" },
-			{ "Service":"/MediaRenderer/AVTransport/Event", "Description":"Transport Event" }
+			{ "Service":"/AlarmClock/Event", "Description":"Alarm Clock", "Sub":"0000000000" },
+			{ "Service":"/MusicServices/Event", "Description":"Music Services", "Sub":"0000000000" },
+			{ "Service":"/AudioIn/Event", "Description":"Audio In", "Sub":"0000000000" },
+			{ "Service":"/DeviceProperties/Event", "Description":"Device Properties", "Sub":"0000000000" },
+			{ "Service":"/SystemProperties/Event", "Description":"System Properties", "Sub":"0000000000" },
+			{ "Service":"/ZoneGroupTopology/Event", "Description":"Zone Group", "Sub":"0000000000" },
+			{ "Service":"/GroupManagement/Event", "Description":"Group Management", "Sub":"0000000000" },
+			{ "Service":"/MediaServer/ContentDirectory/Event", "Description":"Content Directory", "Sub":"0000000000" },
+			{ "Service":"/MediaRenderer/RenderingControl/Event", "Description":"Render Control", "Sub":"0000000000" },
+			{ "Service":"/MediaRenderer/ConnectionManager/Event", "Description":"Connection Manager", "Sub":"0000000000" },
+			{ "Service":"/MediaRenderer/AVTransport/Event", "Description":"Transport Event", "Sub":"0000000000" }
 		],
 		port                         :":1400", // default port to talk to Sonos on
 		systemNameSubscription       :"SSDP Subscription",
@@ -81,7 +81,11 @@ var SonosPlayer = function () {
         trackCurrentPosSecs: 0,
         volume: 0,
         mute:0,
-        priorVolume: 0
+        priorVolume: 0,
+        lastSubIndex: "",
+        msgDone: true,
+        unSubscribeCommands: [],
+        zoneGroupMusicNowPlaying: 0
         //trackCurrentPosStr: "",
         //trackCurrentSliderVal: 0,
         //trackCurrentTime: ""
@@ -100,7 +104,14 @@ var SonosPlayer = function () {
 		self.modelName = sonosPlayer.modelName;
 		self.notificationSystemNumber = systemNumber;
 		// Listens for the response after we have subscribed to a notify service
-		CF.watch(CF.FeedbackMatchedEvent, self.systemNameSubscription, self.feedbackNameSubscription, self.parseFeedbackSubscription);
+        CF.watch(CF.FeedbackMatchedEvent, self.systemNameSubscription, self.feedbackNameSubscription, self.parseFeedbackSubscription);
+        CF.watch(CF.FeedbackMatchedEvent, "Unsubscribe_" + self.notificationSystemNumber, "UnsubscribeFeedback_"+ self.notificationSystemNumber, self.parseUnsubscribe);
+        CF.setSystemProperties("Unsubscribe_" + self.notificationSystemNumber, {enabled: false});
+        CF.setSystemProperties("Unsubscribe_" + self.notificationSystemNumber, {
+            address: self.IP,
+            port: 1400
+        });
+        CF.watch(CF.ConnectionStatusChangeEvent, "Unsubscribe_" + self.notificationSystemNumber, self.UnsubscribeOnConnectionChange, true);
 		// Listens for any notification messages
 		CF.watch(CF.FeedbackMatchedEvent, self.systemNameNotification + self.notificationSystemNumber, self.feedbackNameNotification + self.notificationSystemNumber, self.onProcessNotifyEvent);
 		// Set the call back for when a zone group notification is received.  This message is unusual because we want to process
@@ -115,10 +126,32 @@ var SonosPlayer = function () {
 	// event notification to the player object when something in the service changes, e.g. track change for a
 	// transport event
 
-	self.subscribeEvents = function () {
+    self.UnsubscribeOnConnectionChange = function (system, connected, remote) {
+        // On connected==true, the remote is a string
+        // for example: "192.168.0.16:5050"
+        // When getting initial status, if the system is not connected, remote is null.
+        if (connected) {
+            //CF.log("System " + system + " connected with " + remote);
+        }
+        else {
+            if (remote == null) {
+                //CF.log("Initial status: system " + system + " is not connected.");
+            }
+            else {
+                //CF.log("System " + system + " disconnected from " + remote);
+            self.msgDone = true;
+            self.sendUnsubscribeMessage();
+            }
+        }
+    }
 
+
+
+
+
+    self.subscribeEvents = function () {
+        CF.log("Subscribing to services for room: " + self.roomName);
 		for (var service in self.services) {
-			//CF.log("Subscribing to services for room: " + self.roomName);
 			self.subscribeEvent(self.IP, self.services[service].Service, self.services[service].Description);
 		}
 		//CF.setSystemProperties(self.systemNameSubscription, {address: sonosDevice.IP});
@@ -158,8 +191,68 @@ var SonosPlayer = function () {
 
 	};
 
+    self.unSubscribeEvents = function () {
+        CF.log("unsuscribing player " + self.roomName);
+        CF.setSystemProperties("Unsubscribe_" + self.notificationSystemNumber, {enabled: true});
+        for (var service in self.services) {
+            //CF.log("Subscribing to services for room: " + self.roomName);
+            self.unSubscribeEvent(self.IP, self.services[service].Service, self.services[service].Description, self.services[service].Sub);
+        }
+        //CF.setSystemProperties(self.systemNameSubscription, {address: sonosDevice.IP});
 
-	self.parseFeedbackSubscription = function (regex, data) {
+        /*for(var service in self.services) {
+         self.subscribeEvent(sonosDevice.IP, self.services[service].Service, self.services[service].Description);
+         }*/
+    };
+
+    self.unSubscribeEvent = function (ipaddr, path, subURL, subIndex) {
+
+        /*UNSUBSCRIBE /MediaRenderer/AVTransport/Event HTTP/1.1
+         HOST: 192.168.1.52:1400
+         SID: uuid:RINCON_000E58289F2E01400_sub0000005975
+         */
+        var msg = "UNSUBSCRIBE " + path + " HTTP/1.1\x0D\x0A";
+        msg += "HOST: " + ipaddr + ":1400\x0D\x0A";
+        msg += "SID: uuid:" + self.RINCON + "_" + subIndex + "\x0D\x0A\x0D\x0A";
+/*        var headers = {
+            "SID ": "uuid:" + self.RINCON + "_" + subIndex
+        }*/
+/*        CF.setSystemProperties("Unsubscribe", {enabled: false});
+        CF.setSystemProperties("Unsubscribe", {
+            address: ipaddr,
+            port: 1400
+        });*/
+        CF.setSystemProperties("Unsubscribe", {enabled: true});
+        self.unSubscribeCommands.push(msg);
+        self.sendUnsubscribeMessage();
+        //CF.send("Unsubscribe_" + self.notificationSystemNumber, msg);
+        //CF.log("Unsubscribe msg is : " + msg);
+        //CF.logObject(headers);
+        //CF.log("Subscribing to service " + path + " for room: " + self.roomName);
+/*        CF.request("http://" + ipaddr + ":1400" + path, "UNSUBSCRIBE", headers, function (status, headers, body) {
+            CF.log(" Response to unsubcribe " + path + " for room " + self.roomName + " is : " + status + ", " + headers + ", " + body);
+        });*/
+
+    };
+
+    self.sendUnsubscribeMessage = function () {
+        if (self.msgDone && self.unSubscribeCommands.length != 0) {
+            self.msgDone = false;
+            var cmdtosend = self.unSubscribeCommands.shift();
+            //CF.log("Sending command: " + cmdtosend + " to " + self.roomName);
+            CF.send("Unsubscribe_" + self.notificationSystemNumber, cmdtosend);
+        }
+        else {
+            if (self.unSubscribeCommands.length === 0)
+            CF.log("Unsubscribe Finished");
+        }
+    }
+
+    self.parseUnsubscribe = function (regex, data) {
+        //CF.log("SonosDiscovery Unsubscribe Returned:\n" + data);
+    };
+
+    self.parseFeedbackSubscription = function (regex, data) {
 		//CF.log("SonosDiscovery Subscription Returned:\n" + data);
 	};
 
@@ -174,9 +267,13 @@ var SonosPlayer = function () {
 			self.parseUnderway = true;
 			self.currentNotifyMessage = self.notifyMsgQueue.shift();
             //CF.log("notify message is: " + self.currentNotifyMessage);
-			var description = self.currentNotifyMessage.substring(self.currentNotifyMessage.indexOf("NOTIFY /") + 8, self.currentNotifyMessage.indexOf("HTTP") - 1);
+            var findSub = /sub[A-Z0-9]{10}/;
+            self.lastSubIndex = findSub.exec(self.currentNotifyMessage);
+            //CF.log("Sub extension for player " + self.roomName + " incoming notify is: " + self.lastSubIndex);
+            var description = self.currentNotifyMessage.substring(self.currentNotifyMessage.indexOf("NOTIFY /") + 8, self.currentNotifyMessage.indexOf("HTTP") - 1);
 			//CF.log("parsing notify event for player - " + self.roomName + " of type:" + description);
             var findRINCON = /RINCON_[A-Z0-9]{17}/;  //  get RINCON which is unique ID of componenet
+
             // CF.log("Notify RINCON is:" + findRINCON.exec(self.currentNotifyMessage) + " and this RINCON is: " + self.RINCON);
             if (findRINCON.exec(self.currentNotifyMessage) != self.RINCON) {
                 CF.log("Got extraneous Notify from :" + findRINCON.exec(self.currentNotifyMessage) + " and this RINCON is: " + self.RINCON);
@@ -184,22 +281,28 @@ var SonosPlayer = function () {
             else {
                 switch (description) {
 				case "Alarm Clock":            //self.parseAlarmClock(response);
-					//CF.log("Got a alarm clock event");
+                    self.services[0].Sub = self.lastSubIndex;
+					//CF.log("Got a alarm clock event with sub of: " + self.services[0].Sub);
 					break;
 				case "Music Services":        //self.parseMusicServices(response);
-					//CF.log("Got a music service event");
+                    self.services[1].Sub = self.lastSubIndex;
+                    //CF.log("Got a music service event");
 					break;
 				case "Audio In":            //self.parseAudioIn(response);
-					//CF.log("Got a audio in event");
+                    self.services[2].Sub = self.lastSubIndex;
+                    //CF.log("Got a audio in event");
 					break;
 				case "Device Properties":    //self.parseDeviceProperties(response);
-					//CF.log("Got a device properties event");
+                    self.services[3].Sub = self.lastSubIndex;
+                    //CF.log("Got a device properties event");
 					break;
 				case "System Properties":    //self.parseSystemProperties(response);
-					//CF.log("Got a system properties event");
+                    self.services[4].Sub = self.lastSubIndex;
+                    //CF.log("Got a system properties event");
 					break;
 				case "Zone Group":
-					//CF.log("Got a zone group event");
+                    self.services[5].Sub = self.lastSubIndex;
+                    //CF.log("Got a zone group event");
 					//self.currentNotifyMessage = '<e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><ZoneGroupState>&lt;ZoneGroups&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5828A1C401400&quot; ID=&quot;RINCON_000E5828A1C401400:79&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5828A1C401400&quot; Location=&quot;http://192.168.1.90:1400/xml/device_description.xml&quot; ZoneName=&quot;Record Player&quot; Icon=&quot;x-rincon-roomicon:den&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;55&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5855842601400&quot; ID=&quot;RINCON_000E5855842601400:23&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5855842601400&quot; Location=&quot;http://192.168.1.75:1400/xml/device_description.xml&quot; ZoneName=&quot;Office&quot; Icon=&quot;x-rincon-roomicon:office&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; ChannelMapSet=&quot;RINCON_000E5855842601400:LF,RF;RINCON_000E58980FE001400:SW,SW&quot; BootSeq=&quot;13&quot;/&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58980FE001400&quot; Location=&quot;http://192.168.1.62:1400/xml/device_description.xml&quot; ZoneName=&quot;Office&quot; Icon=&quot;x-rincon-roomicon:office&quot; Invisible=&quot;1&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; ChannelMapSet=&quot;RINCON_000E5855842601400:LF,RF;RINCON_000E58980FE001400:SW,SW&quot; BootSeq=&quot;15&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E585445BA01400&quot; ID=&quot;RINCON_000E585445BA01400:10&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E585445BA01400&quot; Location=&quot;http://192.168.1.65:1400/xml/device_description.xml&quot; ZoneName=&quot;Lauren Room&quot; Icon=&quot;x-rincon-roomicon:living&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;17&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5828228801400&quot; ID=&quot;RINCON_000E5828228801400:216&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5828228801400&quot; Location=&quot;http://192.168.1.67:1400/xml/device_description.xml&quot; ZoneName=&quot;Kitchen&quot; Icon=&quot;x-rincon-roomicon:kitchen&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;101&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5828A20201400&quot; ID=&quot;RINCON_000E58283BD401400:187&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5828A20201400&quot; Location=&quot;http://192.168.1.74:1400/xml/device_description.xml&quot; ZoneName=&quot;Master Bed&quot; Icon=&quot;x-rincon-roomicon:masterbedroom&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;101&quot;/&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58283BD401400&quot; Location=&quot;http://192.168.1.77:1400/xml/device_description.xml&quot; ZoneName=&quot;Bathroom&quot; Icon=&quot;x-rincon-roomicon:bathroom&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;114&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E58289F2E01400&quot; ID=&quot;RINCON_000E58289F2E01400:111&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58289F2E01400&quot; Location=&quot;http://192.168.1.76:1400/xml/device_description.xml&quot; ZoneName=&quot;Dining Room&quot; Icon=&quot;x-rincon-roomicon:dining&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;103&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E58283AC801400&quot; ID=&quot;RINCON_000E58283AC801400:112&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58283AC801400&quot; Location=&quot;http://192.168.1.73:1400/xml/device_description.xml&quot; ZoneName=&quot;TV Room&quot; Icon=&quot;x-rincon-roomicon:tvroom&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;105&quot;/&gt;&lt;/ZoneGroup&gt;&lt;/ZoneGroups&gt;</ZoneGroupState></e:property></e:propertyset>';
 					//self.currentNotifyMessage = Utils.unescape(self.currentNotifyMessage);
 					self.currentNotifyMessage = Utils.unescape(self.currentNotifyMessage);
@@ -208,19 +311,24 @@ var SonosPlayer = function () {
 					}
 					break;
 				case "Group Management":    //self.parseGroupManagement(response);
-					//CF.log("Got a group management event");
+                    self.services[6].Sub = self.lastSubIndex;
+                    //CF.log("Got a group management event");
 					break;
 				case "Content Directory":
-					//CF.log("Got a content directory notify event");
+                    self.services[7].Sub = self.lastSubIndex;
+                    //CF.log("Got a content directory notify event");
 					break;
 				case "Render Control":
-					//CF.log("got a render control event");
+                    self.services[8].Sub = self.lastSubIndex;
+                    //CF.log("got a render control event");
 					self.parseRenderControl();
 					break;
 				case "Connection Manager":    //self.parseConnectionManager(response);
-					break;
+                    self.services[9].Sub = self.lastSubIndex;
+                    break;
 				case "Transport Event":
-					//CF.log("got a transport control event");
+                    self.services[10].Sub = self.lastSubIndex;
+                    //CF.log("got a transport control event");
 					self.parseTransportEvent();  // see transport event area
 					break;
 				default:

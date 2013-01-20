@@ -28,19 +28,27 @@ var SonosPlayers = function (params) {
 
 	self.init = function () {
 		CF.log("Commencing discovery of Sonos players");
-		var sonosDiscover = new SonosDiscovery();
+        self.notificationSystemNumber = 1;
+        self.DiscoveredPlayers = {};
+        var sonosDiscover = new SonosDiscovery();
 		sonosDiscover.init();
 		sonosDiscover.SonosDiscoveredCallback = function (sonosDiscovered) {
 			//CF.log("Found Sonos Zone within SonosPlayers.js: " + sonosDiscovered.roomName);
 			//CF.logObject(sonosDiscovered);
-			var sonosObj = new SonosPlayer();
-			sonosObj.init(sonosDiscovered, self.notificationSystemNumber);
-			//CF.logObject(sonosObj);
-			self.notificationSystemNumber++;
-			self.discoveredPlayers[sonosDiscovered.RINCON] = sonosObj;
-			if (self.sonosPlayersCallback !== null) {
-				self.sonosPlayersCallback(self.discoveredPlayers);
-			}
+            if (sonosDiscovered.modelName != "Sonos DOCK WD100" && sonosDiscovered.modelName != "Sonos SUB") {
+                var sonosObj = new SonosPlayer();
+                sonosObj.init(sonosDiscovered, self.notificationSystemNumber);
+                //CF.log("Initialised sonos player " + sonosObj.roomName);
+                //CF.logObject(sonosObj);
+                self.notificationSystemNumber++;
+                self.discoveredPlayers[sonosDiscovered.RINCON] = sonosObj;
+                if (self.sonosPlayersCallback !== null) {
+                    self.sonosPlayersCallback(self.discoveredPlayers);
+                }
+            }
+            else {
+                CF.log("found and ignored a sub or dock");
+            }
 		};
 	};
 

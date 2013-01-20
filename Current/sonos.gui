@@ -126,6 +126,48 @@
       <cmd name="MusicSourceListEnd" js="sonosGUI.musicSourceListEnd()" jsSendsCommand="True" />
     </system>
     <system name="SendToSpotify" ip="spotify.west.sonos-ws-eu.com" port="80" protocol="tcp" alwayson="0" offlinequeue="0" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0" />
+    <system name="Unsubscribe" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback" regex="." />
+    </system>
+    <system name="Unsubscribe_1" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_1" regex="." />
+    </system>
+    <system name="Unsubscribe_2" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_2" regex="." />
+    </system>
+    <system name="Unsubscribe_3" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_3" regex="." />
+    </system>
+    <system name="Unsubscribe_4" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_4" regex="." />
+    </system>
+    <system name="Unsubscribe_5" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_5" regex="." />
+    </system>
+    <system name="Unsubscribe_6" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_6" regex="." />
+    </system>
+    <system name="Unsubscribe_7" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_7" regex="." />
+    </system>
+    <system name="Unsubscribe_8" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_8" regex="." />
+    </system>
+    <system name="Unsubscribe_9" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_9" regex="." />
+    </system>
+    <system name="Unsubscribe_10" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_10" regex="." />
+    </system>
+    <system name="Unsubscribe_11" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_11" regex="." />
+    </system>
+    <system name="Unsubscribe_12" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_12" regex="." />
+    </system>
+    <system name="Unsubscribe_13" ip="" origin="0" port="1400" protocol="tcp" alwayson="1" offlinequeue="1" accept="0" acceptBroadcasts="0" ssl="0" maxconnections="0" heartbeatRx="" heartbeatTx="" heartbeatMode="-1" eom="" connectionStatus="0" disconnectionStatus="0">
+      <fb name="UnsubscribeFeedback_13" regex="." />
+    </system>
   </systems>
   <themes>
     <theme type="button" name=".newtheme_1[state='0']"><![CDATA[padding: 0px 0px 0px 0px;  filter: Alpha(Opacity=100); -moz-opacity:1; opacity: 1; background-color: Green; color: White; font-size: 12px; font-family: 'Verdana'; font-weight: normal; font-style: none; text-decoration: none; text-align: center; vertical-align: middle; display: table-cell; box-sizing: border-box; -webkit-box-sizing: border-box; -webkit-tap-highlight-color:rgba(0,0,0,0);]]></theme>
@@ -264,8 +306,9 @@
     <theme type="text" name=".left_lightblue_16pt_b"><![CDATA[ color: #B2D0E6; font-size: 14px; font-family: 'Arial'; text-align: left; vertical-align: middle; font-weight: bold; font-style: none; text-decoration: none; display: table-cell;]]></theme>
   </themes>
   <tokens>
-    <token name="servers" value="" persist="1" />
-    <token name="settings" value="" persist="1" />
+    <token name="[spotifyID]" value="Not Set" persist="1" />
+    <token name="[autoDiscoveryFlag]" value="1" persist="1" />
+    <token name="[playerIPAddresses]" value="[]" persist="1" />
   </tokens>
   <scripts>
     <script name="sonosgui.js" />
@@ -349,7 +392,7 @@
       </btn>
       <subpage name="popup_zones" x="728" y="69" j="10001" transition1="fade" subtype1="None" time1="0.1" ease1="" transition2="fade" subtype2="None" time2="0.3" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
       <subpage name="search" x="594" y="20" j="0" transition1="" subtype1="" time1="0" ease1="" transition2="" subtype2="" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
-      <btn j="70" x="982" y="87" w="42" h="43" t="icon_gear" flip="None" sim="2" l="0" s="1">
+      <btn j="10004" x="982" y="87" w="42" h="43" t="icon_gear" flip="None" sim="2" l="0" s="1">
         <inactive s="0">
         </inactive>
         <active s="0">
@@ -391,7 +434,7 @@
           <img x="-10" y="-10" w="70" h="70">transports_grey_shuffle2_on_20.png</img>
         </active>
       </btn>
-      <txt j="0" x="263" y="90" w="347" h="39" t="title_center" wrap="True" l="0">Now Playing</txt>
+      <txt j="310" x="263" y="90" w="347" h="39" t="title_center" wrap="True" l="0">Now Playing</txt>
       <subpage name="queue_actions" x="0" y="0" j="10002" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <btn j="10" x="364" y="28" w="46" h="47" t="transport_default" flip="None" sim="1" l="0" s="0" js="sonosGUI.playPress();">
         <inactive s="0">
@@ -434,13 +477,11 @@
         </active>
       </btn>
       <subpage name="popup_zones_vol" x="100" y="100" j="10003" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <btn j="9999" x="841" y="33" w="133" h="37" t="" flip="None" sim="1" l="0" s="1" js="sonosGUI.testSonosCall();">
-        <inactive s="0">
-        </inactive>
-        <active s="0">
-        </active>
-      </btn>
       <subpage name="config_sonos" x="200" y="100" j="10004" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <btn j="0" x="829" y="38" w="137" h="35" t="setting_button_red" flip="None" sim="1" l="0" s="1" js="sonosGUI.unSubscribeToPlayers();">
+        <inactive s="0">Unsubscribe</inactive>
+        <active s="0">Unsubscribe</active>
+      </btn>
     </landscape>
   </page>
   <page name="Settings" j="0" transition="fade" subtype="None" time="0.3" ease="easeIn">
@@ -498,7 +539,7 @@
     <img x="0" y="0" w="350" h="36" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_sidebar_title.png</img>
     <txt j="0" x="7" y="0" w="126" h="36" t="sidebar_subtitle_left" wrap="False" l="0">NOW PLAYING</txt>
     <img x="182" y="0" w="77" h="36" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_rotate_info.png</img>
-    <btn j="0" x="0" y="0" w="350" h="295" t="blank" flip="None" sim="0" l="0" s="1" js="CF.setJoin(&quot;d13&quot;, &quot;{{1-[@d13]}}&quot;);">
+    <btn j="0" x="0" y="0" w="350" h="295" t="blank" flip="None" sim="0" l="0" s="1">
       <inactive s="0">
       </inactive>
       <active s="0">
@@ -1041,14 +1082,14 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
     </txt>
   </subpage>
   <subpage name="zone_group_member_list" w="259" h="44" clip="1">
-    <btn j="0" x="45" y="0" w="214" h="44" t="sidebar_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
+    <btn j="0" x="45" y="0" w="214" h="44" t="sidebar_listitem" flip="None" sim="1" l="0" s="1">
       <inactive s="202">Zone Member</inactive>
       <active s="202">Zone Member</active>
     </btn>
     <img x="1" y="0" w="48" h="44" j="200" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
   </subpage>
   <subpage name="zone_group_music_list" w="259" h="30" clip="1">
-    <btn j="0" x="21" y="0" w="211" h="24" t="sidebar_listitem" flip="None" sim="0" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
+    <btn j="0" x="21" y="0" w="211" h="24" t="sidebar_listitem" flip="None" sim="0" l="0" s="1">
       <inactive s="203">Zone Music Now Playing</inactive>
       <active s="203">Zone Music Now Playing</active>
     </btn>
@@ -1132,6 +1173,13 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
     <txt j="309" x="198" y="3" w="27" h="12" t="" wrap="False" l="0">
     </txt>
   </subpage>
+  <subpage name="player_list" w="711" h="46" clip="1">
+    <btn j="0" x="0" y="0" w="711" h="46" t="setting_item_last" flip="None" sim="0" l="0" s="1">
+      <inactive s="0">IP Address</inactive>
+      <active s="0">IP Address</active>
+    </btn>
+    <input j="0" s="400" x="133" y="7" w="570" h="32" pass="0" autoFocus="0" f="0" t="setting" l="0">IP in format 192.168.1.100</input>
+  </subpage>
   <subpage name="popup_zones" w="296" h="410" clip="1" t="popup_zones">
     <list j="11" x="29" y="72" w="239" h="298" headerSub="" titleSub="" contentSub="popup_zones_listitem" footerSub="" orientation="v" l="0" swipedelete="0" />
     <img x="0" y="0" w="296" h="410" j="0" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_zones_overlay.png</img>
@@ -1157,24 +1205,24 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <active s="0">Done</active>
     </btn>
   </subpage>
-  <subpage name="config_sonos" w="352" h="558" clip="1">
-    <img x="0" y="0" w="352" h="91" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_middle_bg.png</img>
-    <btn j="69" x="0" y="47" w="350" h="46" t="setting_item_middle" flip="None" sim="2" l="0" s="1">
+  <subpage name="config_sonos" w="352" h="650" clip="1">
+    <img x="0" y="0" w="352" h="55" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_middle_bg.png</img>
+    <btn j="0" x="0" y="105" w="350" h="46" t="setting_item_middle" flip="None" sim="0" l="0" s="1">
       <inactive s="0">Use auto discovery</inactive>
       <active s="0">Use auto discovery</active>
     </btn>
-    <btn j="29" x="272" y="56" w="78" h="29" t="switch" flip="None" sim="2" l="0" s="1">
+    <btn j="29" x="264" y="115" w="78" h="29" t="switch" flip="None" sim="2" l="0" s="1" js="sonosGUI.setAutoDiscoveryFlag();">
       <inactive s="0">
       </inactive>
       <active s="0">
       </active>
     </btn>
-    <list j="14" x="3" y="141" w="346" h="417" headerSub="" titleSub="" contentSub="player_list" footerSub="" orientation="v" l="0" swipedelete="0" />
-    <btn j="0" x="0" y="95" w="350" h="46" t="setting_item_last" flip="None" sim="0" l="0" s="1">
+    <list j="14" x="3" y="200" w="346" h="417" headerSub="" titleSub="" contentSub="player_list" footerSub="" orientation="v" l="0" swipedelete="0" />
+    <btn j="0" x="0" y="153" w="350" h="46" t="setting_item_last" flip="None" sim="0" l="0" s="1">
       <inactive s="0">Player List:</inactive>
       <active s="0">Player List:</active>
     </btn>
-    <btn j="70" x="43" y="0" w="133" h="46" t="setting_item" flip="None" sim="2" l="0" s="1">
+    <btn j="70" x="43" y="0" w="133" h="46" t="setting_item" flip="None" sim="1" l="0" s="1" js="sonosGUI.saveSonosConfig();">
       <inactive s="0">Save</inactive>
       <active s="0">Save</active>
     </btn>
@@ -1182,12 +1230,14 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <inactive s="0">Cancel</inactive>
       <active s="0">Cancel</active>
     </btn>
-  </subpage>
-  <subpage name="player_list" w="711" h="46" clip="1">
-    <btn j="0" x="0" y="0" w="711" h="46" t="setting_item_last" flip="None" sim="0" l="0" s="1">
-      <inactive s="0">IP Address</inactive>
-      <active s="0">IP Address</active>
+    <btn j="0" x="0" y="58" w="350" h="46" t="setting_item_middle" flip="None" sim="0" l="0" s="1">
+      <inactive s="0">Spotify ID:</inactive>
+      <active s="0">Spotify ID:</active>
     </btn>
-    <txt j="310" x="166" y="0" w="533" h="43" t="setting_left" wrap="False" l="0">IP Address</txt>
+    <input j="0" s="401" x="124" y="64" w="220" h="34" pass="0" autoFocus="0" f="0" t="setting" l="0">Enter ID Here</input>
+    <btn j="0" x="201" y="159" w="137" h="34" t="setting_button_red" flip="None" sim="1" l="0" s="1" js="sonosGUI.addPlayerIP();">
+      <inactive s="0">Add Player</inactive>
+      <active s="0">Add Player</active>
+    </btn>
   </subpage>
 </gui>
