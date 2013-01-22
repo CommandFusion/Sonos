@@ -306,7 +306,7 @@
     <theme type="text" name=".left_lightblue_16pt_b"><![CDATA[ color: #B2D0E6; font-size: 14px; font-family: 'Arial'; text-align: left; vertical-align: middle; font-weight: bold; font-style: none; text-decoration: none; display: table-cell;]]></theme>
   </themes>
   <tokens>
-    <token name="[spotifyID]" value="Not Set" persist="1" />
+    <token name="[spotifyID]" value="postsi" persist="1" />
     <token name="[autoDiscoveryFlag]" value="1" persist="1" />
     <token name="[playerIPAddresses]" value="[]" persist="1" />
   </tokens>
