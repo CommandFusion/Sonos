@@ -55,8 +55,8 @@ var SONOS_GUI = function () {
 
         // Sub Page Joins
         subPagePopupPlayMode:"10000",
-        subpagePopupZones:'10001',
-        subpageQueueActions:"10002",
+        subpagePopupZones:'10010',
+        subpageQueueActions:"10011",
         subpagePopupZoneVol:'10003',
         subpageSonosConfig:"10004",
 
