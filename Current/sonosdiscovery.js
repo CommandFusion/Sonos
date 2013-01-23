@@ -67,7 +67,7 @@ var SonosDiscovery = function (params) {
 
 	self.parseFeedbackSSDP = function (regex, data) {
 		var isSonos = false;
-		CF.log("SonosDiscovery SSDP Returned:\n" + data);
+		//CF.log("SonosDiscovery SSDP Returned:\n" + data);
 
 		/* SAMPLE SONOS RESPONSE:
 		 HTTP/1.1 200 OK

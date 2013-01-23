@@ -233,6 +233,9 @@ var SONOS_GUI = function () {
                     //CF.log("Got a player state change at the GUI level");
                     self.displayMusicSourceActions(notificationObj);
                     break;
+                case "ClearQueueUI":
+                    CF.listRemove("l" + self.joinListQueue);
+                    break;
 
                 default:
                     CF.log("Invalid GUI notification type");
@@ -301,18 +304,20 @@ var SONOS_GUI = function () {
 
     self.playNowMusicSourceAction = function () {
         self.sonosMusicSource.musicSourcePlayNow();
+        CF.setJoin("d" + self.subPagePopupPlayMode, 0);
     }
 
     self.playNextMusicSourceAction = function () {
         self.sonosMusicSource.musicSourcePlayNext();
-    }
+        CF.setJoin("d" + self.subPagePopupPlayMode, 0);    }
 
     self.addQueueMusicSourceAction = function () {
         self.sonosMusicSource.musicSourceAddToQueue();
-    }
+        CF.setJoin("d" + self.subPagePopupPlayMode, 0);    }
 
     self.replaceQueueMusicSourceAction = function () {
         self.sonosMusicSource.musicSourceReplaceQueue();
+        CF.setJoin("d" + self.subPagePopupPlayMode, 0);
     }
 
 

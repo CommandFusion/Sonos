@@ -553,7 +553,7 @@ var SonosPlayer = function () {
 	 */
 
 	self.getQueueForCurrentZone = function () {
-		CF.log("Host is: " + self.host)
+		CF.log("Getting queue for player" + self.roomName);
 		self.ContentDirectoryBrowse(self.processGetQueueForCurrentZone, "Q:0", "BrowseDirectChildren", "dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI", self.queueNumberReturned, self.queueRowsToReturn, "");
 
 	};
@@ -728,7 +728,7 @@ var SonosPlayer = function () {
     */
 	self.sendSoapRequest = function (url, xml, soapAction, callback) {
 		url = self.host + url;
-		CF.log("url is: " + url + " and SOAP Action is: " + soapAction);
+		CF.log("SOAP call made with url of: " + url + " and SOAP Action is: " + soapAction);
 		var response = CF.request(url, "POST", {"SOAPAction":soapAction}, xml, function (status, headers, body) {
 			if (status == 200) {
 				CF.log("POST succeeded");

@@ -390,7 +390,7 @@
         <inactive s="0">back</inactive>
         <active s="0">back</active>
       </btn>
-      <subpage name="popup_zones" x="728" y="69" j="10001" transition1="fade" subtype1="None" time1="0.1" ease1="" transition2="fade" subtype2="None" time2="0.3" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
+      <subpage name="popup_zones" x="728" y="69" j="10010" transition1="fade" subtype1="None" time1="0.1" ease1="" transition2="fade" subtype2="None" time2="0.3" ease2="" clickthrough="0" topmost="1" v="0" l="0" />
       <subpage name="search" x="594" y="20" j="0" transition1="" subtype1="" time1="0" ease1="" transition2="" subtype2="" time2="0" ease2="" clickthrough="0" topmost="0" v="1" l="0" />
       <btn j="10004" x="982" y="87" w="42" h="43" t="icon_gear" flip="None" sim="2" l="0" s="1">
         <inactive s="0">
@@ -435,7 +435,7 @@
         </active>
       </btn>
       <txt j="310" x="263" y="90" w="347" h="39" t="title_center" wrap="True" l="0">Now Playing</txt>
-      <subpage name="queue_actions" x="0" y="0" j="10002" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="queue_actions" x="0" y="0" j="10011" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <btn j="10" x="364" y="28" w="46" h="47" t="transport_default" flip="None" sim="1" l="0" s="0" js="sonosGUI.playPress();">
         <inactive s="0">
           <img x="-5" y="-5" w="60" h="60">transports_grey_play_off_20.png</img>
@@ -981,7 +981,7 @@
       <inactive s="0">Play Now</inactive>
       <active s="0">Play Now</active>
     </btn>
-    <btn j="0" x="41" y="66" w="320" h="43" t="setting_button" flip="None" sim="1" l="0" s="1" js="sonosGUI.playNextMusicSourceAction();">
+    <btn j="0" x="41" y="66" w="320" h="43" t="setting_button" flip="None" sim="0" l="0" s="1" js="sonosGUI.playNextMusicSourceAction();">
       <inactive s="0">Play Next</inactive>
       <active s="0">Play Next</active>
     </btn>
@@ -1151,7 +1151,7 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <inactive s="0">Remove Track</inactive>
       <active s="0">Remove Track</active>
     </btn>
-    <btn j="10002" x="41" y="115" w="320" h="43" t="setting_button_red" flip="None" sim="2" l="0" s="1">
+    <btn j="10011" x="41" y="115" w="320" h="43" t="setting_button_red" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Cancel</inactive>
       <active s="0">Cancel</active>
     </btn>
@@ -1184,7 +1184,7 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
     <list j="11" x="29" y="72" w="239" h="298" headerSub="" titleSub="" contentSub="popup_zones_listitem" footerSub="" orientation="v" l="0" swipedelete="0" />
     <img x="0" y="0" w="296" h="410" j="0" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">popup_zones_overlay.png</img>
     <txt j="0" x="23" y="28" w="250" h="45" t="popup_title" wrap="False" l="0">Zones</txt>
-    <btn j="10001" x="198" y="35" w="60" h="30" t="setting_title_button" flip="None" sim="2" l="0" s="1">
+    <btn j="10010" x="198" y="35" w="60" h="30" t="setting_title_button" flip="None" sim="2" l="0" s="1">
       <inactive s="0">Done</inactive>
       <active s="0">Done</active>
     </btn>

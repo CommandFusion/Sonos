@@ -50,7 +50,8 @@ var SonosMusicSources = function () {
         currentPlayer: {},
         metaDataHeader: '<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">',
         metaDataFooter: '</DIDL-Lite>',
-        zoneGroupNotificationCallback:sonosGUI.processNotificationEvent // used to point to the CF system that is handling notification messages for this player
+        zoneGroupNotificationCallback:sonosGUI.processNotificationEvent, // used to point to the CF system that is handling notification messages for this player
+        playNow: true
 
     }
 	// ----------------------------------------------------------------------------
@@ -251,7 +252,8 @@ var SonosMusicSources = function () {
 		}
 		//CF.listRemove("l13");
 		self.musicSourceNumberReturned = 0; // Clear the number of items in the current list
-		if (self.musicSourceLevel == 0) {
+		if (self.musicSourceLevel === 0) {
+            CF.log("Displaying top menu");
             self.setUpAndDisplayTopMenu();
 			//CF.listAdd("l13", self.musicServicesTopList);
 		}
@@ -259,10 +261,11 @@ var SonosMusicSources = function () {
 			self.musicSourceLevel--;	// we must be somewhere down the tree so add one to the source level
 			self.selectMusicSource("","", self.musicSourceType);
 		}
+        CF.log("the music source display ID is: " + self.musicSourceDisplayID + " and the music source level is: " + self.musicSourceLevel);
 	}
 
 	self.getMusicSourceForLibrary = function () {
-        CF.log("the music source diaply id is: " + self.musicSourceDisplayID);
+        CF.log("the music source display id is: " + self.musicSourceDisplayID);
         self.currentPlayer.ContentDirectoryBrowse(self.processGetMusicSourceForLibrary, self.musicSourceDisplayID, "BrowseDirectChildren", "dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI", self.musicSourceNumberReturned, self.musicSourceRowsToReturn, "")
 
 	};
@@ -481,13 +484,150 @@ var SonosMusicSources = function () {
 				break;
 		}
 	};
+    /*
 
-	self.musicSourcePlayNow  = function () {
-		self.currentPlayer.AVTransportSetAVTransportURI(self.musicSourcePlayNow1(), 0, "x-rincon-queue:" + self.currentPlayer.RINCON + "#0", "");
+    Messages for 'Play Now in the UI'
+
+    SEND:
+
+
+    POST /MediaRenderer/AVTransport/Control HTTP/1.1
+    CONNECTION: close
+    ACCEPT-ENCODING: gzip
+    HOST: 192.168.1.61:1400
+    USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+    CONTENT-LENGTH: 1229
+    CONTENT-TYPE: text/xml; charset="utf-8"
+    SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue"
+
+    <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:AddURIToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><EnqueuedURI>x-rincon-cpcontainer:1006006cspotify%3auser%3apostsi%3aplaylist%3a0mOKvVm7zXS4IDvQYz76iH</EnqueuedURI><EnqueuedURIMetaData>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;item id=&quot;1006006cspotify%3auser%3apostsi%3aplaylist%3a0mOKvVm7zXS4IDvQYz76iH&quot; parentID=&quot;100a0064playlists&quot; restricted=&quot;true&quot;&gt;&lt;dc:title&gt;Leona Lewis&lt;/dc:title&gt;&lt;upnp:class&gt;object.container.playlistContainer&lt;/upnp:class&gt;&lt;desc id=&quot;cdudn&quot; nameSpace=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot;&gt;SA_RINCON2311_postsi&lt;/desc&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</EnqueuedURIMetaData><DesiredFirstTrackNumberEnqueued>0</DesiredFirstTrackNumberEnqueued><EnqueueAsNext>1</EnqueueAsNext></u:AddURIToQueue></s:Body></s:Envelope>
+
+
+	RESPONDS:
+
+     HTTP/1.1 200 OK
+     CONTENT-LENGTH: 383
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     EXT:
+     SERVER: Linux UPnP/1.0 Sonos/19.4-60120 (ZPS5)
+     Connection: close
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:AddURIToQueueResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><FirstTrackNumberEnqueued>41</FirstTrackNumberEnqueued><NumTracksAdded>40</NumTracksAdded><NewQueueLength>80</NewQueueLength></u:AddURIToQueueResponse></s:Body></s:Envelope>
+
+     SEND:
+
+     POST /MediaRenderer/AVTransport/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 290
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#Seek"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Seek xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><Unit>TRACK_NR</Unit><Target>41</Target></u:Seek></s:Body></s:Envelope>
+
+     RESPONDS:
+
+     HTTP/1.1 200 OK
+     CONTENT-LENGTH: 240
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     EXT:
+     SERVER: Linux UPnP/1.0 Sonos/19.4-60120 (ZPS5)
+     Connection: close
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:SeekResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"></u:SeekResponse></s:Body></s:Envelope>
+
+     SEND:
+
+     POST /MediaRenderer/AVTransport/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 266
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#Play"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Play xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><Speed>1</Speed></u:Play></s:Body></s:Envelope>
+
+     RESPONDS:
+
+     HTTP/1.1 200 OK
+     CONTENT-LENGTH: 240
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     EXT:
+     SERVER: Linux UPnP/1.0 Sonos/19.4-60120 (ZPS5)
+     Connection: close
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:PlayResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"></u:PlayResponse></s:Body></s:Envelope>
+
+     SENDS NOTIFY:
+
+     NOTIFY /notify HTTP/1.1
+     HOST: 192.168.1.10:3400
+     CONTENT-TYPE: text/xml
+     CONTENT-LENGTH: 204
+     NT: upnp:event
+     NTS: upnp:propchange
+     SID: uuid:RINCON_000E5855842601400_sub0000003325
+     SEQ: 71
+
+     <e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><SystemUpdateID>91</SystemUpdateID></e:property><e:property><ContainerUpdateIDs>Q:0,86</ContainerUpdateIDs></e:property></e:propertyset>
+
+     SENDS:
+
+     POST /MediaServer/ContentDirectory/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 471
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:ContentDirectory:1#Browse"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>Q:0</ObjectID><BrowseFlag>BrowseMetadata</BrowseFlag><Filter>dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI</Filter><StartingIndex>0</StartingIndex><RequestedCount>1</RequestedCount><SortCriteria></SortCriteria></u:Browse></s:Body></s:Envelope>
+
+     HTTP/1.1 200 OK
+     CONTENT-LENGTH: 993
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     EXT:
+     SERVER: Linux UPnP/1.0 Sonos/19.4-60120 (ZPS5)
+     Connection: close
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:BrowseResponse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><Result>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;container id=&quot;Q:0&quot; parentID=&quot;Q:&quot; restricted=&quot;true&quot; childCount=&quot;80&quot;&gt;&lt;dc:title&gt;AVT Instance 0&lt;/dc:title&gt;&lt;upnp:class&gt;object.container.playlistContainer&lt;/upnp:class&gt;&lt;res protocolInfo=&quot;x-rincon-queue:*:*:*&quot;&gt;x-rincon-queue:RINCON_000E5855842601400#0&lt;/res&gt;&lt;/container&gt;&lt;/DIDL-Lite&gt;</Result><NumberReturned>1</NumberReturned><TotalMatches>1</TotalMatches><UpdateID>86</UpdateID></u:BrowseResponse></s:Body></s:Envelope>
+
+     SENDS:
+
+     POST /MediaServer/ContentDirectory/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 479
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:ContentDirectory:1#Browse"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>Q:0</ObjectID><BrowseFlag>BrowseDirectChildren</BrowseFlag><Filter>dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI</Filter><StartingIndex>0</StartingIndex><RequestedCount>100</RequestedCount><SortCriteria></SortCriteria></u:Browse></s:Body></s:Envelope>
+
+     RESPONDS:
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:BrowseResponse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><Result>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;item id=&quot;Q:0/1&quot; parentID=&quot;Q:0&quot; restricted=&quot;true&quot;&gt;&lt;res protocolInfo=&quot;sonos.com-spotify:*:audio/x-spotify:*&quot; duration=&quot;0:04:02&quot;&gt;x-sonos-spotify:spotify%3atrack%3a2DWO9x9rhszjJsabuPqp8P?sid=9&amp;amp;flags=0&lt;/res&gt;&lt;upnp:albumArtURI&gt;/getaa?s=1&amp;amp;u=x-sonos-spotify%3aspotify%253atrack%253a2DWO9x9rhszjJsabuPqp8P%3fsid%3d9%26flags%3d0&lt;/upnp:albumArtURI&gt;&lt;dc:title&gt;Happy&lt;/dc:title&gt;&lt;upnp:class&gt;object.item.audioItem.musicTrack&lt;/upnp:class&gt;&lt;dc:creator&gt;Leona Lewis&lt;/dc:creator&gt;&lt;upnp:album&gt;Echo&lt;/upnp:album&gt;&lt;/item&gt;&lt;item id=&quot;Q:0/2&quot; parentID=&quot;Q:0&quot; restricted=&quot;true&quot;&gt;&lt;res protocolInfo=&quot;sonos.com-spotify:*:audio/x-spotify:*&quot; duration=&quot;0:03:46&quot;&gt;x-sonos-spotify:spotify%3atrack%3a1FbTceMivK92mVV3iGdwZk?sid=9&amp;amp;flags=0&lt;/res&gt;&lt;upnp:albumArtURI&gt;/getaa?s=1&amp;amp;u=x-so
+     ....ie a normal get queue message
+
+
+
+     */
+
+    self.musicSourcePlayNow  = function () {
+		// Set the current player to be looking at its queue in case it was looking at something like radio before
+        // Send 2 as the playNextTrackNumber
+        self.playNow = true;
+        self.currentPlayer.AVTransportSetAVTransportURI(self.musicSourcePlayNow1(0,1), 0, "x-rincon-queue:" + self.currentPlayer.RINCON + "#0", "");
 		//self.AVTransportPlay("", self.currentHost, 0, 1);
 	}
 
-	self.musicSourcePlayNow1 = function () {
+	self.musicSourcePlayNow1 = function (desiredFirstTrackNumberEnqueued, enqueueAsNext) {
 		// This routine handles play now of a music source item
 		// Since the syntax varies depending upon the item type
 		// e.g. library item, LastFM, Radio item etc, it has to
@@ -524,7 +664,8 @@ var SonosMusicSources = function () {
 				enqueuedURIMetaData = self.metaDataHeader + '<itemid="' + sourceToAdd + '" parentID="' + self.musicSourceList[self.musicSourceListIndex].sourceParentID + '" restricted="true"><dc:title>' + self.musicSourceList[self.musicSourceListIndex].sourceName + '<dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">RINCON_AssociatedZPUDN</desc></item></DIDL-Lite>';
 
 			}
-			self.currentPlayer.AVTransportAddURIToQueue(self.sendPlayPostSetAVTransport, 0, enqueuedURI, enqueuedURIMetaData, 0, 1);
+			self.currentPlayer.AVTransportAddURIToQueue(self.sendPlayPostSetAVTransport, 0, enqueuedURI, enqueuedURIMetaData, desiredFirstTrackNumberEnqueued, enqueueAsNext);
+            //self.currentPlayer.getQueueForCurrentZone();
 			return;
 		}
 
@@ -558,7 +699,8 @@ var SonosMusicSources = function () {
 			}
 
 			var currentURIMetaData = self.metaDataHeader + '<itemid="' + self.musicSourceList[self.musicSourceListIndex].sourceID + '" parentID="' + self.musicSourceList[self.musicSourceListIndex].sourceParentID + '" restricted="true"><dc:title>' + self.musicSourceList[self.musicSourceListIndex].sourceName + '<dc:title><upnp:class>object.item.audioItem.audioBroadcast</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">SA_RINCON11_postsi</desc></item></DIDL-Lite>';
-			self.currentPlayerAVTransportSetAVTransportURI(self.sendPlayPostSetAVTransport, 0, currentURI, currentURIMetaData);
+			self.currentPlayer.AVTransportSetAVTransportURI(self.sendPlayPostSetAVTransport, 0, currentURI, currentURIMetaData);
+            //self.currentPlayer.getQueueForCurrentZone();
 			return;
 		}
 		if (self.musicSourceList[self.musicSourceListIndex].sourceClass == "object.item.audioItem.audioBroadcast") {
@@ -567,6 +709,7 @@ var SonosMusicSources = function () {
 			var currentURI = "x-sonosapi-stream:" + sourceToAdd + "?sid=254&flags=32";
 			var currentURIMetaData = self.metaDataHeader + '<item id="F00090020' + self.musicSourceList[self.musicSourceListIndex].sourceID + '" parentID="F00080064' + self.musicSourceList[self.musicSourceListIndex].sourceParentID.replace(/:/g, "%3a") + '" restricted="true"><dc:title>' + self.musicSourceList[self.musicSourceListIndex].sourceName + '</dc:title><upnp:class>object.item.audioItem.audioBroadcast</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">SA_RINCON65031_</desc></item></DIDL-Lite>';
 			self.currentPlayer.AVTransportSetAVTransportURI(self.sendPlayPostSetAVTransport, 0, currentURI, currentURIMetaData);
+            //self.currentPlayer.getQueueForCurrentZone();
 			return;
 		}
 		if (self.musicSourceList[self.musicSourceListIndex].sourceClass == "object.container.playlistContainer") {
@@ -586,34 +729,276 @@ var SonosMusicSources = function () {
 			}
 		}
 		CF.log("Sending the AddURI Commmand");
-		self.currentPlayer.AVTransportAddURIToQueue(self.sendPlayPostSetAVTransport, 0, enqueuedURI, enqueuedURIMetaData, 0, 1);
+		self.currentPlayer.AVTransportAddURIToQueue(self.sendPlayPostSetAVTransport, 0, enqueuedURI, enqueuedURIMetaData, desiredFirstTrackNumberEnqueued, enqueueAsNext);
+        //self.currentPlayer.getQueueForCurrentZone();
 		return;
 	}
 
-    self.musicSourcePlayNext  = function () {
+    /*
 
+    SENDS:
+     POST /MediaRenderer/AVTransport/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 1286
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:AddURIToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><EnqueuedURI>x-rincon-cpcontainer:1006006cspotify%3auser%3apostsi%3aplaylist%3a5bYN33WtPGCx6RkmGvhRHI</EnqueuedURI><EnqueuedURIMetaData>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;item id=&quot;1006006cspotify%3auser%3apostsi%3aplaylist%3a5bYN33WtPGCx6RkmGvhRHI&quot; parentID=&quot;100a0064playlists&quot; restricted=&quot;true&quot;&gt;&lt;dc:title&gt;The Cinematic Orchestra - The Crimson Wing: Mystery Of The Flamingos&lt;/dc:title&gt;&lt;upnp:class&gt;object.container.playlistContainer&lt;/upnp:class&gt;&lt;desc id=&quot;cdudn&quot; nameSpace=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot;&gt;SA_RINCON2311_postsi&lt;/desc&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</EnqueuedURIMetaData><DesiredFirstTrackNumberEnqueued>2</DesiredFirstTrackNumberEnqueued><EnqueueAsNext>1</EnqueueAsNext></u:AddURIToQueue></s:Body></s:Envelope>
+
+     RESPONDS:
+
+     HTTP/1.1 200 OK
+     CONTENT-LENGTH: 383
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     EXT:
+     SERVER: Linux UPnP/1.0 Sonos/19.4-60120 (ZPS5)
+     Connection: close
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:AddURIToQueueResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><FirstTrackNumberEnqueued>2</FirstTrackNumberEnqueued><NumTracksAdded>67</NumTracksAdded><NewQueueLength>107</NewQueueLength></u:AddURIToQueueResponse></s:Body></s:Envelope>
+
+     SENDS NOTIFY:
+
+     NOTIFY /notify HTTP/1.1
+     HOST: 192.168.1.10:3400
+     CONTENT-TYPE: text/xml
+     CONTENT-LENGTH: 204
+     NT: upnp:event
+     NTS: upnp:propchange
+     SID: uuid:RINCON_000E5855842601400_sub0000003325
+     SEQ: 77
+
+     <e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><SystemUpdateID>97</SystemUpdateID></e:property><e:property><ContainerUpdateIDs>Q:0,92</ContainerUpdateIDs></e:property></e:propertyset>
+
+     SEND NOTIFY OF TRANSPORT EVENT
+
+     SENDS:
+
+     POST /MediaServer/ContentDirectory/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 471
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:ContentDirectory:1#Browse"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>Q:0</ObjectID><BrowseFlag>BrowseMetadata</BrowseFlag><Filter>dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI</Filter><StartingIndex>0</StartingIndex><RequestedCount>1</RequestedCount><SortCriteria></SortCriteria></u:Browse></s:Body></s:Envelope>
+
+     RESPONDS:
+
+     HTTP/1.1 200 OK
+     CONTENT-LENGTH: 994
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     EXT:
+     SERVER: Linux UPnP/1.0 Sonos/19.4-60120 (ZPS5)
+     Connection: close
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:BrowseResponse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><Result>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;container id=&quot;Q:0&quot; parentID=&quot;Q:&quot; restricted=&quot;true&quot; childCount=&quot;107&quot;&gt;&lt;dc:title&gt;AVT Instance 0&lt;/dc:title&gt;&lt;upnp:class&gt;object.container.playlistContainer&lt;/upnp:class&gt;&lt;res protocolInfo=&quot;x-rincon-queue:*:*:*&quot;&gt;x-rincon-queue:RINCON_000E5855842601400#0&lt;/res&gt;&lt;/container&gt;&lt;/DIDL-Lite&gt;</Result><NumberReturned>1</NumberReturned><TotalMatches>1</TotalMatches><UpdateID>92</UpdateID></u:BrowseResponse></s:Body></s:Envelope>
+
+    SENDS:
+
+     POST /MediaServer/ContentDirectory/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 479
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:ContentDirectory:1#Browse"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>Q:0</ObjectID><BrowseFlag>BrowseDirectChildren</BrowseFlag><Filter>dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI</Filter><StartingIndex>0</StartingIndex><RequestedCount>100</RequestedCount><SortCriteria></SortCriteria></u:Browse></s:Body></s:Envelope>
+
+     RESPONDS:
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:BrowseResponse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><Result>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;item id=&quot;Q:0/1&quot; parentID=&quot;Q:0&quot; restricted=&quot;true&quot;&gt;&lt;res protocolInfo=&quot;sonos.com-spotify:*:audio/x-spotify:*&quot; duration=&quot;0:04:02&quot;&gt;x-sonos-spotify:spotify%3atrack%3a2DWO9x9rhszjJsabuPqp8P?sid=9&amp;amp;flags=0&lt;/res&gt;&lt;upnp:albumArtURI&gt;/getaa?s=1&amp;amp;u=x-sonos-spotify%3aspotify%253atrack%253a2DWO9x9rhszjJsabuPqp8P%3fsid%3d9%26flags%3d0&lt;/upnp:albumArtURI&gt;&lt;dc:title&gt;Happy&lt;/dc:title&gt;&lt;upnp:class&gt;object.item.audioItem.musicTrack&lt;/upnp:class&gt;&lt;dc:creator&gt;Leona Lewis&lt;/dc:creator&gt;&lt;upnp:album&gt;Echo&lt;/upnp:album&gt;&lt;/item&gt;&lt;item id=&quot;Q:0/2&quot; parentID=&quot;Q:0&quot; restricted=&quot;true&quot;&gt;&lt;res protocolInfo=&quot;sonos.com-spotify:*:audio/x-spotify:*&quot; duration=&quot;0:02:53&quot;&gt;x-sonos-spotify:spotify%3atrack%3a5B8QDkxbSR7ML2GdN2ZRTY?sid=9&amp;amp;flags=0&lt;/res&gt;&lt;upnp:albumArtURI&gt;/getaa?s=1&amp;amp;u=x-so
+     ....ie a normal get queue message
+
+     */
+
+
+
+
+
+    self.musicSourcePlayNext  = function () {
+        // Set the current player to be looking at its queue in case it was looking at something like radio before
+        // Send 2 as the playNextTrackNumber
+        self.playNow = false; //Used later in the process to set with a seek is needed
+        self.currentPlayer.AVTransportSetAVTransportURI(self.musicSourcePlayNow1(2,1), 0, "x-rincon-queue:" + self.currentPlayer.RINCON + "#0", "");
     }
 
-	self.sendPlayPostSetAVTransport = function (){
+	self.sendPlayPostSetAVTransport = function (response){
+// {"FirstTrackNumberEnqueued":xmlDoc.getElementsByTagName("FirstTrackNumberEnqueued")[0].textContent, "NumTracksAdded":xmlDoc.getElementsByTagName("NumTracksAdded")[0].textContent, "NewQueueLength":xmlDoc.getElementsByTagName("NewQueueLength")[0].textContent}
 		CF.log("Process play");
-		//CF.setJoin("d130",0)
-		self.currentPlayer.AVTransportPlay("", 0, 1)
+        CF.logObject(response);
+        if (self.zoneGroupNotificationCallback !== null) {
+            self.zoneGroupNotificationCallback("ClearQueueUI", self.musicSourceList, self.musicSourceNumberReturned);  // process this message in the GUI layer
+        }
+        self.currentPlayer.resetQueueNumberReturned();
+		if (self.playNow) { // need to do a seek to the track number first
+            self.currentPlayer.AVTransportSeek(self.currentPlayer.AVTransportPlay(self.currentPlayer.getQueueForCurrentZone(), 0, 1), 0, "TRACK_NR", response.FirstTrackNumberEnqueued) ;
+        }
+        else {
+            self.currentPlayer.AVTransportPlay(self.currentPlayer.getQueueForCurrentZone(), 0, 1);
+        }/*setTimeout(function () {
+            self.currentPlayer.getQueueForCurrentZone();
+        }, 4000);*/
 
 	}
 
-	self.musicSourceAddToQueue = function() {
-		self.currentPlayer.AVTransportSetAVTransportURI(self.musicSourcePlayNow1(), 0, "x-rincon-queue:" + self.currentPlayer.RINCON + "#0", "");
+	/*
+
+	SENDS:
+
+     POST /MediaRenderer/AVTransport/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 1240
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:AddURIToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><EnqueuedURI>x-rincon-cpcontainer:1006006cspotify%3auser%3apostsi%3aplaylist%3a6T1i84HyLqwiiRObQ9idQd</EnqueuedURI><EnqueuedURIMetaData>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;item id=&quot;1006006cspotify%3auser%3apostsi%3aplaylist%3a6T1i84HyLqwiiRObQ9idQd&quot; parentID=&quot;100a0064playlists&quot; restricted=&quot;true&quot;&gt;&lt;dc:title&gt;The Presets - Pacifica&lt;/dc:title&gt;&lt;upnp:class&gt;object.container.playlistContainer&lt;/upnp:class&gt;&lt;desc id=&quot;cdudn&quot; nameSpace=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot;&gt;SA_RINCON2311_postsi&lt;/desc&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</EnqueuedURIMetaData><DesiredFirstTrackNumberEnqueued>0</DesiredFirstTrackNumberEnqueued><EnqueueAsNext>0</EnqueueAsNext></u:AddURIToQueue></s:Body></s:Envelope>
+
+     RESPONDS
+
+     HTTP/1.1 200 OK
+     CONTENT-LENGTH: 385
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     EXT:
+     SERVER: Linux UPnP/1.0 Sonos/19.4-60120 (ZPS5)
+     Connection: close
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:AddURIToQueueResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><FirstTrackNumberEnqueued>108</FirstTrackNumberEnqueued><NumTracksAdded>34</NumTracksAdded><NewQueueLength>141</NewQueueLength></u:AddURIToQueueResponse></s:Body></s:Envelope>
+
+     SENDS NOTIFY:
+
+     <ToGXU&E7@@}=
+     Hjq=>p
+     1VdPNOTIFY /notify HTTP/1.1
+     HOST: 192.168.1.10:3400
+     CONTENT-TYPE: text/xml
+     CONTENT-LENGTH: 204
+     NT: upnp:event
+     NTS: upnp:propchange
+     SID: uuid:RINCON_000E5855842601400_sub0000003325
+     SEQ: 78
+
+     <e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><SystemUpdateID>98</SystemUpdateID></e:property><e:property><ContainerUpdateIDs>Q:0,93</ContainerUpdateIDs></e:property></e:propertyset>
+
+     SENDS:
+
+     POST /MediaServer/ContentDirectory/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 471
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:ContentDirectory:1#Browse"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>Q:0</ObjectID><BrowseFlag>BrowseMetadata</BrowseFlag><Filter>dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI</Filter><StartingIndex>0</StartingIndex><RequestedCount>1</RequestedCount><SortCriteria></SortCriteria></u:Browse></s:Body></s:Envelope>
+
+     RESPONDS:
+
+     HTTP/1.1 200 OK
+     CONTENT-LENGTH: 994
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     EXT:
+     SERVER: Linux UPnP/1.0 Sonos/19.4-60120 (ZPS5)
+     Connection: close
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:BrowseResponse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><Result>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;container id=&quot;Q:0&quot; parentID=&quot;Q:&quot; restricted=&quot;true&quot; childCount=&quot;141&quot;&gt;&lt;dc:title&gt;AVT Instance 0&lt;/dc:title&gt;&lt;upnp:class&gt;object.container.playlistContainer&lt;/upnp:class&gt;&lt;res protocolInfo=&quot;x-rincon-queue:*:*:*&quot;&gt;x-rincon-queue:RINCON_000E5855842601400#0&lt;/res&gt;&lt;/container&gt;&lt;/DIDL-Lite&gt;</Result><NumberReturned>1</NumberReturned><TotalMatches>1</TotalMatches><UpdateID>93</UpdateID></u:BrowseResponse></s:Body></s:Envelope>
+
+     SENDS:
+
+     POST /MediaServer/ContentDirectory/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 479
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:ContentDirectory:1#Browse"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>Q:0</ObjectID><BrowseFlag>BrowseDirectChildren</BrowseFlag><Filter>dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI</Filter><StartingIndex>0</StartingIndex><RequestedCount>100</RequestedCount><SortCriteria></SortCriteria></u:Browse></s:Body></s:Envelope>
+
+     RESPONDS:
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:BrowseResponse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><Result>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;item id=&quot;Q:0/1&quot; parentID=&quot;Q:0&quot; restricted=&quot;true&quot;&gt;&lt;res protocolInfo=&quot;sonos.com-spotify:*:audio/x-spotify:*&quot; duration=&quot;0:04:02&quot;&gt;x-sonos-spotify:spotify%3atrack%3a2DWO9x9rhszjJsabuPqp8P?sid=9&amp;amp;flags=0&lt;/res&gt;&lt;upnp:albumArtURI&gt;/getaa?s=1&amp;amp;u=x-sonos-spotify%3aspotify%253atrack%253a2DWO9x9rhszjJsabuPqp8P%3fsid%3d9%26flags%3d0&lt;/upnp:albumArtURI&gt;&lt;dc:title&gt;Happy&lt;/dc:title&gt;&lt;upnp:class&gt;object.item.audioItem.musicTrack&lt;/upnp:class&gt;&lt;dc:creator&gt;Leona Lewis&lt;/dc:creator&gt;&lt;upnp:album&gt;Echo&lt;/upnp:album&gt;&lt;/item&gt;&lt;item id=&quot;Q:0/2&quot; parentID=&quot;Q:0&quot; restricted=&quot;true&quot;&gt;&lt;res protocolInfo=&quot;sonos.com-spotify:*:audio/x-spotify:*&quot; duration=&quot;0:02:53&quot;&gt;x-sonos-spotify:spotify%3atrack%3a5B8QDkxbSR7ML2GdN2ZRTY?sid=9&amp;amp;flags=0&lt;/res&gt;&lt;upnp:albumArtURI&gt;/getaa?s=1&amp;amp;u=x-so
+     ....ie a normal get queue message
+
+	 */
+
+
+    self.musicSourceAddToQueue = function() {
+		self.currentPlayer.AVTransportSetAVTransportURI(self.musicSourcePlayNow1(0,0), 0, "x-rincon-queue:" + self.currentPlayer.RINCON + "#0", "");
 
 	}
 
-	self.musicSourceReplaceQueue = function () {
-		self.transportEventRemoveAllTracks();
-		self.musicSourceAddToQueue();
+
+
+    /*
+
+    SENDS:
+
+     POST /MediaRenderer/AVTransport/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 290
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#RemoveAllTracksFromQueue"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:RemoveAllTracksFromQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID></u:RemoveAllTracksFromQueue></s:Body></s:Envelope>
+
+     Responds:
+
+     HTTP/1.1 200 OK
+     CONTENT-LENGTH: 280
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     EXT:
+     SERVER: Linux UPnP/1.0 Sonos/19.4-60120 (ZPS5)
+     Connection: close
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:RemoveAllTracksFromQueueResponse xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"></u:RemoveAllTracksFromQueueResponse></s:Body></s:Envelope>
+
+     SENDS:
+
+     POST /MediaRenderer/AVTransport/Control HTTP/1.1
+     CONNECTION: close
+     ACCEPT-ENCODING: gzip
+     HOST: 192.168.1.61:1400
+     USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+     CONTENT-LENGTH: 1240
+     CONTENT-TYPE: text/xml; charset="utf-8"
+     SOAPACTION: "urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue"
+
+     <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><u:AddURIToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><EnqueuedURI>x-rincon-cpcontainer:1006006cspotify%3auser%3apostsi%3aplaylist%3a6T1i84HyLqwiiRObQ9idQd</EnqueuedURI><EnqueuedURIMetaData>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;item id=&quot;1006006cspotify%3auser%3apostsi%3aplaylist%3a6T1i84HyLqwiiRObQ9idQd&quot; parentID=&quot;100a0064playlists&quot; restricted=&quot;true&quot;&gt;&lt;dc:title&gt;The Presets - Pacifica&lt;/dc:title&gt;&lt;upnp:class&gt;object.container.playlistContainer&lt;/upnp:class&gt;&lt;desc id=&quot;cdudn&quot; nameSpace=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot;&gt;SA_RINCON2311_postsi&lt;/desc&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</EnqueuedURIMetaData><DesiredFirstTrackNumberEnqueued>0</DesiredFirstTrackNumberEnqueued><EnqueueAsNext>0</EnqueueAsNext></u:AddURIToQueue></s:Body></s:Envelope>
+
+
+     THEN THE SAME AS ADD TO THE QUEUE
+
+     */
+
+
+    self.musicSourceReplaceQueue = function () {
+        CF.log("Clearing the queue");
+        self.currentPlayer.AVTransportRemoveAllTracksFromQueue(self.transportEventRemoveAllTracks, 0);
+        //self.currentPlayer.AVTransportSetAVTransportURI(self.transportEventRemoveAllTracks(), 0, "x-rincon-queue:" + self.currentPlayer.RINCON + "#0", "");
+        //self.currentPlayer.AVTransportRemoveAllTracksFromQueue(self.musicSourceAddToQueue(), 0);
+        //self.transportEventRemoveAllTracks();
+        //self.currentPlayer.getQueueForCurrentZone();
 	}
 
     self.transportEventRemoveAllTracks = function () {
-        self.currentPlayer.AVTransportRemoveAllTracksFromQueue(self.getQueueForCurrentZone, 0);
-        self.currentPlayer.getQueueForCurrentZone();
+        CF.log("Returned from Remove All Tracks Call");
+        self.musicSourcePlayNow1(0,0);
+        //self.currentPlayer.getQueueForCurrentZone();
 
     }
 
