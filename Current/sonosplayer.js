@@ -767,9 +767,9 @@ var SonosPlayer = function () {
                 album = "None"
             }
             else {
-                title = self.extractTag(body, "<dc:title>", "</dc:title>");
+                title = Utils.unescape(self.extractTag(body, "<dc:title>", "</dc:title>"));
                 art = self.host + Utils.unescape(self.extractTag(body, "<upnp:albumArtURI>", "</upnp:albumArtURI>"));
-                album = self.extractTag(body, "<upnp:album>", "</upnp:album>")
+                album = Utils.unescape(self.extractTag(body, "<upnp:album>", "</upnp:album>"));
             }
             self.currentTrackAlbumArtAddr = art;
             self.currentTrackName = title;
