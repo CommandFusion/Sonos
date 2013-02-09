@@ -51,7 +51,10 @@ var SonosMusicSources = function () {
         metaDataHeader: '<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">',
         metaDataFooter: '</DIDL-Lite>',
         zoneGroupNotificationCallback:sonosGUI.processNotificationEvent, // used to point to the CF system that is handling notification messages for this player
-        playNow: true
+        playNow: true,
+        allMusicServicesDetails:[],
+        subscribedMusicServicesDetails: [],
+        musicTotalMatches: 0 // tracks the total number of matches in a music query
 
     }
 	// ----------------------------------------------------------------------------
@@ -62,9 +65,1884 @@ var SonosMusicSources = function () {
 	self.init = function () {
         //self.getLastFMTopTags();
         //self.getLASTMFRecentStations();
+        self.currentPlayer = sonosGUI.getCurrentPlayer();
+        self.getMusicServicesInfo();
         self.setUpAndDisplayTopMenu();
-            self.getSpotifySessionID();
+        self.getSpotifySessionID();
     }
+
+    // Gets music service type details from Sonos
+    /*
+     SEND:
+
+     GET /services/mslogo.xml HTTP/1.1
+     CONNECTION: close
+     ACCEPT:
+    ACCEPT-ENCODING: gzip
+    HOST: update-services.sonos.com
+    USER-AGENT: Sonos
+
+    RESPONDS:
+
+     HTTP/1.1 200 OK
+     Accept-Ranges: bytes
+     Content-Type: text/xml
+     Date: Sat, 26 Jan 2013 01:06:15 GMT
+     ETag: "b2f481273ddacd1:0"
+     Last-Modified: Fri, 14 Dec 2012 20:54:05 GMT
+     Server: ECD (lhr/4A59)
+     X-Cache: HIT
+     X-Powered-By: ASP.NET
+     Content-Length: 53742
+
+     <?xml version="1.0" encoding="utf-8"?>
+     <images>
+     <cr200>
+     <service id="1">
+     <!-- Rhapsody -->
+
+     <image lastModified="15:41:28 8 Jul 2010">
+     http://www.sonos.com/graphics/ms/cr200/Rhapsody.png </image>
+     </service>
+
+     <service id="3">
+     <!-- Pandora -->
+
+     <image lastModified="10:25:48 7 Aug 2009">
+     http://www.sonos.com/graphics/ms/cr200/Pandora.png </image>
+     </service>
+
+     <service id="5">
+     <!-- Sirius -->
+
+     <image lastModified="08:00:04 19 Apr 2011">
+     http://www.sonos.com/graphics/ms/cr200/Sirius.png </image>
+     </service>
+
+     <service id="7">
+     <!-- Napster -->
+
+     <image lastModified="10:29:42 7 Aug 2009">
+     http://www.sonos.com/graphics/ms/cr200/Napster.png </image>
+     </service>
+
+     <service id="11">
+     <!-- Last.FM -->
+
+     <image lastModified="10:30:14 7 Aug 2009">
+     http://www.sonos.com/graphics/ms/cr200/LastFm.png </image>
+     </service>
+
+     <service id="519">
+     <!-- Deezer -->
+
+     <image lastModified="10:29:20 7 Aug 2009">
+     http://www.sonos.com/graphics/ms/cr200/Deezer.png </image>
+     </service>
+
+     <service id="775">
+     <!-- Twitter -->
+
+     <image lastModified="15:54:18 6 Aug 2009">
+     http://www.sonos.com/graphics/ms/cr200/Twitter.png </image>
+     </service>
+
+     <service id="63751">
+     <!-- Deezer -->
+
+     <image lastModified="10:29:20 7 Aug 2009">
+     http://www.sonos.com/graphics/ms/cr200/Deezer.png </image>
+     </service>
+
+     <service id="1543">
+     <!-- iheartradio -->
+
+     <image lastModified="12:36:20 1 Mar 2010">
+     http://www.sonos.com/graphics/ms/cr200/iheartradio.png </image>
+     </service>
+
+     <service id="1799">
+     <!-- Wolfgang's Vault -->
+
+     <image lastModified="10:00:00 1 Jun 2010">
+     http://www.sonos.com/graphics/ms/cr200/WV1.png </image>
+     </service>
+
+     <service id="2311">
+     <!-- Spotify -->
+
+     <image lastModified="07:26:26 24 Feb 2011">
+     http://www.sonos.com/graphics/ms/cr200/Spotify.png </image>
+     </service>
+
+     <service id="2567">
+     <!-- Songl -->
+
+     <image lastModified="11:00:00 17 Nov 2011">
+     http://www.sonos.com/graphics/ms/cr200/songl.png </image>
+     </service>
+
+     <service id="2823">
+     <!-- Rdio -->
+
+     <image lastModified="11:00:00 14 Jan 2011">
+     http://www.sonos.com/graphics/ms/cr200/Rdio.png </image>
+     </service>
+
+     <service id="2055">
+     <!-- AUPEO -->
+
+     <image lastModified="01:00:00 14 Jan 2011">
+     http://www.sonos.com/graphics/ms/cr200/Aupeo.png </image>
+     </service>
+
+     <service id="3591">
+     <!-- Napster Beta -->
+
+     <image lastModified="10:29:42 9 Mar 2011">
+     http://www.sonos.com/graphics/ms/cr200/Napster.png </image>
+     </service>
+
+     <service id="3335">
+     <!-- Stitcher SmartRadio -->
+
+     <image lastModified="12:00:00 14 Mar 2011">
+     http://www.sonos.com/graphics/ms/cr200/Stitcher.png </image>
+     </service>
+
+     <service id="3847">
+     <!-- MOG -->
+
+     <image lastModified="13:30:00 07 Jun 2012">
+     http://www.sonos.com/graphics/ms/cr200/mog.png </image>
+     </service>
+
+     <service id="4103">
+     <!-- A8 -->
+
+     <image lastModified="11:00:00 25 May 2011">
+     http://www.sonos.com/graphics/ms/cr200/A8.png </image>
+     </service>
+
+     <service id="3079">
+     <!-- Spotify US-->
+
+     <image lastModified="11:00:00 17 Jun 2011">
+     http://www.sonos.com/graphics/ms/cr200/Spotify.png </image>
+     </service>
+
+     <service id="4359">
+     <!-- Slacker -->
+
+     <image lastModified="10:15:00 11 Nov 2011">
+     http://www.sonos.com/graphics/ms/cr200/slacker.png </image>
+     </service>
+
+     <service id="4871">
+     <!-- Juke -->
+
+     <image lastModified="10:15:00 11 Nov 2011">
+     http://www.sonos.com/graphics/ms/cr200/juke.png </image>
+     </service>
+
+     <service id="5127">
+     <!-- WiMP -->
+
+     <image lastModified="10:15:00 02 Dec 2011">
+     http://www.sonos.com/graphics/ms/cr200/wimp.png </image>
+     </service>
+
+     <service id="5383">
+     <!-- Juke AT-->
+
+     <image lastModified="10:15:00 11 Dec 2011">
+     http://www.sonos.com/graphics/ms/cr200/juke.png </image>
+     </service>
+
+     <service id="5639">
+     <!-- Sonora-->
+
+     <image lastModified="12:00:00 23 Jan 2012">
+     http://www.sonos.com/graphics/ms/cr200/sonora.png </image>
+     </service>
+
+     <service id="13">
+     <!-- Napster by Rhapsody-->
+
+     <image lastModified="12:00:00 14 Feb 2012">
+     http://www.sonos.com/graphics/ms/cr200/napsterbyrhapsody.png </image>
+     </service>
+
+     <service id="5895">
+     <!-- QQ Music -->
+
+     <image lastModified="12:00:00 01 Mar 2012">
+     http://www.sonos.com/graphics/ms/cr200/QQ.png </image>
+     </service>
+
+     <service id="6151">
+     <!-- DAR.fm -->
+
+     <image lastModified="16:00:00 14 Mar 2012">
+     http://www.sonos.com/graphics/ms/cr200/dar.png </image>
+     </service>
+
+     <service id="6407">
+     <!-- JB Hifi -->
+
+     <image lastModified="12:00:00 24 Apr 2012">
+     http://www.sonos.com/graphics/ms/cr200/jbhifi.png </image>
+     </service>
+
+     <service id="6663">
+     <!-- Amazon Cloud Player -->
+
+     <image lastModified="16:00:00 10 Apr 2012">
+     http://www.sonos.com/graphics/ms/cr200/amazoncloudplayer.png </image>
+     </service>
+
+     <service id="8199">
+     <!-- OI Rdio -->
+
+     <image lastModified="15:00:00 5 Jun 2012">
+     http://www.sonos.com/graphics/ms/cr200/oi_rdio.png </image>
+     </service>
+
+     <service id="7431">
+     <!-- Songza -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/cr200/songza.png </image>
+     </service>
+
+     <service id="7175">
+     <!-- Simfy -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/cr200/simfy.png </image>
+     </service>
+
+     <service id="7943">
+     <!-- QoBuz -->
+
+     <image lastModified="13:31:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/cr200/qobuz.png </image>
+     </service>
+
+     <service id="8967">
+     <!-- QQ V2 beta-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/cr200/QQ.png</image>
+     </service>
+
+     <service id="8455">
+     <!-- Murfie-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/cr200/murfie.png</image>
+     </service>
+
+     <service id="9223">
+     <!-- Hearts of Space-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/cr200/hos.png</image>
+     </service>
+
+     <service id="9735">
+     <!-- 7Digital-->
+
+     <image
+     lastModified="12:00:00 02 Nov 2012">http://www.sonos.com/graphics/ms/cr200/7digital.png</image>
+     </service>
+
+     <service id="9991">
+     <!-- QoBuz Hi-Fi-->
+
+     <image lastModified="13:31:00 14 Nov 2012">
+     http://www.sonos.com/graphics/ms/cr200/qobuz.png </image>
+     </service>
+
+     <service id="10247">
+     <!-- Deezer -->
+
+     <image lastModified="10:29:20 27 Nov 2012">
+     http://www.sonos.com/graphics/ms/cr200/Deezer.png </image>
+     </service>
+
+     <service id="9479">
+     <!-- SiriusXM -->
+
+     <image lastModified="08:00:04 14 Dec 2012">
+     http://www.sonos.com/graphics/ms/cr200/Sirius.png </image>
+     </service>
+     </cr200>
+
+     <icr>
+     <service id="1">
+     <!-- Rhapsody -->
+
+     <image lastModified="15:41:28 8 Jul 2010">
+     http://www.sonos.com/graphics/ms/icr/Rhapsody.png </image>
+     </service>
+
+     <service id="3">
+     <!-- Pandora -->
+
+     <image lastModified="11:10:22 3 Aug 2009">
+     http://www.sonos.com/graphics/ms/icr/Pandora.png </image>
+     </service>
+
+     <service id="5">
+     <!-- Sirius -->
+
+     <image lastModified="08:00:44 19 Apr 2011">
+     http://www.sonos.com/graphics/ms/icr/Sirius.png </image>
+     </service>
+
+     <service id="7">
+     <!-- Napster -->
+
+     <image lastModified="11:13:46 3 Aug 2009">
+     http://www.sonos.com/graphics/ms/icr/Napster.png </image>
+     </service>
+
+     <service id="11">
+     <!-- Last.FM -->
+
+     <image lastModified="11:09:34 3 Aug 2009">
+     http://www.sonos.com/graphics/ms/icr/LastFm.png </image>
+     </service>
+
+     <service id="519">
+     <!-- Deezer -->
+
+     <image lastModified="11:08:52 3 Aug 2009">
+     http://www.sonos.com/graphics/ms/icr/Deezer.png </image>
+     </service>
+
+     <service id="775">
+     <!-- Twitter -->
+
+     <image lastModified="15:58:02 6 Aug 2009">
+     http://www.sonos.com/graphics/ms/icr/Twitter.png </image>
+     </service>
+
+     <service id="63751">
+     <!-- Deezer -->
+
+     <image lastModified="11:08:52 3 Aug 2009">
+     http://www.sonos.com/graphics/ms/icr/Deezer.png </image>
+     </service>
+
+     <service id="1543">
+     <!-- iheartradio -->
+
+     <image lastModified="12:36:20 1 Mar 2010">
+     http://www.sonos.com/graphics/ms/icr/iheartradio.png </image>
+     </service>
+
+     <service id="1799">
+     <!-- Wolfgang's Vault -->
+
+     <image lastModified="10:00:00 1 Jun 2010">
+     http://www.sonos.com/graphics/ms/icr/WV1.png </image>
+     </service>
+
+     <service id="2311">
+     <!-- Spotify -->
+
+     <image lastModified="16:26:26 14 Jul 2010">
+     http://www.sonos.com/graphics/ms/icr/Spotify.png </image>
+     </service>
+
+     <service id="2567">
+     <!-- Songl -->
+
+     <image lastModified="11:00:00 17 Nov 2011">
+     http://www.sonos.com/graphics/ms/icr/songl.png </image>
+     </service>
+
+     <service id="2823">
+     <!-- Rdio -->
+
+     <image lastModified="11:00:00 14 Jan 2011">
+     http://www.sonos.com/graphics/ms/icr/Rdio.png </image>
+     </service>
+
+     <service id="2055">
+     <!-- AUPEO -->
+
+     <image lastModified="11:00:00 14 Jan 2011">
+     http://www.sonos.com/graphics/ms/icr/Aupeo.png </image>
+     </service>
+
+     <service id="3591">
+     <!-- Napster Beta -->
+
+     <image lastModified="11:13:46 9 Mar 2011">
+     http://www.sonos.com/graphics/ms/icr/Napster.png </image>
+     </service>
+
+     <service id="3335">
+     <!-- Stitcher SmartRadio -->
+
+     <image lastModified="12:00:00 14 Mar 2011">
+     http://www.sonos.com/graphics/ms/icr/Stitcher.png </image>
+     </service>
+
+     <service id="3847">
+     <!-- MOG -->
+
+     <image lastModified="13:30:00 07 Jun 2012">
+     http://www.sonos.com/graphics/ms/icr/mog.png </image>
+     </service>
+
+     <service id="4103">
+     <!-- A8 -->
+
+     <image lastModified="11:00:00 25 May 2011">
+     http://www.sonos.com/graphics/ms/icr/A8.png </image>
+     </service>
+
+     <service id="3079">
+     <!-- Spotify US -->
+
+     <image lastModified="11:00:00 17 Jun 2011">
+     http://www.sonos.com/graphics/ms/icr/Spotify.png </image>
+     </service>
+
+     <service id="4359">
+     <!-- Slacker -->
+
+     <image lastModified="10:15:00 11 Nov 2011">
+     http://www.sonos.com/graphics/ms/icr/slacker.png </image>
+     </service>
+
+     <service id="4871">
+     <!-- Juke -->
+
+     <image lastModified="10:15:00 11 Nov 2011">
+     http://www.sonos.com/graphics/ms/icr/juke.png </image>
+     </service>
+
+     <service id="5127">
+     <!-- WiMP -->
+
+     <image lastModified="10:15:00 02 Dec 2011">
+     http://www.sonos.com/graphics/ms/icr/wimp.png </image>
+     </service>
+
+     <service id="5383">
+     <!-- Juke AT-->
+
+     <image lastModified="10:15:00 11 Dec 2011">
+     http://www.sonos.com/graphics/ms/icr/juke.png </image>
+     </service>
+
+     <service id="5639">
+     <!-- Sonora -->
+
+     <image lastModified="12:00:00 23 Jan 2012">
+     http://www.sonos.com/graphics/ms/icr/sonora.png </image>
+     </service>
+
+     <service id="13">
+     <!-- Napster by Rhapsody-->
+
+     <image lastModified="12:00:00 14 Feb 2012">
+     http://www.sonos.com/graphics/ms/icr/napsterbyrhapsody.png </image>
+     </service>
+
+     <service id="5895">
+     <!-- QQ Music -->
+
+     <image lastModified="12:00:00 01 Mar 2012">
+     http://www.sonos.com/graphics/ms/icr/QQ.png </image>
+     </service>
+
+     <service id="6151">
+     <!-- DAR.fm -->
+
+     <image lastModified="16:00:00 14 Mar 2012">
+     http://www.sonos.com/graphics/ms/icr/dar.png </image>
+     </service>
+
+     <service id="6407">
+     <!-- JB Hifi -->
+
+     <image lastModified="12:00:00 24 Apr 2012">
+     http://www.sonos.com/graphics/ms/icr/jbhifi.png </image>
+     </service>
+
+     <service id="6663">
+     <!-- Amazon Cloud Player -->
+
+     <image lastModified="16:00:00 10 Apr 2012">
+     http://www.sonos.com/graphics/ms/icr/amazoncloudplayer.png </image>
+     </service>
+
+     <service id="8199">
+     <!-- OI Rdio -->
+
+     <image lastModified="15:00:00 5 Jun 2012">
+     http://www.sonos.com/graphics/ms/icr/oi_rdio.png </image>
+     </service>
+
+     <service id="7431">
+     <!-- Songza -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/icr/songza.png </image>
+     </service>
+
+     <service id="7175">
+     <!-- Simfy -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/icr/simfy.png </image>
+     </service>
+
+     <service id="7943">
+     <!-- QoBuz -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/icr/qobuz.png </image>
+     </service>
+
+     <service id="8967">
+     <!-- QQ V2 beta-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/icr/QQ.png</image>
+     </service>
+
+     <service id="8455">
+     <!-- Murfie-->
+
+     <image
+     lastModified="12:00:00 01 Mar 2012">http://www.sonos.com/graphics/ms/icr/murfie.png</image>
+     </service>
+
+     <service id="9223">
+     <!-- Hearts of Space-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/icr/hos.png</image>
+     </service>
+
+     <service id="9735">
+     <!-- 7Digital-->
+
+     <image
+     lastModified="12:00:00 02 Nov 2012">http://www.sonos.com/graphics/ms/icr/7digital.png</image>
+     </service>
+
+     <service id="9991">
+     <!-- QoBuz Hi-Fi-->
+
+     <image lastModified="13:30:00 14 Nov 2012">
+     http://www.sonos.com/graphics/ms/icr/qobuz.png </image>
+     </service>
+
+     <service id="10247">
+     <!-- Deezer -->
+
+     <image lastModified="11:08:52 27 Nov 2012">
+     http://www.sonos.com/graphics/ms/icr/Deezer.png </image>
+     </service>
+
+     <service id="9479">
+     <!-- SiriusXM -->
+
+     <image lastModified="08:00:44 14 Dec 2012">
+     http://www.sonos.com/graphics/ms/icr/Sirius.png </image>
+     </service>
+     </icr>
+
+     <acr>
+     <service id="1">
+     <!-- Rhapsody -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/rhapsody.png </image>
+     </service>
+
+     <service id="3">
+     <!-- Pandora -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/pandora.png </image>
+     </service>
+
+     <service id="5">
+     <!-- Sirius -->
+
+     <image lastModified="11:08:04 10 Feb 2011">
+     http://www.sonos.com/graphics/ms/acr/sirius.png </image>
+     </service>
+
+     <service id="7">
+     <!-- Napster -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/napster.png </image>
+     </service>
+
+     <service id="11">
+     <!-- Last.FM -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/lastfm.png </image>
+     </service>
+
+     <service id="519">
+     <!-- Deezer -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/deezer.png </image>
+     </service>
+
+     <service id="775">
+     <!-- Twitter -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/twitter.png </image>
+     </service>
+
+     <service id="63751">
+     <!-- Deezer -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/deezer.png </image>
+     </service>
+
+     <service id="1543">
+     <!-- iheartradio -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/iheartradio.png </image>
+     </service>
+
+     <service id="1799">
+     <!-- Wolfgang's Vault -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/wolfgangvault.png </image>
+     </service>
+
+     <service id="2311">
+     <!-- Spotify -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr/spotify.png </image>
+     </service>
+
+     <service id="2567">
+     <!-- Songl -->
+
+     <image lastModified="11:00:00 17 Nov 2011">
+     http://www.sonos.com/graphics/ms/acr/songl.png </image>
+     </service>
+
+     <service id="2055">
+     <!-- Aupeo! -->
+
+     <image lastModified="14:00:28 11 Jan 2011">
+     http://www.sonos.com/graphics/ms/acr/aupeo.png </image>
+     </service>
+
+     <service id="2823">
+     <!-- Rdio -->
+
+     <image lastModified="14:00:28 11 Jan 2011">
+     http://www.sonos.com/graphics/ms/acr/rdio.png </image>
+     </service>
+
+     <service id="3591">
+     <!-- Napster Beta -->
+
+     <image lastModified="14:00:28 9 Mar 2011">
+     http://www.sonos.com/graphics/ms/acr/napster.png </image>
+     </service>
+
+     <service id="3335">
+     <!-- Stitcher SmartRadio -->
+
+     <image lastModified="12:00:00 14 Mar 2011">
+     http://www.sonos.com/graphics/ms/acr/Stitcher.png </image>
+     </service>
+
+     <service id="3847">
+     <!-- MOG -->
+
+     <image lastModified="13:30:00 07 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr/mog.png </image>
+     </service>
+
+     <service id="4103">
+     <!-- A8 -->
+
+     <image lastModified="11:00:00 25 May 2011">
+     http://www.sonos.com/graphics/ms/acr/A8.png </image>
+     </service>
+
+     <service id="3079">
+     <!-- Spotify US -->
+
+     <image lastModified="11:00:00 17 Jun 2011">
+     http://www.sonos.com/graphics/ms/acr/spotify.png </image>
+     </service>
+
+     <service id="4359">
+     <!-- Slacker -->
+
+     <image lastModified="10:15:00 11 Nov 2011">
+     http://www.sonos.com/graphics/ms/acr/slacker.png </image>
+     </service>
+
+     <service id="4871">
+     <!-- Juke -->
+
+     <image lastModified="10:15:00 11 Nov 2011">
+     http://www.sonos.com/graphics/ms/acr/juke.png </image>
+     </service>
+
+     <service id="5127">
+     <!-- WiMP -->
+
+     <image lastModified="10:15:00 02 Dec 2011">
+     http://www.sonos.com/graphics/ms/acr/wimp.png </image>
+     </service>
+
+     <service id="5383">
+     <!-- Juke AT-->
+
+     <image lastModified="10:15:00 11 Dec 2011">
+     http://www.sonos.com/graphics/ms/acr/juke.png </image>
+     </service>
+
+     <service id="5639">
+     <!-- Sonora -->
+
+     <image lastModified="12:00:00 23 Jan 2012">
+     http://www.sonos.com/graphics/ms/acr/sonora.png </image>
+     </service>
+
+     <service id="13">
+     <!-- Napster by Rhapsody-->
+
+     <image lastModified="12:00:00 14 Feb 2012">
+     http://www.sonos.com/graphics/ms/acr/napsterbyrhapsody.png </image>
+     </service>
+
+     <service id="5895">
+     <!-- QQ Music -->
+
+     <image lastModified="12:00:00 01 Mar 2012">
+     http://www.sonos.com/graphics/ms/acr/QQ.png </image>
+     </service>
+
+     <service id="6151">
+     <!-- DAR.fm -->
+
+     <image lastModified="16:00:00 14 Mar 2012">
+     http://www.sonos.com/graphics/ms/acr/dar.png </image>
+     </service>
+
+     <service id="6407">
+     <!-- JB Hifi -->
+
+     <image lastModified="12:00:00 24 Apr 2012">
+     http://www.sonos.com/graphics/ms/acr/jbhifi.png </image>
+     </service>
+
+     <service id="6663">
+     <!-- Amazon Cloud Player -->
+
+     <image lastModified="16:00:00 10 Apr 2012">
+     http://www.sonos.com/graphics/ms/acr/amazoncloudplayer.png </image>
+     </service>
+
+     <service id="8199">
+     <!-- OI Rdio -->
+
+     <image lastModified="15:00:00 5 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr/oi_rdio.png </image>
+     </service>
+
+     <service id="7431">
+     <!-- Songza -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr/songza.png </image>
+     </service>
+
+     <service id="7175">
+     <!-- Simfy -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr/simfy.png </image>
+     </service>
+
+     <service id="7943">
+     <!-- QoBuz -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr/qobuz.png </image>
+     </service>
+
+     <service id="8967">
+     <!-- QQ V2 beta-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/acr/QQ.png</image>
+     </service>
+
+     <service id="8455">
+     <!-- Murfie-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/acr/murfie.png</image>
+     </service>
+
+     <service id="9223">
+     <!-- Hearts of Space-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/acr/hos.png</image>
+     </service>
+
+     <service id="9735">
+     <!-- 7Digital-->
+
+     <image
+     lastModified="12:00:00 02 Nov 2012">http://www.sonos.com/graphics/ms/acr/7digital.png</image>
+     </service>
+
+     <service id="9991">
+     <!-- QoBuz Hi-Fi-->
+
+     <image lastModified="13:30:00 14 Nov 2012">
+     http://www.sonos.com/graphics/ms/acr/qobuz.png </image>
+     </service>
+
+     <service id="10247">
+     <!-- Deezer -->
+
+     <image lastModified="14:00:28 27 Nov 2012">
+     http://www.sonos.com/graphics/ms/acr/deezer.png </image>
+     </service>
+
+     <service id="9479">
+     <!-- SiriusXM -->
+
+     <image lastModified="11:08:04 14 Dec 2012">
+     http://www.sonos.com/graphics/ms/acr/sirius.png </image>
+     </service>
+     </acr>
+
+     <acr-hdpi>
+     <service id="1">
+     <!-- Rhapsody -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr-hdpi/rhapsody.png </image>
+     </service>
+
+     <service id="3">
+     <!-- Pandora -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr-hdpi/pandora.png </image>
+     </service>
+
+     <service id="5">
+     <!-- Sirius -->
+
+     <image lastModified="11:08:04 10 Feb 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/sirius.png </image>
+     </service>
+
+     <service id="7">
+     <!-- Napster -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr-hdpi/napster.png </image>
+     </service>
+
+     <service id="11">
+     <!-- Last.FM -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr-hdpi/lastfm.png </image>
+     </service>
+
+     <service id="519">
+     <!-- Deezer -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr-hdpi/deezer.png </image>
+     </service>
+
+     <service id="775">
+     <!-- Twitter -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr-hdpi/twitter.png </image>
+     </service>
+
+     <service id="63751">
+     <!-- Deezer -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr-hdpi/deezer.png </image>
+     </service>
+
+     <service id="1543">
+     <!-- iheartradio -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr-hdpi/iheartradio.png </image>
+     </service>
+
+     <service id="1799">
+     <!-- Wolfgang's Vault -->
+
+     <image lastModified="14:00:28 2 Nov 2010">
+     http://www.sonos.com/graphics/ms/acr-hdpi/wolfgangvault.png </image>
+     </service>
+
+     <service id="2311">
+     <!-- Spotify -->
+
+     <image lastModified="07:35:28 24 Feb 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/spotify.png </image>
+     </service>
+
+     <service id="2567">
+     <!-- Songl -->
+
+     <image lastModified="11:00:00 17 Nov 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/songl.png </image>
+     </service>
+
+     <service id="2055">
+     <!-- Aupeo! -->
+
+     <image lastModified="14:00:28 11 Jan 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/aupeo.png </image>
+     </service>
+
+     <service id="2823">
+     <!-- Rdio -->
+
+     <image lastModified="14:00:28 11 Jan 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/rdio.png </image>
+     </service>
+
+     <service id="3591">
+     <!-- Napster Beta -->
+
+     <image lastModified="14:00:28 9 Mar 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/napster.png </image>
+     </service>
+
+     <service id="3335">
+     <!-- Stitcher SmartRadio -->
+
+     <image lastModified="12:00:00 14 Mar 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/Stitcher.png </image>
+     </service>
+
+     <service id="3847">
+     <!-- MOG -->
+
+     <image lastModified="13:30:00 07 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/mog.png </image>
+     </service>
+
+     <service id="4103">
+     <!-- A8 -->
+
+     <image lastModified="11:00:00 25 May 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/A8.png </image>
+     </service>
+
+     <service id="3079">
+     <!-- Spotify US-->
+
+     <image lastModified="11:00:00 17 Jun 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/spotify.png </image>
+     </service>
+
+     <service id="4359">
+     <!-- Slacker -->
+
+     <image lastModified="10:15:00 11 Nov 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/slacker.png </image>
+     </service>
+
+     <service id="4871">
+     <!-- Juke -->
+
+     <image lastModified="10:15:00 11 Nov 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/juke.png </image>
+     </service>
+
+     <service id="5127">
+     <!-- WiMP -->
+
+     <image lastModified="10:15:00 02 Dec 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/wimp.png </image>
+     </service>
+
+     <service id="5383">
+     <!-- Juke AT-->
+
+     <image lastModified="10:15:00 11 Dec 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/juke.png </image>
+     </service>
+
+     <service id="5639">
+     <!-- Sonora -->
+
+     <image lastModified="12:00:00 23 Jan 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/sonora.png </image>
+     </service>
+
+     <service id="13">
+     <!-- Napster by Rhapsody-->
+
+     <image lastModified="12:00:00 14 Feb 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/napsterbyrhapsody.png </image>
+     </service>
+
+     <service id="5895">
+     <!-- QQ Music -->
+
+     <image lastModified="12:00:00 01 Mar 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/QQ.png </image>
+     </service>
+
+     <service id="6151">
+     <!-- DAR.fm -->
+
+     <image lastModified="16:00:00 14 Mar 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/dar.png </image>
+     </service>
+
+     <service id="6407">
+     <!-- JB Hifi -->
+
+     <image lastModified="12:00:00 24 Apr 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/jbhifi.png </image>
+     </service>
+
+     <service id="6663">
+     <!-- Amazon Cloud Player -->
+
+     <image lastModified="16:00:00 10 Apr 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/amazoncloudplayer.png </image>
+     </service>
+
+     <service id="8199">
+     <!-- OI Rdio -->
+
+     <image lastModified="15:00:00 5 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/oi_rdio.png </image>
+     </service>
+
+     <service id="7431">
+     <!-- Songza -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/songza.png </image>
+     </service>
+
+     <service id="7175">
+     <!-- Simfy -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/simfy.png </image>
+     </service>
+
+     <service id="7943">
+     <!-- QoBuz -->
+
+     <image lastModified="13:30:00 7 Jun 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/qobuz.png </image>
+     </service>
+
+     <service id="8967">
+     <!-- QQ V2 Beta-->
+
+     <image
+     lastModified="12:00:00 13 Mar 2012">http://www.sonos.com/graphics/ms/acr-hdpi/QQ.png</image>
+     </service>
+
+     <service id="8455">
+     <!-- Murfie-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/acr-hdpi/murfie.png</image>
+     </service>
+
+     <service id="9223">
+     <!-- Hearts of Space-->
+
+     <image
+     lastModified="12:00:00 13 Sep 2012">http://www.sonos.com/graphics/ms/acr-hdpi/hos.png</image>
+     </service>
+
+     <service id="9735">
+     <!-- 7Digital-->
+
+     <image
+     lastModified="12:00:00 02 Nov 2012">http://www.sonos.com/graphics/ms/acr-hdpi/7digital.png</image>
+     </service>
+
+     <service id="9991">
+     <!-- QoBuz Hi-Fi-->
+
+     <image lastModified="13:30:00 14 Nov 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/qobuz.png </image>
+     </service>
+
+     <service id="10247">
+     <!-- Deezer -->
+
+     <image lastModified="14:00:28 27 Nov 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/deezer.png </image>
+     </service>
+
+     <service id="9479">
+     <!-- SiriusXM -->
+
+     <image lastModified="11:08:04 14 Dec 2012">
+     http://www.sonos.com/graphics/ms/acr-hdpi/sirius.png </image>
+     </service>
+     </acr-hdpi>
+
+     <sized>
+     <service id="1">
+     <!-- Rhapsody -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/rhapsody_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/rhapsody_medium.png
+     </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/rhapsody_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/rhapsody_x-large.png
+     </image>
+     </service>
+
+     <service id="3">
+     <!-- Pandora -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/pandora_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/pandora_medium.png
+     </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/pandora_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/pandora_x-large.png
+     </image>
+     </service>
+
+     <service id="5">
+     <!-- Sirius -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/sxm_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/sxm_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/sxm_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/sxm_x-large.png </image>
+     </service>
+
+     <service id="7">
+     <!-- Napster -->
+
+     <image lastModified="09:30:00 30 Sep 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/napster.png </image>
+     </service>
+
+     <service id="11">
+     <!-- Last.FM -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/lastfm_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/lastfm_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/lastfm_large.png </image>
+
+     <image lastModified="14:40:00 15 Jun 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/lastfm_x-large.png
+     </image>
+     </service>
+
+     <service id="519">
+     <!-- Deezer -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/deezer_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/deezer_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/deezer_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/deezer_x-large.png
+     </image>
+     </service>
+
+     <service id="775">
+     <!-- Twitter -->
+
+     <image lastModified="11:00:00 07 Jun 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/twitter_small.png </image>
+
+     <image lastModified="11:00:00 07 Jun 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/twitter_medium.png
+     </image>
+
+     <image lastModified="11:00:00 07 Jun 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/twitter_large.png </image>
+
+     <image lastModified="11:00:00 07 Jun 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/twitter_x-large.png
+     </image>
+     </service>
+
+     <service id="63751">
+     <!-- Deezer -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/deezer_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/deezer_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/deezer_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/deezer_x-large.png
+     </image>
+     </service>
+
+     <service id="1543">
+     <!-- iheartradio -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/iheartradio_small.png
+     </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/iheartradio_medium.png
+     </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/iheartradio_large.png
+     </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/iheartradio_x-large.png
+     </image>
+     </service>
+
+     <service id="1799">
+     <!-- Wolfgang's Vault -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/WV_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/WV_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/WV_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/WV_x-large.png </image>
+     </service>
+
+     <service id="2311">
+     <!-- Spotify -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/spotify_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/spotify_medium.png
+     </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/spotify_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/spotify_x-large.png
+     </image>
+     </service>
+
+     <service id="2567">
+     <!-- Songl -->
+
+     <image lastModified="11:00:00 17 Nov 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/songl.png </image>
+     </service>
+
+     <service id="2055">
+     <!-- Aupeo! -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/aupeo_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/aupeo_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/aupeo_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/aupeo_x-large.png
+     </image>
+     </service>
+
+     <service id="2823">
+     <!-- Rdio -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/rdio_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/rdio_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/rdio_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/rdio_x-large.png </image>
+     </service>
+
+     <service id="3591">
+     <!-- Napster Beta -->
+
+     <image lastModified="09:30:00 30 Sep 2011">
+     http://www.sonos.com/graphics/ms/acr-hdpi/napster.png </image>
+     </service>
+
+     <service id="3335">
+     <!-- Stitcher SmartRadio -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/stitcher_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/stitcher_medium.png
+     </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/stitcher_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/stitcher_x-large.png
+     </image>
+     </service>
+
+     <service id="3847">
+     <!-- MOG -->
+
+     <image lastModified="13:30:00 07 Jun 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/mog_small.png </image>
+
+     <image lastModified="13:30:00 07 Jun 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/mog_medium.png </image>
+
+     <image lastModified="13:30:00 07 Jun 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/mog_large.png </image>
+
+     <image lastModified="13:30:00 07 Jun 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/mog_x-large.png </image>
+     </service>
+
+     <service id="4103">
+     <!-- A8 -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/duomi_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/duomi_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/duomi_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/duomi_x-large.png
+     </image>
+     </service>
+
+     <service id="3079">
+     <!-- Spotify US-->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/spotify_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/spotify_medium.png
+     </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/spotify_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/spotify_x-large.png
+     </image>
+     </service>
+
+     <service id="4359">
+     <!-- Slacker -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/slacker_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/slacker_medium.png
+     </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/slacker_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/slacker_x-large.png
+     </image>
+     </service>
+
+     <service id="4871">
+     <!-- Juke -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/juke_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/juke_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/juke_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/juke_x-large.png </image>
+     </service>
+
+     <service id="5127">
+     <!-- WiMP -->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/wimp_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/wimp_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/wimp_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/wimp_x-large.png </image>
+     </service>
+
+     <service id="5383">
+     <!-- Juke AT-->
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/juke_small.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/juke_medium.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/juke_large.png </image>
+
+     <image lastModified="11:00:00 02 Dec 2011" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/juke_x-large.png </image>
+     </service>
+
+     <service id="5639">
+     <!-- Sonora -->
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/sonora_small.png </image>
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/sonora_medium.png </image>
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/sonora_large.png </image>
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/sonora_x-large.png
+     </image>
+     </service>
+
+     <service id="13">
+     <!-- Napster by Rhapsody -->
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/napbyrhap_small.png
+     </image>
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/napbyrhap_medium.png
+     </image>
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/napbyrhap_large.png
+     </image>
+
+     <image lastModified="12:00:00 15 Jun 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/napbyrhap_x-large.png
+     </image>
+     </service>
+
+     <service id="5895">
+     <!-- QQ Music -->
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/QQ_small.png </image>
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/QQ_medium.png </image>
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/QQ_large.png </image>
+
+     <image lastModified="12:00:00 23 Jan 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/QQ_x-large.png </image>
+     </service>
+
+     <service id="6151">
+     <!-- DAR.fm -->
+
+     <image lastModified="16:00:00 14 Mar 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/dar_small.png </image>
+
+     <image lastModified="16:00:00 14 Mar 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/dar_medium.png </image>
+
+     <image lastModified="16:00:00 14 Mar 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/dar_large.png </image>
+
+     <image lastModified="16:00:00 14 Mar 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/dar_x-large.png </image>
+     </service>
+
+     <service id="6407">
+     <!-- JB Hifi -->
+
+     <image lastModified="12:00:00 24 Apr 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/jbhifi_small.png </image>
+
+     <image lastModified="12:00:00 24 Apr 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/jbhifi_medium.png </image>
+
+     <image lastModified="12:00:00 24 Apr 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/jbhifi_large.png </image>
+
+     <image lastModified="12:00:00 24 Apr 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/jbhifi_x-large.png
+     </image>
+     </service>
+
+     <service id="6663">
+     <!-- Amazon Cloud Player -->
+
+     <image lastModified="16:00:00 10 Apr 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/amazoncloudplayer_small.png
+     </image>
+
+     <image lastModified="16:00:00 10 Apr 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/amazoncloudplayer_medium.png
+     </image>
+
+     <image lastModified="16:00:00 10 Apr 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/amazoncloudplayer_large.png
+     </image>
+
+     <image lastModified="16:00:00 10 Apr 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/amazoncloudplayer_x-large.png
+     </image>
+     </service>
+
+     <service id="8199">
+     <!-- OI Rdio -->
+
+     <image lastModified="15:00:00 5 Jun 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/oi_rdio_small.png </image>
+
+     <image lastModified="15:00:00 5 Jun 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/oi_rdio_medium.png
+     </image>
+
+     <image lastModified="15:00:00 5 Jun 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/oi_rdio_large.png </image>
+
+     <image lastModified="15:00:00 5 Jun 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/oi_rdio_x-large.png
+     </image>
+     </service>
+
+     <service id="7431">
+     <!-- Songza -->
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/songza_small.png </image>
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/songza_medium.png </image>
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/songza_large.png </image>
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/songza_x-large.png
+     </image>
+     </service>
+
+     <service id="7175">
+     <!-- Simfy -->
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/simfy_small.png </image>
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/simfy_medium.png </image>
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/simfy_large.png </image>
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/simfy_x-large.png
+     </image>
+     </service>
+
+     <service id="7943">
+     <!-- QoBuz -->
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/qobuz_small.png </image>
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/qobuz_medium.png </image>
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/qobuz_large.png </image>
+
+     <image lastModified="13:30:00 7 Jun 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/qobuz_x-large.png
+     </image>
+     </service>
+
+     <service id="8455">
+     <!-- Murfie-->
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="small">http://www.sonos.com/graphics/ms/sized/small/murfie_small.png</image>
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="medium">http://www.sonos.com/graphics/ms/sized/medium/murfie_medium.png</image>
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="large">http://www.sonos.com/graphics/ms/sized/large/murfie_large.png</image>
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="x-large">http://www.sonos.com/graphics/ms/sized/x-large/murfie_x-large.png</image>
+     </service>
+
+     <service id="9223">
+     <!-- Hearts of Space-->
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="small">http://www.sonos.com/graphics/ms/sized/small/hos_small.png</image>
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="medium">http://www.sonos.com/graphics/ms/sized/medium/hos_medium.png</image>
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="large">http://www.sonos.com/graphics/ms/sized/large/hos_large.png</image>
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="x-large">http://www.sonos.com/graphics/ms/sized/x-large/hos_x-large.png</image>
+     </service>
+
+     <service id="8967">
+     <!-- QQ V2 Beta-->
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="small">http://www.sonos.com/graphics/ms/sized/small/QQ_small.png</image>
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="medium">http://www.sonos.com/graphics/ms/sized/medium/QQ_medium.png</image>
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="large">http://www.sonos.com/graphics/ms/sized/large/QQ_large.png</image>
+
+     <image lastModified="11:00:00 13 Sep 2012"
+     placement="x-large">http://www.sonos.com/graphics/ms/sized/x-large/QQ_x-large.png</image>
+     </service>
+
+     <service id="9735">
+     <!-- 7digital -->
+
+     <image lastModified="11:00:00 02 Nov 2012"
+     placement="small">http://www.sonos.com/graphics/ms/sized/small/7digital_small.png</image>
+
+     <image lastModified="11:00:00 02 Nov 2012"
+     placement="medium">http://www.sonos.com/graphics/ms/sized/medium/7digital_medium.png</image>
+
+     <image lastModified="11:00:00 02 Nov 2012"
+     placement="large">http://www.sonos.com/graphics/ms/sized/large/7digital_large.png</image>
+
+     <image lastModified="11:00:00 02 Nov 2012"
+     placement="x-large">http://www.sonos.com/graphics/ms/sized/x-large/7digital_x-large.png</image>
+     </service>
+
+     <service id="9991">
+     <!-- QoBuz Hi-Fi-->
+
+     <image lastModified="13:30:00 14 Nov 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/qobuz_small.png </image>
+
+     <image lastModified="13:30:00 14 Nov 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/qobuz_medium.png </image>
+
+     <image lastModified="13:30:00 14 Nov 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/qobuz_large.png </image>
+
+     <image lastModified="13:30:00 14 Nov 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/qobuz_x-large.png
+     </image>
+     </service>
+
+     <service id="10247">
+     <!-- Deezer -->
+
+     <image lastModified="11:00:00 27 Nov 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/deezer_small.png </image>
+
+     <image lastModified="11:00:00 27 Nov 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/deezer_medium.png </image>
+
+     <image lastModified="11:00:00 27 Nov 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/deezer_large.png </image>
+
+     <image lastModified="11:00:00 27 Nov 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/deezer_x-large.png
+     </image>
+     </service>
+
+     <service id="9479">
+     <!-- SiriusXM -->
+
+     <image lastModified="11:00:00 14 Dec 2012" placement="small">
+     http://www.sonos.com/graphics/ms/sized/small/sxm_small.png </image>
+
+     <image lastModified="11:00:00 14 Dec 2012" placement="medium">
+     http://www.sonos.com/graphics/ms/sized/medium/sxm_medium.png </image>
+
+     <image lastModified="11:00:00 14 Dec 2012" placement="large">
+     http://www.sonos.com/graphics/ms/sized/large/sxm_large.png </image>
+
+     <image lastModified="11:00:00 14 Dec 2012" placement="x-large">
+     http://www.sonos.com/graphics/ms/sized/x-large/sxm_x-large.png </image>
+     </service>
+     </sized>
+     </images>
+
+
+    */
+
+    // Get the above music service info and pass into a JSON object
+
+    self.getMusicServicesInfo = function () {
+        var host = "http://update-services.sonos.com";
+        var url = '/services/mslogo.xml';
+        var url = host + url;
+        CF.request( url, function(status, headers, body) {
+            if (status == 200) {
+                //body = self.extractTag(body, '<cr200>', '</cr200>')
+                //CF.log("Sonos Music Service response is: " + body);
+                var parser = new DOMParser();
+                var xmlDoc = parser.parseFromString(body, 'text/xml');
+                var results = xmlDoc.evaluate("/images/cr200//service", xmlDoc, null,XPathResult.ANY_TYPE, null);
+                var infoItem = results.iterateNext();
+                while (infoItem) {
+                    var serviceID = infoItem.getAttribute("id");
+                    var serviceName = infoItem.childNodes[1].nodeValue;
+                    var serviceImage = infoItem.getElementsByTagName("image")[0].childNodes[0].nodeValue;
+                    //CF.log("id is: " + serviceID + " name is: " + serviceName + " image is: " + serviceImage);
+                    self.allMusicServicesDetails[serviceID] = {"serviceName": serviceName, "serviceImage": serviceImage};
+                    infoItem = results.iterateNext();
+                }
+                //CF.logObject(self.allMusicServicesDetails);
+                self.getSubscribedMusicServices();
+            }
+            else {
+                CF.log('Sonos Music Service call failed with status ' + status);
+            }
+        });
+       }
+
+    // Gets the music services to which we are subscribed.  Thaese can be found at the player http://192.168.1.61:1400/status/securesettings
+    //
+    self.getSubscribedMusicServices = function () {
+        var host = "http://" + self.currentPlayer.IP;
+        var url = ':1400/status/securesettings';
+        var url = host + url;
+        //CF.log("the url is: " + url);
+        CF.request( url, function(status, headers, body) {
+            if (status == 200) {
+                //body = self.extractTag(body, '<cr200>', '</cr200>')
+                //CF.log("Got here");
+                body = Encoder.htmlDecode(body);
+                body = self.extractTag(body, 'Setting Name="R_SvcAccounts" Value="', '"');
+                body = body.split(",");
+                for (i=0; i < body.length; i+=4) {
+                    self.subscribedMusicServicesDetails[body[i]] = self.allMusicServicesDetails[body[i]];
+                    self.subscribedMusicServicesDetails[body[i]].userID = body[i+1];
+                    CF.log(body[i] +":"+ body[i+1]);
+                }
+                //CF.logObject(self.subscribedMusicServicesDetails);
+            }
+            else {
+                CF.log('Sonos Music Subscribed Music Services call failed with status ' + status);
+            }
+        });
+    }
+
+
     // Gets the SPotify session ID which is need to communicate with the server
 
     self.getSpotifySessionID = function (){
@@ -277,9 +2155,17 @@ var SonosMusicSources = function () {
 		// if (response.NumberReturned = 0) {return};
 		CF.log("Number of results returned is: " + response.NumberReturned);
 		CF.log("Total matches is: " + response.TotalMatches)
-		CF.log("Total result returned is: " + self.musicSourceNumberReturned)
-		body = Utils.unescape(body);
-		i = body.indexOf("<item", j);
+		CF.log("Total result returned is: " + self.musicSourceNumberReturned);
+        var parser = new DOMParser();
+        var xmlDoc = parser.parseFromString(body, 'text/xml');
+        //CF.logObject(xmlDoc);
+		//body = Utils.unescape(body);
+        //body = Encoder.correctEncoding(body);
+        //body = Encoder.htmlDecode(body);
+        //CF.log("The encoded music library response is:" + body);
+        //body = unescape(body);
+        CF.log("The music library response is:" + body);
+        i = body.indexOf("<item", j);
 		var i = 0, j = 0, k = 0, l = 0, artist = "", title = "", res = "", art = "", nextTag = "", endTag = ""
 		// having got the response, we can check to see whether we have reached track level by checking to see what object types are in the response
 		if (body.indexOf("<upnp:class>object.item.audioItem.musicTrack</upnp:class>") > 0) {
@@ -300,7 +2186,8 @@ var SonosMusicSources = function () {
 
 		}
 		// now we can get and process the records
-		i = body.indexOf(startTag, j);
+
+        i = body.indexOf(startTag, j);
 		while (i >= 0) {
 			// Loop over all items, where each item is a track on the queue.
 			j = body.indexOf(endTag, i);
@@ -324,6 +2211,7 @@ var SonosMusicSources = function () {
             self.zoneGroupNotificationCallback("AppendMusicSources", self.musicSourceList, self.musicSourceNumberReturned);  // process this message in the GUI layer
         }
         self.musicSourceNumberReturned = self.musicSourceNumberReturned + parseInt(response.NumberReturned);
+
 	};
 
 	self.getMusicSourceSpotify = function () {
@@ -331,10 +2219,40 @@ var SonosMusicSources = function () {
 
     }
 
+    /*
+     <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+     <soap:Body>
+     <getMetadataResponse xmlns="http://www.sonos.com/Services/1.1">
+         <getMetadataResult>
+             <index>0</index>
+             <count>67</count>
+             <total>67</total>
+             <mediaMetadata>
+                 <id>spotify:track:5B8QDkxbSR7ML2GdN2ZRTY</id>
+                 <itemType>track</itemType>
+                 <title>Opening Titles</title>
+                 <mimeType>audio/x-spotify</mimeType>
+                     <trackMetadata>
+                         <artistId>spotify:artist:32ogthv0BdaSMPml02X9YB</artistId>
+                         <artist>The Cinematic Orchestra</artist>
+                         <albumId>spotify:album:48zPKXSCFOdMlgTaeVQn5u</albumId>
+                         <album>The Crimson Wing: Mystery Of The Flamingos</album>
+                         <duration>173</duration>
+                         <albumArtURI>http://o.scdn.co/image/3d6f4910c4ef371a0a31e602a23eb46575cf067f</albumArtURI>
+                         <canPlay>true</canPlay>
+                         <canSkip>true</canSkip>
+                         <canAddToFavorites>false</canAddToFavorites>
+                         </trackMetadata>
+             </mediaMetadata>
+         </getMetadataResult>
+     </getMetadataResponse>
+     </soap:Body></soap:Envelope>
+     */
+
 	self.processGetMusicSourceSpotify = function (body) {
-		body = Utils.unescape(body);
-		body = Utils.unescape(body);
-		//CF.log("Spotify response is: " + body);
+		body = Utils.decodeXml(body);
+		//body = Utils.decodeXml(body);
+		CF.log("Spotify response is: " + body);
 		var i = 0, j = 0, k = 0, l = 0, artist = "", title = "", res = "", art = "", nextTag = "", endTag = ""
 		// having got the response, we can check to see whether we have reached track level by checking to see what object types are in the response
 		if (body.indexOf("<itemType>track</itemType>") > 0) {
@@ -660,9 +2578,11 @@ var SonosMusicSources = function () {
 			if (sourceToAdd.indexOf("x-sonos-spotify") >= 0) {
 				// Must be a spotify track
 				CF.log("Got a Sonos PLaylist Item which is a spotify track");
-				enqueuedURI = sourceToAdd + sourceToAdd.substring(0,sourceToAdd.indexOf("flags=0") + 6);
-				enqueuedURIMetaData = self.metaDataHeader + '<itemid="' + sourceToAdd + '" parentID="' + self.musicSourceList[self.musicSourceListIndex].sourceParentID + '" restricted="true"><dc:title>' + self.musicSourceList[self.musicSourceListIndex].sourceName + '<dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">RINCON_AssociatedZPUDN</desc></item></DIDL-Lite>';
-
+				//enqueuedURI = sourceToAdd + sourceToAdd.substring(0,sourceToAdd.indexOf("flags=0") + 6);
+                enqueuedURI =  sourceToAdd.substring(0,sourceToAdd.indexOf("flags=0") + 7);
+                enqueuedURI = Encoder.htmlEncode(enqueuedURI.replace(self.musicSourceList[self.musicSourceListIndex].sourceParentID.substr(1)+"/",""));
+                enqueuedURIMetaData = self.metaDataHeader + '<item id="' + sourceToAdd + '" parentID="' + self.musicSourceList[self.musicSourceListIndex].sourceParentID + '" restricted="true"><dc:title>' + self.musicSourceList[self.musicSourceListIndex].sourceName + '<dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">RINCON_AssociatedZPUDN</desc></item></DIDL-Lite>';
+                enqueuedURIMetaData = encodeURIComponent(enqueuedURIMetaData);
 			}
 			self.currentPlayer.AVTransportAddURIToQueue(self.sendPlayPostSetAVTransport, 0, enqueuedURI, enqueuedURIMetaData, desiredFirstTrackNumberEnqueued, enqueueAsNext);
             //self.currentPlayer.getQueueForCurrentZone();

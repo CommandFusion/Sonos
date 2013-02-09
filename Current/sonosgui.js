@@ -46,11 +46,13 @@ var SONOS_GUI = function () {
 
         // Text Button Joins
         joinBtnTxtZoneGrouping:'200',
-        joinBtnTxtMusicSourcesItem:"201",
+        joinBtnTxtMusicSourcesItemLine1:"201",
         joinBtnTxtZoneList:'202',
         joinBtnTxtZoneMusicText:'203',
         joinBtnTxtQueueItemSong:'204',
         joinBtnTxtQueueItemArtist:'205',
+        joinBtnTxtMusicSourcesItemLine2:"206",
+
 
 
         // Sub Page Joins
@@ -79,7 +81,7 @@ var SONOS_GUI = function () {
         joinTxtNowPlayingNextSong:"307",
         joinTxtRoomNameVol:"308",
         joinTxtRINCONVol:"309",
-        joinTxtNowPlayingRoom: "310",
+        joinTxtNowPlayingRoom:"310",
 
 
         // Input Fields
@@ -132,10 +134,10 @@ var SONOS_GUI = function () {
         autoDiscoveryFlag:true, // holds whether to use autoDiscovery or not before wirtten to a global token
         autoDiscoveryIPs:[], // used to hold the hardcoded IP address before written to a global token
         spotifyID:"", //used to hold Spotify ID prior to being written to a global token
-        discoveryComplete: false,
-        notificationObjQueue: [],
-        notificationTypeQueue: [],
-        notificationVar1Queue: []
+        discoveryComplete:false,
+        notificationObjQueue:[],
+        notificationTypeQueue:[],
+        notificationVar1Queue:[]
     };
 
     self.init = function () {
@@ -157,8 +159,7 @@ var SONOS_GUI = function () {
         // Wait 6 seconds for all the players to be discovered and processed before handling GUUI notification messages
         setTimeout(function () {
             self.discoveryOver();
-        }, 10000);
-
+        }, 7000);
 
 
     };
@@ -236,6 +237,9 @@ var SONOS_GUI = function () {
                 case "ClearQueueUI":
                     CF.listRemove("l" + self.joinListQueue);
                     break;
+                case "ScrollToMusicSource":
+                    CF.listScroll("l" + self.joinListMusicSources, notificationObj, CF.MiddlePosition, true);
+                    break;
 
                 default:
                     CF.log("Invalid GUI notification type");
@@ -263,7 +267,13 @@ var SONOS_GUI = function () {
      */
 
     self.selectMusicSource = function (join, list, listIndex) {
-        self.sonosMusicSource.selectMusicSource(join, list, listIndex)
+        //CF.log("Gui is sending a music source press");
+        CF.getJoin(list + ":" + listIndex + ":s" + self.joinBtnTxtMusicSourcesItemLine1, function (join, value) {
+            //CF.log("Source selected is: "+ value);
+            self.sonosMusicSource.selectMusicSource(value, listIndex);
+        });
+
+        //self.sonosMusicSource.selectMusicSource(join, list, listIndex)
 
     }
 
@@ -281,10 +291,8 @@ var SONOS_GUI = function () {
         //CF.log("adding the music sources");
         var displayArray = [];
         for (var i = var1; i < notificationObj.length; i++) { // loop around for the number of grouped zones
-            if (notificationObj[i].sourceArt[i] === undefined) {
-                notificationObj[i].sourceArt[i] = "";
-            }
-            displayArray.push({s203:notificationObj[i].sourceArt, s201:notificationObj[i].sourceName});
+            //CF.log("Source art is:" + notificationObj[i].sourceArt);
+            displayArray.push({s203:notificationObj[i].sourceArt, s201:notificationObj[i].sourceName, s206:notificationObj[i].sourceCreator});
         }
         CF.listAdd("l" + self.joinListMusicSources, displayArray);
     }
@@ -294,7 +302,7 @@ var SONOS_GUI = function () {
     }
 
     self.musicSourceListEnd = function () {
-        CF.log("got a music source list end");
+        CF.log("Got a music source list end at the GUI layer");
         self.sonosMusicSource.musicSourceListEnd();
     }
 
@@ -309,11 +317,13 @@ var SONOS_GUI = function () {
 
     self.playNextMusicSourceAction = function () {
         self.sonosMusicSource.musicSourcePlayNext();
-        CF.setJoin("d" + self.subPagePopupPlayMode, 0);    }
+        CF.setJoin("d" + self.subPagePopupPlayMode, 0);
+    }
 
     self.addQueueMusicSourceAction = function () {
         self.sonosMusicSource.musicSourceAddToQueue();
-        CF.setJoin("d" + self.subPagePopupPlayMode, 0);    }
+        CF.setJoin("d" + self.subPagePopupPlayMode, 0);
+    }
 
     self.replaceQueueMusicSourceAction = function () {
         self.sonosMusicSource.musicSourceReplaceQueue();
@@ -337,8 +347,8 @@ var SONOS_GUI = function () {
     self.processTransportChange = function (notificationObj) {
         if (self.selectedZoneCoordinator != "Not Set") {
             //CF.log("The zone which got the transport event is: " + self.discoveredPlayerList[notificationObj].roomName);
-            if (self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying != 0 ) {
-                CF.log("The transport event was for room: " + self.discoveredPlayerList[notificationObj].roomName + " which has index: " + self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying);
+            if (self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying != 0) {
+                //CF.log("The transport event was for room: " + self.discoveredPlayerList[notificationObj].roomName + " which has index: " + self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying);
                 CF.setJoin("l" + self.joinListZones + ":" + self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying + ":s" + self.joinBtnTxtZoneMusicText, self.discoveredPlayerList[notificationObj].currentTrackName);
                 if (self.discoveredPlayerList[notificationObj].transportState === "PLAYING") {
                     CF.setJoin("l" + self.joinListZones + ":" + self.discoveredPlayerList[notificationObj].zoneGroupMusicNowPlaying + ":d" + self.joinBtnZoneMusicPlay, 1);
@@ -352,6 +362,7 @@ var SONOS_GUI = function () {
                 self.currentPlayer.getPositionInfo();
                 self.trackStartTime = new Date().getTime();
                 self.updateTimerWithoutGetPosInfo();
+                //self.updateTimerWithGetPosInfo();
                 self.updateNowPlayingGUI();
                 self.updatePlayControls();
 
@@ -362,11 +373,13 @@ var SONOS_GUI = function () {
 
     self.updateNowPlayingGUI = function () {
         //self.currentPlayer = self.discoveredPlayerList[self.selectedZoneCoordinator];
+        CF.log("Got a pos info update with current track of: " + self.currentPlayer.currentTrackName);
         CF.setJoin("s" + self.joinTxtNowPlayingArtist, self.currentPlayer.currentTrackArtist);
         CF.setJoin("s" + self.joinTxtNowPlayingAlbum, self.currentPlayer.currentTrackAlbum);
         CF.setJoin("s" + self.joinTxtNowPlayingSong, self.currentPlayer.currentTrackName);
         CF.setJoin("s" + self.joinImgNowPlayingArt, self.currentPlayer.currentTrackAlbumArtAddr);
         CF.setJoin("s" + self.joinTxtNowPlayingNextSong, self.currentPlayer.nextTrackName + " - " + self.currentPlayer.nextTrackAlbum);
+        self.updateTimerWithoutGetPosInfo();
 
     };
 
@@ -405,20 +418,29 @@ var SONOS_GUI = function () {
         if (self.currentPlayer.transportState === "PLAYING") {
             self.trackCurrentTime = new Date().getTime() + self.currentPlayer.trackCurrentPosSecs * 1000;
             var timeDifference = (self.trackCurrentTime - self.trackStartTime) / 1000;
-            CF.setJoin("a" + self.joinSliderAnalTime, timeDifference / self.currentPlayer.trackDurationSecs * 65536);
-            CF.setJoin("s" + self.joinTxtTimeToEnd, self.turnSecondstoSonosString(self.currentPlayer.trackDurationSecs - timeDifference));
-            CF.setJoin("s" + self.joinTxtTimeFromBeginning, self.turnSecondstoSonosString(timeDifference));
-            setTimeout(function () {
-                self.updateTimerWithoutGetPosInfo();
-            }, 1000);
+            CF.log("trackDuration is : " + self.currentPlayer.trackDurationSecs + "trackCurrentPosSecs is :" + self.currentPlayer.trackCurrentPosSecs);
+            if (self.currentPlayer.radioPlaying) { // when playing radio we will get a track duration of zero so dont want to keep updating timing etc
+                CF.setJoin("a" + self.joinSliderAnalTime, 0);
+                CF.setJoin("s" + self.joinTxtTimeToEnd, "00:00:00");
+                CF.setJoin("s" + self.joinTxtTimeFromBeginning, "00:00:00");
+            }
+            else {
+                CF.setJoin("a" + self.joinSliderAnalTime, timeDifference / self.currentPlayer.trackDurationSecs * 65536);
+                CF.setJoin("s" + self.joinTxtTimeToEnd, self.turnSecondstoSonosString(self.currentPlayer.trackDurationSecs - timeDifference));
+                CF.setJoin("s" + self.joinTxtTimeFromBeginning, self.turnSecondstoSonosString(timeDifference));
+                setTimeout(function () {
+                    self.updateTimerWithoutGetPosInfo();
+                }, 1000);
+            }
+
         }
 
     }
 
-    /*self.updateTimerWithGetPosInfo = function () {
-     self.currentPlayer.getPositionInfo();
-     setTimeout(function() { self.updateTimerWithGetPosInfo(); }, 8000);
-     }*/
+    self.updateTimerWithGetPosInfo = function () {
+         self.currentPlayer.getPositionInfo();
+         setTimeout(function() { self.updateTimerWithGetPosInfo(); }, 8000);
+     }
 
 
     self.turnSecondstoSonosString = function (numSeconds) {
@@ -514,17 +536,19 @@ var SONOS_GUI = function () {
             //CF.logObject(self.zoneDisplay);
             self.populateZonesList();
             // This is various stuff run when the first zone grouping message is received
-            if (self.firstZoneDisplayTrue === true) {
+            if (self.selectedZoneCoordinator === "Not Set") {
                 // Check to see if the player referenced as the first one in the zone list has actually been discovered yet and if not ignore rest
                 if (typeof self.discoveredPlayerList[self.zoneDisplay[0].coordinatorRINCON] !== "undefined") {
                     //CF.log("the coordinator for the first zone is: " + self.zoneDisplay[0].coordinatorRINCON);
                     self.currentPlayer = self.discoveredPlayerList[self.zoneDisplay[0].coordinatorRINCON];
-                    //CF.log("the default player selected is: " + self.currentPlayer.roomName);
+                    CF.log("the default player selected is: " + self.currentPlayer.roomName);
                     CF.getJoin("l" + self.joinListZones + ":0:s" + self.joinBtnTxtZoneList, function (j, v, tokens) {
-                        CF.setJoin("s"+self.joinTxtNowPlayingRoom, v);
+                        CF.setJoin("s" + self.joinTxtNowPlayingRoom, v);
                     });
                     self.processSelectedZone(self.zoneDisplay[0].coordinatorRINCON);
-                    self.sonosMusicSource = new SonosMusicSources();
+                    //self.sonosMusicSource = new SonosMusicSources();
+                    //self.sonosMusicSource.init();
+                    self.sonosMusicSource = new SonosMusicSources2();
                     self.sonosMusicSource.init();
                     self.firstZoneDisplayTrue = false;
                 }
@@ -572,7 +596,7 @@ var SONOS_GUI = function () {
 
                 }
             }
-            if (i === self.zoneDisplay.length-1 ) {
+            if (i === self.zoneDisplay.length - 1) {
                 //CF.log("Do final music list");
                 self.discoveredPlayerList[self.zoneDisplay[i].coordinatorRINCON].zoneGroupMusicNowPlaying = listCounter;
                 //CF.log("adding music zone sub page for room");
@@ -586,8 +610,8 @@ var SONOS_GUI = function () {
 
     self.populateZoneMusicField = function () {
         for (var player in self.discoveredPlayerList) {
-            CF.log("The player is : " + self.discoveredPlayerList[player].roomName + " which has index: " + self.discoveredPlayerList[player].zoneGroupMusicNowPlaying);
-            if (self.discoveredPlayerList[player].zoneGroupMusicNowPlaying != 0 ) {
+            //CF.log("The player is : " + self.discoveredPlayerList[player].roomName + " which has index: " + self.discoveredPlayerList[player].zoneGroupMusicNowPlaying);
+            if (self.discoveredPlayerList[player].zoneGroupMusicNowPlaying != 0) {
                 //CF.log("The transport event was for room: " + self.discoveredPlayerList[player].roomName + " which has index: " + self.discoveredPlayerList[player].zoneGroupMusicNowPlaying);
                 CF.setJoin("l" + self.joinListZones + ":" + self.discoveredPlayerList[player].zoneGroupMusicNowPlaying + ":s" + self.joinBtnTxtZoneMusicText, self.discoveredPlayerList[player].currentTrackName);
                 if (self.discoveredPlayerList[player].transportState === "PLAYING") {
@@ -641,6 +665,7 @@ var SONOS_GUI = function () {
     // Handles the functions required when a zone is selected in the GUI
 
     self.selectZone = function (join, list, listIndex) {
+        CF.log("got a zone select message");
         //CF.log("listIndex is: " + listIndex)
         CF.getJoin("l" + self.joinListZones + ":" + listIndex + ":s" + self.joinTxtZoneCoordinatorHidden, function (j, v, tokens) {
             self.selectedZoneCoordinator = v;
@@ -648,17 +673,11 @@ var SONOS_GUI = function () {
         });
 
         CF.getJoin("l" + self.joinListZones + ":" + listIndex + ":s" + self.joinBtnTxtZoneList, function (j, v, tokens) {
-            CF.setJoin("s"+self.joinTxtNowPlayingRoom, v);
+            CF.setJoin("s" + self.joinTxtNowPlayingRoom, v);
         });
-
-        /*		self.calcMuteAndZoneVolumeDetails();
-         self.getPositionInfo();
-         self.displayCurrentZone();
-         self.getQueueForCurrentZone();*/
-        self.firstZoneDisplayTrue = true;
     };
 
-    self.processSelectedZone = function(zone) {
+    self.processSelectedZone = function (zone) {
         //self.selectedZoneCoordinator = v;
         self.selectedZoneCoordinator = zone;
 
@@ -669,15 +688,18 @@ var SONOS_GUI = function () {
         self.currentPlayer.getQueueForCurrentZone();
         self.currentPlayer.getPositionInfo();
         self.trackStartTime = new Date().getTime();
-        self.firstZoneDisplayTrue = true;
+        //self.firstZoneDisplayTrue = true;
         self.calcMuteAndZoneVolumeDetails();
 
     }
 
     // Because retrieving of queue information will be asynchroous have to use a call back from the player when the data
     // is ready
-    self.zoneQueueReturnedCallback = function (joinData) {
+    self.zoneQueueReturnedCallback = function (joinData, reset) {
         var displayQueue = []; // temp object used to build the list object.  Quicker than individual list adds
+        if (reset) {
+            CF.listRemove("l" + self.joinListQueue);
+        }
         for (var i = 0; i < joinData.length; i++) { // loop around for the number of grouped zones
             if (joinData[i].art === undefined) {
                 joinData[i].art = "";
@@ -1054,7 +1076,7 @@ var SONOS_GUI = function () {
             CF.log(items);
             CF.setToken(CF.GlobalTokensJoin, "[playerIPAddresses]", JSON.stringify(items));
         });
-        CF.setJoin("d"+ self.subpageSonosConfig, 0);
+        CF.setJoin("d" + self.subpageSonosConfig, 0);
 
 
     }
@@ -1081,13 +1103,20 @@ var SONOS_GUI = function () {
     }
 
     self.unSubscribeToPlayers = function () {
-        //CF.log("unsbscribing " + self.zoneMembers.length + " players");
+        /*//CF.log("unsbscribing " + self.zoneMembers.length + " players");
 
         for (var i = 0; i < self.zoneMembers.length; i++) {
             curPlayer = self.discoveredPlayerList[self.zoneMembers[i].RINCON];
             //CF.log("Unsubscribing zone" + curPlayer.roomName);
             curPlayer.unSubscribeEvents();
-        }
+        }*/
+        var xml = '<CurrentTrackMetaData val="<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="-1" parentID="-1" restricted="true"><res protocolInfo="sonos.com-http:*:*:*">x-sonosapi-stream:s117787?sid=254&flags=32</res><r:streamContent></r:streamContent><r:radioShowMd>Christian OConnell Breakfast Show,p149945</r:radioShowMd><upnp:albumArtURI>/getaa?s=1&u=x-sonosapi-stream:s117787?sid=254&flags=32</upnp:albumArtURI><dc:title>x-sonosapi-stream:s117787?sid=254&flags=32</dc:title><upnp:class>object.item</upnp:class></item></DIDL-Lite>"/><r:NextTrackURI val="mms://mp3-a8-128.timlradio.co.uk"/><r:NextTrackMetaData val="<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="-1" parentID="-1" restricted="true"><res protocolInfo="mms:*:*:*">mms://mp3-a8-128.timlradio.co.uk</res><dc:title>mp3-a8-128.timlradio.co.uk</dc:title><upnp:class>object.item</upnp:class></item></DIDL-Lite>"</CurrentTrackMetaData>';
+        //var xml = '<CurrentTrackMetaData xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="-1" parentID="-1" restricted="true"><res protocolInfo="sonos.com-http:*:*:*">x-sonosapi-stream:s117787?sid=254&flags=32</res><r:streamContent></r:streamContent><r:radioShowMd>Christian OConnell Breakfast Show,p149945</r:radioShowMd><upnp:albumArtURI>/getaa?s=1&u=x-sonosapi-stream:s117787?sid=254&flags=32</upnp:albumArtURI><dc:title>x-sonosapi-stream:s117787?sid=254&flags=32</dc:title><upnp:class>object.item</upnp:class></item></DIDL-Lite>"/>';
+        var parser = new DOMParser();
+        var xmlDoc = parser.parseFromString(xml, 'text/xml');
+        debugger;
+        var results = xml.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/",'CurrentTrackMetaData');
+
     }
 
     self.onGUISuspended = function () {
@@ -1104,7 +1133,6 @@ var SONOS_GUI = function () {
         //sonosPlayers.init();
         CF.log("GUI resumed at " + (new Date()));
     }
-
 
 
     return self;

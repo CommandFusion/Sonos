@@ -1,0 +1,1863 @@
+Music Library Top Level
+
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+           xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+           xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+    <container id="A:ARTIST"
+               parentID="A:"
+               restricted="true">
+        <dc:title>Contributing Artists</dc:title>
+        <upnp:class>object.container</upnp:class>
+        <res protocolInfo="x-rincon-playlist:*:*:*">
+            x-rincon-playlist:RINCON_000E5855842601400#A:ARTIST</res>
+    </container>
+    <container id="A:ALBUMARTIST"
+               parentID="A:"
+               restricted="true">
+        <dc:title>Artists</dc:title>
+        <upnp:class>object.container</upnp:class>
+        <res protocolInfo="x-rincon-playlist:*:*:*">
+            x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST</res>
+    </container>
+    <container id="A:ALBUM"
+               parentID="A:"
+               restricted="true">
+        <dc:title>Albums</dc:title>
+        <upnp:class>object.container.albumlist</upnp:class>
+        <res protocolInfo="x-rincon-playlist:*:*:*">
+            x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM</res>
+    </container>
+    <container id="A:GENRE"
+               parentID="A:"
+               restricted="true">
+        <dc:title>Genres</dc:title>
+        <upnp:class>object.container</upnp:class>
+        <res protocolInfo="x-rincon-playlist:*:*:*">
+            x-rincon-playlist:RINCON_000E5855842601400#A:GENRE</res>
+    </container>
+    <container id="A:COMPOSER"
+               parentID="A:"
+               restricted="true">
+        <dc:title>Composers</dc:title>
+        <upnp:class>object.container</upnp:class>
+        <res protocolInfo="x-rincon-playlist:*:*:*">
+            x-rincon-playlist:RINCON_000E5855842601400#A:COMPOSER</res>
+    </container>
+    <container id="A:TRACKS"
+               parentID="A:"
+               restricted="true">
+        <dc:title>Tracks</dc:title>
+        <upnp:class>object.container.playlistContainer</upnp:class>
+        <res protocolInfo="x-rincon-playlist:*:*:*">
+            x-rincon-playlist:RINCON_000E5855842601400#A:TRACKS</res>
+    </container>
+    <container id="A:PLAYLISTS"
+               parentID="A:"
+               restricted="true">
+        <dc:title>Playlists</dc:title>
+        <upnp:class>object.container</upnp:class>
+    </container>
+</DIDL-Lite>
+
+
+        Music Library Select Artist Category
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+           xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+           xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+<container id="A:ALBUMARTIST/!!!"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>!!!</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/!!!</res>
+</container>
+<container id="A:ALBUMARTIST/'N%20Sync"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>'N Sync</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/'N%20Sync</res>
+</container>
+<container id="A:ALBUMARTIST/%2b44"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>+44</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/%2b44</res>
+</container>
+<container id="A:ALBUMARTIST/1%20Giant%20Leap"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>1 Giant Leap</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/1%20Giant%20Leap</res>
+</container>
+<container id="A:ALBUMARTIST/1%20Voice"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>1 Voice</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/1%20Voice</res>
+</container>
+<container id="A:ALBUMARTIST/125%20Nature%20Sounds"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>125 Nature Sounds</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/125%20Nature%20Sounds</res>
+</container>
+<container id="A:ALBUMARTIST/17"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>17</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/17</res>
+</container>
+<container id="A:ALBUMARTIST/1910%20Fruitgum%20Co."
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>1910 Fruitgum Co.</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/1910%20Fruitgum%20Co.</res>
+</container>
+<container id="A:ALBUMARTIST/1910%20Fruitgum%20Company"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>1910 Fruitgum Company</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/1910%20Fruitgum%20Company</res>
+</container>
+<container id="A:ALBUMARTIST/1990s"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>1990s</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/1990s</res>
+</container>
+<container id="A:ALBUMARTIST/2%20Unlimited"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>2 Unlimited</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/2%20Unlimited</res>
+</container>
+<container id="A:ALBUMARTIST/2010s%20Karaoke%20Band"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>2010s Karaoke Band</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/2010s%20Karaoke%20Band</res>
+</container>
+<container id="A:ALBUMARTIST/2Play"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>2Play</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/2Play</res>
+</container>
+<container id="A:ALBUMARTIST/3OH!3"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>3OH!3</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/3OH!3</res>
+</container>
+<container id="A:ALBUMARTIST/4%20Strings"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>4 Strings</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/4%20Strings</res>
+</container>
+<container id="A:ALBUMARTIST/411"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>411</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/411</res>
+</container>
+<container id="A:ALBUMARTIST/50%20Cent"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>50 Cent</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/50%20Cent</res>
+</container>
+<container id="A:ALBUMARTIST/50%20Cent%20Feat.%20Nate%20Dogg"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>50 Cent Feat. Nate Dogg</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/50%20Cent%20Feat.%20Nate%20Dogg</res>
+</container>
+<container id="A:ALBUMARTIST/50hz"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>50hz</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/50hz</res>
+</container>
+<container id="A:ALBUMARTIST/7000%20$"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>7000 $</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/7000%20$</res>
+</container>
+<container id="A:ALBUMARTIST/80's%20Collection"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>80's Collection</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/80's%20Collection</res>
+</container>
+<container id="A:ALBUMARTIST/808Funk"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>808Funk</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/808Funk</res>
+</container>
+<container id="A:ALBUMARTIST/A%20Man%20Called%20Adam"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>A Man Called Adam</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/A%20Man%20Called%20Adam</res>
+</container>
+<container id="A:ALBUMARTIST/A%20Rough%20Trade%20America%20Sampler"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>A Rough Trade America Sampler</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/A%20Rough%20Trade%20America%20Sampler</res>
+</container>
+<container id="A:ALBUMARTIST/a-Ha"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>a-Ha</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/a-Ha</res>
+</container>
+<container id="A:ALBUMARTIST/Aaliyah"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>Aaliyah</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/Aaliyah</res>
+</container>
+<container id="A:ALBUMARTIST/Aamer%20Muneeb"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>Aamer Muneeb</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/Aamer%20Muneeb</res>
+</container>
+<container id="A:ALBUMARTIST/Aaron%20Marshall"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>Aaron Marshall</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/Aaron%20Marshall</res>
+</container>
+<container id="A:ALBUMARTIST/ABBA"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>ABBA</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/ABBA</res>
+</container>
+<container id="A:ALBUMARTIST/Abraham"
+           parentID="A:ALBUMARTIST"
+           restricted="true">
+    <dc:title>Abraham</dc:title>
+    <upnp:class>object.container.person.musicArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/Abraham</res>
+</container>
+</DIDL-Lite>
+
+
+        Music Library Select Specific Artist
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+           xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+           xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+<container id="A:ALBUMARTIST/a-Ha/"
+           parentID="A:ALBUMARTIST/a-Ha"
+           restricted="true">
+    <dc:title>All</dc:title>
+    <upnp:class>object.container.playlistContainer.sameArtist</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/a-Ha/</res>
+</container>
+<container id="A:ALBUMARTIST/a-Ha/Analogue"
+           parentID="A:ALBUMARTIST/a-Ha"
+           restricted="true">
+    <dc:title>Analogue</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/a-Ha/Analogue</res>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/01%20Celice.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUMARTIST/a-Ha/Analogue (All I Want)"
+           parentID="A:ALBUMARTIST/a-Ha"
+           restricted="true">
+    <dc:title>Analogue (All I Want)</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/a-Ha/Analogue
+        (All I Want)</res>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Compilations/Analogue%20(All%20I%20Want)/01%20Analogue%20(All%20I%20Want).mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+           parentID="A:ALBUMARTIST/a-Ha"
+           restricted="true">
+    <dc:title>Stay On These Roads</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUMARTIST/a-Ha/Stay On
+        These Roads</res>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/01%20Stay%20On%20These%20Roads.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+</DIDL-Lite>
+
+        Artist Select Album
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+           xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+           xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/01 Stay On These Roads.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/01 Stay On These Roads.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/01%20Stay%20On%20These%20Roads.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>Stay On These Roads</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>1</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/02 The Blood That Moves The Body.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/02 The Blood That Moves The Body.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/02%20The%20Blood%20That%20Moves%20The%20Body.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>The Blood That Moves The Body</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>2</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/03 Touchy!.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/03 Touchy!.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/03%20Touchy!.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>Touchy!</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>3</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/04 This Alone Is Love.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/04 This Alone Is Love.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/04%20This%20Alone%20Is%20Love.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>This Alone Is Love</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>4</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/05 Hurry Home.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/05 Hurry Home.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/05%20Hurry%20Home.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>Hurry Home</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>5</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/06 The Living Daylights.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/06 The Living Daylights.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/06%20The%20Living%20Daylights.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>The Living Daylights</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>6</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/07 There's Never A Forever Thing.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/07 There's Never A Forever Thing.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/07%20There's%20Never%20A%20Forever%20Thing.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>There's Never A Forever Thing</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>7</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/08 Out Of Blue Comes Green.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/08 Out Of Blue Comes Green.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/08%20Out%20Of%20Blue%20Comes%20Green.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>Out Of Blue Comes Green</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>8</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/09 You Are The One.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/09 You Are The One.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/09%20You%20Are%20The%20One.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>You Are The One</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>9</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/10 You'll End Up Crying.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/Stay On These Roads"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/10 You'll End Up Crying.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/10%20You'll%20End%20Up%20Crying.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>You'll End Up Crying</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>10</upnp:originalTrackNumber>
+</item>
+</DIDL-Lite>
+
+        Artist Select All
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+           xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+           xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/09 A Fine Blue Line.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/09 A Fine
+        Blue Line.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/09%20A%20Fine%20Blue%20Line.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>A Fine Blue Line</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>9</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/04 Analogue.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/04
+        Analogue.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/04%20Analogue.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Analogue</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>4</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/Compilations/Analogue (All I Want)/01 Analogue (All I Want).mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/Compilations/Analogue (All
+        I Want)/01 Analogue (All I Want).mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Compilations/Analogue%20(All%20I%20Want)/01%20Analogue%20(All%20I%20Want).mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>Analogue (All I Want)</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue (All I Want)</upnp:album>
+    <upnp:originalTrackNumber>1</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/05 Birthright.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/05
+        Birthright.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/05%20Birthright.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Birthright</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>5</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/01 Celice.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/01
+        Celice.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/01%20Celice.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Celice</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>1</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/03 Cosy Prisons.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/03 Cosy
+        Prisons.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/03%20Cosy%20Prisons.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Cosy Prisons</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>3</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/02 Don't Do Me Any Favours.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/02 Don't Do
+        Me Any Favours.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/02%20Don't%20Do%20Me%20Any%20Favours.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Don't Do Me Any Favours</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>2</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/08 Halfway Through The Tour.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/08 Halfway
+        Through The Tour.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/08%20Halfway%20Through%20The%20Tour.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Halfway Through The Tour</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>8</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/06 Holy Ground.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/06 Holy
+        Ground.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/06%20Holy%20Ground.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Holy Ground</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>6</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/05 Hurry Home.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/05 Hurry Home.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/05%20Hurry%20Home.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>Hurry Home</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>5</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/10 Keeper Of The Flame.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/10 Keeper Of
+        The Flame.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/10%20Keeper%20Of%20The%20Flame.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Keeper Of The Flame</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>10</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/11 Make It Soon.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/11 Make It
+        Soon.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/11%20Make%20It%20Soon.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Make It Soon</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>11</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/08 Out Of Blue Comes Green.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/08 Out Of Blue Comes Green.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/08%20Out%20Of%20Blue%20Comes%20Green.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>Out Of Blue Comes Green</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>8</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/07 Over The Treetops.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/07 Over The
+        Treetops.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/07%20Over%20The%20Treetops.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>Over The Treetops</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>7</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/01 Stay On These Roads.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/01 Stay On These Roads.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/01%20Stay%20On%20These%20Roads.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>Stay On These Roads</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>1</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/02 The Blood That Moves The Body.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/02 The Blood That Moves The Body.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/02%20The%20Blood%20That%20Moves%20The%20Body.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>The Blood That Moves The Body</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>2</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/06 The Living Daylights.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/06 The Living Daylights.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/06%20The%20Living%20Daylights.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>The Living Daylights</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>6</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/13 The Summers Of Our Youth.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/13 The
+        Summers Of Our Youth.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/13%20The%20Summers%20Of%20Our%20Youth.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>The Summers Of Our Youth</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>13</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/07 There's Never A Forever Thing.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/07 There's Never A Forever Thing.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/07%20There's%20Never%20A%20Forever%20Thing.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>There's Never A Forever Thing</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>7</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/04 This Alone Is Love.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/04 This Alone Is Love.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/04%20This%20Alone%20Is%20Love.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>This Alone Is Love</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>4</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/03 Touchy!.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/03 Touchy!.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/03%20Touchy!.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>Touchy!</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>3</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/12 White Dwarf.m4a"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Analogue/12 White
+        Dwarf.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Analogue/12%20White%20Dwarf.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>White Dwarf</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Analogue</upnp:album>
+    <upnp:originalTrackNumber>12</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/09 You Are The One.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/09 You Are The One.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/09%20You%20Are%20The%20One.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>You Are The One</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>9</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These Roads/10 You'll End Up Crying.mp3"
+      parentID="A:ALBUMARTIST/a-Ha/"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes Music/a-Ha/Stay On These
+        Roads/10 You'll End Up Crying.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs://iMac/Music/iTunes/iTunes%20Music/a-Ha/Stay%20On%20These%20Roads/10%20You'll%20End%20Up%20Crying.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>You'll End Up Crying</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>a-Ha</dc:creator>
+    <upnp:album>Stay On These Roads</upnp:album>
+    <upnp:originalTrackNumber>10</upnp:originalTrackNumber>
+</item>
+</DIDL-Lite>
+
+        Music Library Select Album
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+           xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+           xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+<container id="A:ALBUM/!"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>!</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/!</res>
+    <dc:creator>Alex Habachi</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fSarahsiPod%2fF07%2fYPZC.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/...%20Bo%20Marze%20I%20Snie"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>... Bo Marze I Snie</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/...%20Bo%20Marze%20I%20Snie</res>
+    <dc:creator>Krzysztof Krawczyk</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fKrzysztof%2520Krawczyk%2f_..%2520Bo%2520Marze%2520I%2520Snie%2f13%2520Moj%2520Przyjacielu.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/...And%20Then%20There%20Were%20Three..."
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>...And Then There Were Three...</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/...And%20Then%20There%20Were%20Three...</res>
+    <dc:creator>Genesis</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fGenesis%2f_..And%2520Then%2520There%2520Were%2520Three.._%2f01%2520Down%2520And%2520Out.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/...But%20Seriously"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>...But Seriously</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/...But%20Seriously</res>
+    <dc:creator>Phil Collins</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fPhil%2520Collins%2f_..But%2520Seriously%2f01%2520Hang%2520In%2520Long%2520Enough.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/...The%20Best%20Is%20Yet%20To%20Come%20(s)"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>...The Best Is Yet To Come (s)</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/...The%20Best%20Is%20Yet%20To%20Come%20(s)</res>
+    <dc:creator>Scooch</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fScooch%2f_..The%2520Best%2520Is%2520Yet%2520To%2520Come%2520(s)%2f02%2520Maybe%2520Tomorrow.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/...You"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>...You</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/...You</res>
+    <dc:creator>Sasha</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fCompilations%2f_..You%2f01%2520Let%2520Me%2520Be%2520The%2520One.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/(I'm%20Going%20To%20Follow%20Your)%20Star%20Trail"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>(I'm Going To Follow Your) Star Trail</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/(I'm%20Going%20To%20Follow%20Your)%20Star%20Trail</res>
+    <dc:creator>Duloks</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fDuloks%2f(I'm%2520Going%2520To%2520Follow%2520Your)%2520Star%2520Trail%2f01%2520(I'm%2520Going%2520To%2520Follow%2520Your)%2520Star%2520Trail.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/(I'm%20Gonna%20Follow%20Your)%20Star%20Trail%20VLS"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>(I'm Gonna Follow Your) Star Trail VLS</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/(I'm%20Gonna%20Follow%20Your)%20Star%20Trail%20VLS</res>
+    <dc:creator>Duloks</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fSarahsiPod%2fF32%2fMZXA.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/(Pronounced%20'Leh-'N%c3%a9rd%20'Skin-'N%c3%a9rd)"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>(Pronounced 'Leh-'N&#233;rd 'Skin-'N&#233;rd)</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/(Pronounced%20'Leh-'N%c3%a9rd%20'Skin-'N%c3%a9rd)</res>
+    <dc:creator>Lynyrd Skynyrd</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fCompilations%2f(Pronounced%2520'Leh-'N%25c3%25a9rd%2520'Skin-'N%25c3%25a9rd)%2f01%2520I%2520Ain't%2520The%2520One.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/%5bDisc%2024%5d"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>[Disc 24]</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/%5bDisc%2024%5d</res>
+    <dc:creator>Rock and Roll Graffiti</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRock%2520and%2520Roll%2520Graffiti%2f%255bDisc%252024%255d%2f24-11%2520I'm%2520Into%2520Something%2520Good%2520_%2520Hermans%2520Hermits.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/1%20Giant%20Leap"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>1 Giant Leap</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/1%20Giant%20Leap</res>
+    <dc:creator>1 Giant Leap</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2f1%2520Giant%2520Leap%2f1%2520Giant%2520Leap%2f01%2520Dunya%2520Salam.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/10%20Years%20of%20Hits"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>10 Years of Hits</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/10%20Years%20of%20Hits</res>
+    <dc:creator>Ronan Keating</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRonan%2520Keating%2f10%2520Years%2520of%2520Hits%2f03%2520The%2520Way%2520You%2520Make%2520Me%2520Feel.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/100%20Degrees%20And%20Rising"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>100 Degrees And Rising</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/100%20Degrees%20And%20Rising</res>
+    <dc:creator>Incognito</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fIncognito%2f100%2520Degrees%2520And%2520Rising%2f01%2520Where%2520Did%2520We%2520Go%2520Wrong.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/100%20Essential%20Love%20Songs%20Vol.%202"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>100 Essential Love Songs Vol. 2</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/100%20Essential%20Love%20Songs%20Vol.%202</res>
+    <dc:creator>Various Artists</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fVarious%2520Artists%2f100%2520Essential%2520Love%2520Songs%2520Vol.%25202%2f1-07%2520Out%2520Of%2520Reach.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/100%20Party%20Hits%20Of%20The%2060S"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>100 Party Hits Of The 60S</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/100%20Party%20Hits%20Of%20The%2060S</res>
+    <dc:creator>Various Artists</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fCompilations%2f100%2520Party%2520Hits%2520Of%2520The%252060S%2f07%2520Runaway.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/100%25%20Alternative"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>100% Alternative</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/100%25%20Alternative</res>
+    <dc:creator>Various Artists</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fVarious%2520Artists%2f100%2525%2520Alternative%2f5-03%2520Archangel.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/100th%20Window"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>100th Window</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/100th%20Window</res>
+    <dc:creator>Massive Attack</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fMassive%2520Attack%2f100th%2520Window%2f01%2520Future%2520Proof.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/101%20All%20Time%20Greats"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>101 All Time Greats</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/101%20All%20Time%20Greats</res>
+    <dc:creator>Ella Fitzgerald</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fElla%2520Fitzgerald%2f101%2520All%2520Time%2520Greats%2f39%2520You_re%2520The%2520Top.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/101%20Kidz%20Party%20Songs"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>101 Kidz Party Songs</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/101%20Kidz%20Party%20Songs</res>
+    <dc:creator>Kid's Party Central</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fKid's%2520Party%2520Central%2f101%2520Kidz%2520Party%2520Songs%2f01%2520Bunny%2520Hop.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/101%20Summer%20Songs%20%5bDisc%205%5d"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>101 Summer Songs [Disc 5]</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/101%20Summer%20Songs%20%5bDisc%205%5d</res>
+    <dc:creator>Mongo Santamar&#237;a</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fMongo%2520Santamar%25c3%25ada%2f101%2520Summer%2520Songs%2520%255bDisc%25205%255d%2f5-18%2520You%2520Sexy%2520Thing.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/110%20Bible%20Songs%20For%20Kids%20Vol%20I"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>110 Bible Songs For Kids Vol I</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/110%20Bible%20Songs%20For%20Kids%20Vol%20I</res>
+    <dc:creator>St. John Children's Chior and Steven Anderson</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fThe%2520St.%2520John%2520Children's%2520Chior%2520and%2520Steven%2520Anderson%2f110%2520Bible%2520Songs%2520For%2520Kids%2520Vol%2520I%2f1-02%2520All%2520Creatures%2520Of%2520Our%2520God%2520And%2520King.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/120%20Bible%20Songs%20For%20Kids%20-%20Volume%203"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>120 Bible Songs For Kids - Volume 3</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/120%20Bible%20Songs%20For%20Kids%20-%20Volume%203</res>
+    <dc:creator>Countdown Kids</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fThe%2520Countdown%2520Kids%2f120%2520Bible%2520Songs%2520For%2520Kids%2520-%2520Volume%25203%2f3-08%2520Alleluia,%2520Sing%2520To%2520Jesus.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/120%20Bible%20Songs%20For%20Kids%20-%20Volume%204"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>120 Bible Songs For Kids - Volume 4</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/120%20Bible%20Songs%20For%20Kids%20-%20Volume%204</res>
+    <dc:creator>Countdown Kids</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fThe%2520Countdown%2520Kids%2f120%2520Bible%2520Songs%2520For%2520Kids%2520-%2520Volume%25204%2f4-23%2520All%2520Glory,%2520Laud%2520And%2520Honor.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/120%20Bible%20Songs%20For%20Kids%20%5bDisc%201%5d"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>120 Bible Songs For Kids [Disc 1]</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/120%20Bible%20Songs%20For%20Kids%20%5bDisc%201%5d</res>
+    <dc:creator>Madacy Production Children's Choir</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fMadacy%2520Production%2520Children's%2520Choir%2f120%2520Bible%2520Songs%2520For%2520Kids%2520%255bDisc%25201%255d%2f30%2520Blessed%2520Feasts.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/125%20Nature%20Sounds"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>125 Nature Sounds</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/125%20Nature%20Sounds</res>
+    <dc:creator>125 Nature Sounds</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2f125%2520Nature%2520Sounds%2f125%2520Nature%2520Sounds%2fKCZW.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/20%20Golden%20Greats"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>20 Golden Greats</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/20%20Golden%20Greats</res>
+    <dc:creator>Nat King Cole</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fNat%2520King%2520Cole%2f20%2520Golden%2520Greats%2fSQOX.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/20%20Greatest%20Hits"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>20 Greatest Hits</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/20%20Greatest%20Hits</res>
+    <dc:creator>Glen Campbell</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fGlen%2520Campbell%2f20%2520Greatest%2520Hits%2f11%2520Rhinestone%2520Cowboy.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/20%20of%20the%20Best"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>20 of the Best</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/20%20of%20the%20Best</res>
+    <dc:creator>Frank Sinatra</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fCompilations%2f20%2520of%2520the%2520Best%2f01%2520Come%2520Fly%2520with%2520Me.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/200%20KM%2fH%20In%20The%20Wrong%20Lane"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>200 KM/H In The Wrong Lane</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/200%20KM%2fH%20In%20The%20Wrong%20Lane</res>
+    <dc:creator>t.A.T.u.</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2ft.A.T.u_%2f200%2520km_h%2520in%2520the%2520Wrong%2520Lane%2f03%2520Show%2520Me%2520Love.mp3&amp;v=284</upnp:albumArtURI>
+</container>
+<container id="A:ALBUM/2001"
+           parentID="A:ALBUM"
+           restricted="true">
+    <dc:title>2001</dc:title>
+    <upnp:class>object.container.album.musicAlbum</upnp:class>
+    <res protocolInfo="x-rincon-playlist:*:*:*">
+        x-rincon-playlist:RINCON_000E5855842601400#A:ALBUM/2001</res>
+    <dc:creator>Dr. Dre</dc:creator>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fSarahsiPod%2fF42%2fHEVY.m4a&amp;v=284</upnp:albumArtURI>
+</container>
+</DIDL-Lite>
+
+        Music Library Select Individual Album
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+           xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+           xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+<item id="S://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/03%20The%20Way%20You%20Make%20Me%20Feel.mp3"
+      parentID="A:ALBUM/10%20Years%20of%20Hits"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/03%20The%20Way%20You%20Make%20Me%20Feel.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRonan%2520Keating%2f10%2520Years%2520of%2520Hits%2f03%2520The%2520Way%2520You%2520Make%2520Me%2520Feel.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>The Way You Make Me Feel</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>Bryan Adams/Ronan Keating</dc:creator>
+    <upnp:album>10 Years of Hits</upnp:album>
+    <upnp:originalTrackNumber>3</upnp:originalTrackNumber>
+    <r:albumArtist>Ronan Keating</r:albumArtist>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/03%20The%20Way%20You%20Make%20Me%20Feel%20(Single%20Mix).m4a"
+      parentID="A:ALBUM/10%20Years%20of%20Hits"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/03%20The%20Way%20You%20Make%20Me%20Feel%20(Single%20Mix).m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRonan%2520Keating%2f10%2520Years%2520of%2520Hits%2f03%2520The%2520Way%2520You%2520Make%2520Me%2520Feel%2520(Single%2520Mix).m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>The Way You Make Me Feel (Single Mix)</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>Ronan Keating</dc:creator>
+    <upnp:album>10 Years of Hits</upnp:album>
+    <upnp:originalTrackNumber>3</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/05%20If%20Tomorrow%20Never%20Comes.m4a"
+      parentID="A:ALBUM/10%20Years%20of%20Hits"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/05%20If%20Tomorrow%20Never%20Comes.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRonan%2520Keating%2f10%2520Years%2520of%2520Hits%2f05%2520If%2520Tomorrow%2520Never%2520Comes.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>If Tomorrow Never Comes</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>Ronan Keating</dc:creator>
+    <upnp:album>10 Years of Hits</upnp:album>
+    <upnp:originalTrackNumber>5</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/07%20We've%20Got%20Tonight.mp3"
+      parentID="A:ALBUM/10%20Years%20of%20Hits"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/07%20We've%20Got%20Tonight.mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRonan%2520Keating%2f10%2520Years%2520of%2520Hits%2f07%2520We've%2520Got%2520Tonight.mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>We've Got Tonight</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>Lulu/Ronan Keating</dc:creator>
+    <upnp:album>10 Years of Hits</upnp:album>
+    <upnp:originalTrackNumber>7</upnp:originalTrackNumber>
+    <r:albumArtist>Ronan Keating</r:albumArtist>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/07%20We've%20Got%20Tonight.m4a"
+      parentID="A:ALBUM/10%20Years%20of%20Hits"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/07%20We've%20Got%20Tonight.m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRonan%2520Keating%2f10%2520Years%2520of%2520Hits%2f07%2520We've%2520Got%2520Tonight.m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>We've Got Tonight</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>Ronan Keating</dc:creator>
+    <upnp:album>10 Years of Hits</upnp:album>
+    <upnp:originalTrackNumber>7</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/10%20She%20Believes%20(In%20Me).mp3"
+      parentID="A:ALBUM/10%20Years%20of%20Hits"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mpeg:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/10%20She%20Believes%20(In%20Me).mp3</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRonan%2520Keating%2f10%2520Years%2520of%2520Hits%2f10%2520She%2520Believes%2520(In%2520Me).mp3&amp;v=284</upnp:albumArtURI>
+    <dc:title>She Believes (In Me)</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>Ronan Keating</dc:creator>
+    <upnp:album>10 Years of Hits</upnp:album>
+    <upnp:originalTrackNumber>10</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/10%20She%20Believes%20(In%20Me)%20(Single%20Version).m4a"
+      parentID="A:ALBUM/10%20Years%20of%20Hits"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/10%20She%20Believes%20(In%20Me)%20(Single%20Version).m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRonan%2520Keating%2f10%2520Years%2520of%2520Hits%2f10%2520She%2520Believes%2520(In%2520Me)%2520(Single%2520Version).m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>She Believes (In Me) (Single Version)</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>Ronan Keating</dc:creator>
+    <upnp:album>10 Years of Hits</upnp:album>
+    <upnp:originalTrackNumber>10</upnp:originalTrackNumber>
+</item>
+<item id="S://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/17%20This%20Is%20Your%20Song%20(New).m4a"
+      parentID="A:ALBUM/10%20Years%20of%20Hits"
+      restricted="true">
+    <res protocolInfo="x-file-cifs:*:audio/mp4:*">
+        x-file-cifs://iMac/Music/iTunes/iTunes%20Music/Ronan%20Keating/10%20Years%20of%20Hits/17%20This%20Is%20Your%20Song%20(New).m4a</res>
+    <upnp:albumArtURI>
+        /getaa?u=x-file-cifs%3a%2f%2fiMac%2fMusic%2fiTunes%2fiTunes%2520Music%2fRonan%2520Keating%2f10%2520Years%2520of%2520Hits%2f17%2520This%2520Is%2520Your%2520Song%2520(New).m4a&amp;v=284</upnp:albumArtURI>
+    <dc:title>This Is Your Song (New)</dc:title>
+    <upnp:class>object.item.audioItem.musicTrack</upnp:class>
+    <dc:creator>Ronan Keating</dc:creator>
+    <upnp:album>10 Years of Hits</upnp:album>
+    <upnp:originalTrackNumber>17</upnp:originalTrackNumber>
+</item>
+</DIDL-Lite>
+
+Sonos Playlist Browse Returns:
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+           xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+           xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/">
+<container id="SQ:32"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>A</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#32</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:26"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>A-Ha</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#26</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:27"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Abc</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#27</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:16"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Amy</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#16</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:2"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Antony</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#2</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:31"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Bathtune</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#31</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:34"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Christmas Party</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#34</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:20"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Fish pie evening</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#20</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:30"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Florence</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#30</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:21"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Fourtet</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#21</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:33"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Indian chilled</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#33</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:14"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Kate Bush</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#14</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:24"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Lauren</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#24</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:25"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Lp</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#25</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:35"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Meditation</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#35</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:28"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Monsters and Men</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#28</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:8"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Morning</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#8</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:12"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Muse</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#12</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:13"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>MuseElbow</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#13</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:7"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Nature sounds</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#7</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:18"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>PlanB</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#18</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:23"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>PotentialWeddingSong</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#23</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:5"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Rainforest</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#5</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:29"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Rennie</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#29</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:9"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Spesh</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#9</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:15"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Star Trek</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#15</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:10"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Take That and Ronan</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#10</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:4"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>TibetanMusic</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#4</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:3"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>Trent remix</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#3</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+<container id="SQ:17"
+           parentID="SQ:"
+           restricted="true">
+    <dc:title>U2</dc:title>
+    <res protocolInfo="file:*:audio/mpegurl:*">
+        file:///jffs/settings/savedqueues.rsq#17</res>
+    <upnp:class>object.container.playlistContainer</upnp:class>
+</container>
+</DIDL-Lite>
+
+
+
+
+Sonos Playlist Add All:
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+            s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+<s:Body>
+    <u:AddURIToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
+        <InstanceID>0</InstanceID>
+        <EnqueuedURI>file:///jffs/settings/savedqueues.rsq#34</EnqueuedURI>
+        <EnqueuedURIMetaData>&lt;DIDL-Lite
+            xmlns:dc="http://purl.org/dc/elements/1.1/"
+            xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+            xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+            xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"&gt;&lt;item
+            id="SQ:34" parentID="SQ:"
+            restricted="true"&gt;&lt;dc:title&gt;Christmas
+            Party&lt;/dc:title&gt;&lt;upnp:class&gt;object.container.playlistContainer&lt;/upnp:class&gt;&lt;desc
+            id="cdudn"
+            nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/"&gt;RINCON_AssociatedZPUDN&lt;/desc&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</EnqueuedURIMetaData>
+        <DesiredFirstTrackNumberEnqueued>
+            0</DesiredFirstTrackNumberEnqueued>
+        <EnqueueAsNext>1</EnqueueAsNext>
+    </u:AddURIToQueue>
+</s:Body>
+</s:Envelope>
+
+
+
+Radio
+
+        I think this echange is just getting what things you can search on
+
+        Sends:
+
+        POST /Radio.asmx HTTP/1.1
+        CONNECTION: close
+        ACCEPT-ENCODING: gzip
+        HOST: legato.radiotime.com
+        USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+        CONTENT-LENGTH: 380
+        CONTENT-TYPE: text/xml; charset="utf-8"
+        ACCEPT-LANGUAGE: en-US
+        SOAPACTION: "http://www.sonos.com/Services/1.1#getMetadata"
+
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+<s:Header>
+    <credentials xmlns="http://www.sonos.com/Services/1.1">
+        <deviceId>00-0E-58-28-3B-D4:8</deviceId>
+        <deviceProvider>Sonos</deviceProvider>
+    </credentials>
+</s:Header>
+<s:Body>
+    <getMetadata xmlns="http://www.sonos.com/Services/1.1">
+        <id>search</id>
+        <index>0</index>
+        <count>100</count>
+    </getMetadata>
+</s:Body>
+</s:Envelope>
+
+
+        Responds:
+
+        HTTP/1.1 200 OK
+        Cache-Control: private, max-age=0
+        Content-Type: text/xml; charset=utf-8
+        Content-Encoding: gzip
+        Vary: Accept-Encoding
+        Server: Microsoft-IIS/7.5
+        X-AspNet-Version: 4.0.30319
+        X-Powered-By: ASP.NET
+        Date: Sat, 26 Jan 2013 14:26:32 GMT
+        Connection: close
+        Content-Length: 411
+
+        <?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<soap:Body>
+    <getMetadataResponse xmlns="http://www.sonos.com/Services/1.1">
+        <getMetadataResult>
+            <index>0</index>
+            <count>3</count>
+            <total>3</total>
+            <mediaCollection>
+                <id>search:station</id>
+                <title>Stations</title>
+                <itemType>container</itemType>
+                <authRequired>false</authRequired>
+                <canPlay>false</canPlay>
+                <canEnumerate>true</canEnumerate>
+                <canCache>true</canCache>
+                <homogeneous>false</homogeneous>
+                <canAddToFavorite>false</canAddToFavorite>
+                <canScroll>false</canScroll>
+            </mediaCollection>
+            <mediaCollection>
+                <id>search:show</id>
+                <title>Shows</title>
+                <itemType>container</itemType>
+                <authRequired>false</authRequired>
+                <canPlay>false</canPlay>
+                <canEnumerate>true</canEnumerate>
+                <canCache>true</canCache>
+                <homogeneous>false</homogeneous>
+                <canAddToFavorite>false</canAddToFavorite>
+                <canScroll>false</canScroll>
+            </mediaCollection>
+            <mediaCollection>
+                <id>search:host</id>
+                <title>Hosts</title>
+                <itemType>container</itemType>
+                <authRequired>false</authRequired>
+                <canPlay>false</canPlay>
+                <canEnumerate>true</canEnumerate>
+                <canCache>true</canCache>
+                <homogeneous>false</homogeneous>
+                <canAddToFavorite>false</canAddToFavorite>
+                <canScroll>false</canScroll>
+            </mediaCollection>
+        </getMetadataResult>
+    </getMetadataResponse>
+</soap:Body>
+</soap:Envelope>
+
+        Sends:
+
+        POST /Radio.asmx HTTP/1.1
+        CONNECTION: close
+        ACCEPT-ENCODING: gzip
+        HOST: legato.radiotime.com
+        USER-AGENT: Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)
+        CONTENT-LENGTH: 380
+        CONTENT-TYPE: text/xml; charset="utf-8"
+        ACCEPT-LANGUAGE: en-US
+        SOAPACTION: "http://www.sonos.com/Services/1.1#getMetadata"
+
+        <?xml version="1.0" encoding="us-ascii"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+<s:Header>
+    <credentials xmlns="http://www.sonos.com/Services/1.1">
+        <deviceId>00-0E-58-28-3B-D4:8</deviceId>
+        <deviceProvider>Sonos</deviceProvider>
+    </credentials>
+</s:Header>
+<s:Body>
+    <getMetadata xmlns="http://www.sonos.com/Services/1.1">
+        <id>root</id>
+        <index>0</index>
+        <count>98</count>
+    </getMetadata>
+</s:Body>
+</s:Envelope>
+
+        Responds:
+
+        <?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <getMetadataResponse xmlns="http://www.sonos.com/Services/1.1">
+            <getMetadataResult>
+                <index>0</index>
+                <count>5</count>
+                <total>5</total>
+                <mediaCollection>
+                    <id>y1</id>
+                    <title>Music</title>
+                    <itemType>container</itemType>
+                    <authRequired>false</authRequired>
+                    <canPlay>false</canPlay>
+                    <canEnumerate>true</canEnumerate>
+                    <canCache>true</canCache>
+                    <homogeneous>false</homogeneous>
+                    <canAddToFavorite>false</canAddToFavorite>
+                    <canScroll>false</canScroll>
+                </mediaCollection>
+                <mediaCollection>
+                    <id>c57922</id>
+                    <title>News</title>
+                    <itemType>container</itemType>
+                    <authRequired>false</authRequired>
+                    <canPlay>false</canPlay>
+                    <canEnumerate>true</canEnumerate>
+                    <canCache>true</canCache>
+                    <homogeneous>false</homogeneous>
+                    <canAddToFavorite>false</canAddToFavorite>
+                    <canScroll>false</canScroll>
+                </mediaCollection>
+                <mediaCollection>
+                    <id>g2723</id>
+                    <title>Sports</title>
+                    <itemType>container</itemType>
+                    <authRequired>false</authRequired>
+                    <canPlay>false</canPlay>
+                    <canEnumerate>true</canEnumerate>
+                    <canCache>true</canCache>
+                    <homogeneous>false</homogeneous>
+                    <canAddToFavorite>false</canAddToFavorite>
+                    <canScroll>false</canScroll>
+                </mediaCollection>
+                <mediaCollection>
+                    <id>y2</id>
+                    <title>Talk</title>
+                    <itemType>container</itemType>
+                    <authRequired>false</authRequired>
+                    <canPlay>false</canPlay>
+                    <canEnumerate>true</canEnumerate>
+                    <canCache>true</canCache>
+                    <homogeneous>false</homogeneous>
+                    <canAddToFavorite>false</canAddToFavorite>
+                    <canScroll>false</canScroll>
+                </mediaCollection>
+                <mediaCollection>
+                    <id>r0</id>
+                    <title>Location</title>
+                    <itemType>container</itemType>
+                    <authRequired>false</authRequired>
+                    <canPlay>false</canPlay>
+                    <canEnumerate>true</canEnumerate>
+                    <canCache>true</canCache>
+                    <homogeneous>false</homogeneous>
+                    <canAddToFavorite>false</canAddToFavorite>
+                    <canScroll>false</canScroll>
+                </mediaCollection>
+            </getMetadataResult>
+        </getMetadataResponse>
+    </soap:Body>
+</soap:Envelope>
+
+To get Radio Favourites
+
+Use R:0
+
+To Play a radio station from Favourties:
+
+<?xml version="1.0" encoding="us-ascii"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+            s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+    <s:Body>
+        <u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
+
+            <InstanceID>0</InstanceID>
+            <CurrentURI>
+                x-sonosapi-stream:s117787?sid=254&amp;flags=32</CurrentURI>
+            <CurrentURIMetaData>&lt;DIDL-Lite
+                xmlns:dc="http://purl.org/dc/elements/1.1/"
+                xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+                xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+                xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"&gt;&lt;item
+                id="R:0/0/14" parentID="R:0/0"
+                restricted="true"&gt;&lt;dc:title&gt;Absolute
+                80s&lt;/dc:title&gt;&lt;upnp:class&gt;object.item.audioItem.audioBroadcast&lt;/upnp:class&gt;&lt;desc
+                id="cdudn"
+                nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/"&gt;SA_RINCON65031_&lt;/desc&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</CurrentURIMetaData>
+        </u:SetAVTransportURI>
+    </s:Body>
+</s:Envelope>
+
+To PLay a radio station from list
+
+<?xml version="1.0" encoding="us-ascii"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"
+            s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+    <s:Body>
+        <u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1">
+
+            <InstanceID>0</InstanceID>
+            <CurrentURI>
+                x-sonosapi-stream:s49815?sid=254&amp;flags=32</CurrentURI>
+            <CurrentURIMetaData>&lt;DIDL-Lite
+                xmlns:dc="http://purl.org/dc/elements/1.1/"
+                xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"
+                xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/"
+                xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"&gt;&lt;item
+                id="F00090020s49815" parentID="L"
+                restricted="true"&gt;&lt;dc:title&gt;Absolute Classic Rock (Classic
+                Rock)&lt;/dc:title&gt;&lt;upnp:class&gt;object.item.audioItem.audioBroadcast&lt;/upnp:class&gt;&lt;desc
+                id="cdudn"
+                nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/"&gt;SA_RINCON65031_&lt;/desc&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</CurrentURIMetaData>
+        </u:SetAVTransportURI>
+    </s:Body>
+</s:Envelope>
+
+
+
+
+

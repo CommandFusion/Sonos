@@ -40,6 +40,9 @@ var Utils = {
         return string;
     },
 
+
+
+
     xmlUnescape:function (string) {
         string = string.replace(/&amp;/g, "&");
         string = string.replace(/&amp;/g, "&");
@@ -66,6 +69,13 @@ var Utils = {
         return string;
     },
 
+    xmlUnescapeTransportNotify:function (string) {
+        string = string.replace(/&lt;/g, "<");
+        string = string.replace(/&gt;/g, ">");
+        string = string.replace(/&quot;/g, "\"");
+        return string;
+    },
+
     trim:function (str) {
         var str = str.replace(/^\s\s*/, ''),
             ws = /\s/,
@@ -88,7 +98,34 @@ var Utils = {
             CF.logObject(restored);
             callback(restored);
         });
+    },
+
+
+    encodeXml:function(string) {
+        var xml_special_to_escaped_one_map = {
+            '&': '&amp;',
+            '"': '&quot;',
+            '<': '&lt;',
+            '>': '&gt;'
+        };
+        return string.replace(/([\&"<>])/g, function(str, item) {
+            return xml_special_to_escaped_one_map[item];
+        });
+    },
+
+    decodeXml:function(string) {
+        var escaped_one_to_xml_special_map = {
+            '&amp;': '&',
+            '&quot;': '"',
+            '&lt;': '<',
+            '&gt;': '>'
+        };
+        return string.replace(/(&quot;|&lt;|&gt;|&amp;)/g,
+        function(str, item) {
+            return escaped_one_to_xml_special_map[item];
+        });
     }
+
 }
 
 

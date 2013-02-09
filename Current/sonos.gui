@@ -306,7 +306,7 @@
     <theme type="text" name=".left_lightblue_16pt_b"><![CDATA[ color: #B2D0E6; font-size: 14px; font-family: 'Arial'; text-align: left; vertical-align: middle; font-weight: bold; font-style: none; text-decoration: none; display: table-cell;]]></theme>
   </themes>
   <tokens>
-    <token name="[spotifyID]" value="Not Set" persist="1" />
+    <token name="[spotifyID]" value="postsi" persist="1" />
     <token name="[autoDiscoveryFlag]" value="1" persist="1" />
     <token name="[playerIPAddresses]" value="[]" persist="1" />
   </tokens>
@@ -321,6 +321,8 @@
     <script name="utilities.js" />
     <script name="main.js" />
     <script name="musicsource.js" />
+    <script name="encoder.js" />
+    <script name="musicsourcev2.js" />
   </scripts>
   <page name="Player" j="0" transition="fade" subtype="None" time="0.5" ease="easeIn" start="1">
     <portrait t="bg_portrait_statusbar">
@@ -422,7 +424,7 @@
         </active>
       </btn>
       <list j="12" x="260" y="406" w="348" h="316" headerSub="" titleSub="" contentSub="queue_item_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="QueueListEnd" listEndOffset="1" />
-      <list j="13" x="609" y="129" w="375" h="592" headerSub="" titleSub="" contentSub="music_source_item_single_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="MusicSourceListEnd" listEndOffset="1" />
+      <list j="13" x="609" y="129" w="375" h="592" headerSub="" titleSub="" contentSub="music_source_item_double_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="MusicSourceListEnd" listEndOffset="1" />
       <img x="0" y="720" w="1020" h="48" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">field_middle.png</img>
       <txt j="0" x="667" y="89" w="175" h="39" t="title_center" wrap="True" l="0">Music Source</txt>
       <txt j="0" x="3" y="88" w="255" h="39" t="title_center" wrap="True" l="0">Zones</txt>
@@ -478,10 +480,6 @@
       </btn>
       <subpage name="popup_zones_vol" x="100" y="100" j="10003" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="config_sonos" x="200" y="100" j="10004" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
-      <btn j="0" x="829" y="38" w="137" h="35" t="setting_button_red" flip="None" sim="1" l="0" s="1" js="sonosGUI.unSubscribeToPlayers();">
-        <inactive s="0">Unsubscribe</inactive>
-        <active s="0">Unsubscribe</active>
-      </btn>
     </landscape>
   </page>
   <page name="Settings" j="0" transition="fade" subtype="None" time="0.3" ease="easeIn">
@@ -1129,14 +1127,18 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
     <img x="1" y="0" w="48" h="44" j="203" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
   </subpage>
   <subpage name="music_source_item_double_list" w="348" h="44" clip="1">
-    <btn j="36" x="45" y="0" w="303" h="21" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
-      <inactive s="35">Music Source Line 1</inactive>
-      <active s="35">Music Source Line 1</active>
+    <btn j="0" x="45" y="0" w="303" h="21" t="queue_song_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.selectMusicSource(join, list, listIndex);">
+      <inactive s="201">
+      </inactive>
+      <active s="201">
+      </active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="39" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
-    <btn j="38" x="45" y="23" w="303" h="21" t="queue_artist_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.player.browse(tokens[&quot;browseid&quot;]);">
-      <inactive s="37">Music Source Line 2</inactive>
-      <active s="37">Music Source Line 2</active>
+    <img x="1" y="0" w="48" h="44" j="203" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="1">coverart_blank.png</img>
+    <btn j="0" x="45" y="23" w="303" h="21" t="queue_artist_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.selectMusicSource(join, list, listIndex);">
+      <inactive s="206">
+      </inactive>
+      <active s="206">
+      </active>
     </btn>
   </subpage>
   <subpage name="queue_actions" w="389" h="291" clip="1">
