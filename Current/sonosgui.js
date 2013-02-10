@@ -398,7 +398,7 @@ var SONOS_GUI = function () {
                 if (self.currentPlayer.queueData.length > 0 && (self.currentPlayer.lastTrackNbr-1) <= self.currentPlayer.queueData.length) {
                     if (self.currentPlayer.lastTrackNbr != -1) {CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.lastTrackNbr-1)+":s"+self.joinImgQueueAlbumIcon, self.currentPlayer.queueData[self.currentPlayer.lastTrackNbr-1].art );}
                     CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.currentTrackNbr-1)+":s"+self.joinImgQueueAlbumIcon, "transports_grey_play_on_20.png");
-                    CF.listScroll("l" + self.joinListQueue, self.currentPlayer.lastTrackNbr-1, CF.MiddlePosition, true);
+                    CF.listScroll("l" + self.joinListQueue, self.currentPlayer.currentTrackNbr-1, CF.MiddlePosition, true);
 
                 }
                 self.updateTimerWithoutGetPosInfo();
