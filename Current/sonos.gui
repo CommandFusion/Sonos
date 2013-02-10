@@ -424,7 +424,7 @@
         </active>
       </btn>
       <list j="12" x="260" y="406" w="348" h="316" headerSub="" titleSub="" contentSub="queue_item_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="QueueListEnd" listEndOffset="1" />
-      <list j="13" x="609" y="129" w="375" h="592" headerSub="" titleSub="" contentSub="music_source_item_double_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="MusicSourceListEnd" listEndOffset="1" />
+      <list j="13" x="609" y="159" w="375" h="562" headerSub="" titleSub="" contentSub="music_source_item_double_list" footerSub="" orientation="v" l="0" swipedelete="0" listEndCmd="MusicSourceListEnd" listEndOffset="1" />
       <img x="0" y="720" w="1020" h="48" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">field_middle.png</img>
       <txt j="0" x="667" y="89" w="175" h="39" t="title_center" wrap="True" l="0">Music Source</txt>
       <txt j="0" x="3" y="88" w="255" h="39" t="title_center" wrap="True" l="0">Zones</txt>
@@ -480,6 +480,8 @@
       </btn>
       <subpage name="popup_zones_vol" x="100" y="100" j="10003" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
       <subpage name="config_sonos" x="200" y="100" j="10004" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="selectMusicSource" x="613" y="130" j="10005" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
+      <subpage name="selectSearchType" x="613" y="130" j="10006" transition1="None" subtype1="None" time1="0" ease1="" transition2="None" subtype2="None" time2="0" ease2="" clickthrough="0" topmost="0" v="0" l="0" />
     </landscape>
   </page>
   <page name="Settings" j="0" transition="fade" subtype="None" time="0.3" ease="easeIn">
@@ -804,12 +806,13 @@
       </active>
     </btn>
   </subpage>
-  <subpage name="search" w="192" h="65" clip="1">
+  <subpage name="search" w="250" h="65" clip="1">
     <img x="1" y="27" w="25" h="30" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">search_left.png</img>
-    <img x="26" y="27" w="149" h="30" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">search_middle.png</img>
-    <img x="175" y="27" w="15" h="30" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">search_right.png</img>
-    <input j="0" s="4" x="29" y="28" w="153" h="28" pass="0" autoFocus="0" f="0" t="search" l="0">Filter by</input>
-    <txt j="0" x="4" y="3" w="187" h="25" t="topbar_light" wrap="False" l="0">FILTER CURRENT VIEW</txt>
+    <img x="26" y="27" w="207" h="30" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">search_middle.png</img>
+    <img x="230" y="27" w="15" h="30" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">search_right.png</img>
+    <input j="0" s="402" x="58" y="28" w="178" h="28" pass="0" autoFocus="0" f="0" t="search" l="0">Search</input>
+    <txt j="0" x="4" y="3" w="187" h="25" t="topbar_light" wrap="False" l="0">SEARCH</txt>
+    <img x="27" y="29" w="25" h="25" j="704" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">btn_home_on.png</img>
   </subpage>
   <subpage name="sidebar_listitem_arrow" w="259" h="44" clip="1">
     <btn j="100001" x="0" y="0" w="259" h="44" t="sidebar_listitem" flip="None" sim="1" l="0" s="1" js="JRiver.selectPlayerByIndex(listIndex);">
@@ -1031,7 +1034,7 @@
     </btn>
   </subpage>
   <subpage name="now_playing_details" w="350" h="254" clip="1">
-    <img x="0" y="0" w="140" h="140" j="202" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_nowplaying_overlay.png</img>
+    <img x="0" y="0" w="140" h="140" j="702" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_nowplaying_overlay.png</img>
     <txt j="306" x="142" y="25" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Song Name</txt>
     <txt j="0" x="142" y="0" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Track [1/100]</txt>
     <img x="10" y="177" w="11" h="57" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">slider_h_thin_left.png</img>
@@ -1075,7 +1078,7 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <inactive s="0">Group</inactive>
       <active s="0">Group</active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="200" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
+    <img x="1" y="0" w="48" h="44" j="700" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
     <txt j="304" x="67" y="8" w="103" h="14" t="" wrap="False" l="0">
     </txt>
   </subpage>
@@ -1084,7 +1087,7 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <inactive s="202">Zone Member</inactive>
       <active s="202">Zone Member</active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="200" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
+    <img x="1" y="0" w="48" h="44" j="700" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
   </subpage>
   <subpage name="zone_group_music_list" w="259" h="30" clip="1">
     <btn j="0" x="21" y="0" w="211" h="24" t="sidebar_listitem" flip="None" sim="0" l="0" s="1">
@@ -1111,7 +1114,7 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <inactive s="204">Queue Song</inactive>
       <active s="204">Queue Song</active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="201" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
+    <img x="1" y="0" w="48" h="44" j="701" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
     <btn j="0" x="45" y="23" w="303" h="21" t="queue_artist_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.queueActionSelected(join, list, listIndex);">
       <inactive s="205">Queue Artist</inactive>
       <active s="205">Queue Artist</active>
@@ -1133,7 +1136,7 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <active s="201">
       </active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="203" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="1">coverart_blank.png</img>
+    <img x="1" y="0" w="48" h="44" j="703" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="1">coverart_blank.png</img>
     <btn j="0" x="45" y="23" w="303" h="21" t="queue_artist_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.selectMusicSource(join, list, listIndex);">
       <inactive s="206">
       </inactive>
@@ -1181,6 +1184,23 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <active s="0">IP Address</active>
     </btn>
     <input j="0" s="400" x="133" y="7" w="570" h="32" pass="0" autoFocus="0" f="0" t="setting" l="0">IP in format 192.168.1.100</input>
+  </subpage>
+  <subpage name="selectMusicSource" w="375" h="30" clip="1" t="bg_landscape_statusbar">
+    <txt j="0" x="0" y="1" w="379" h="33" t="title_center" wrap="False" l="0">Select Music Source</txt>
+  </subpage>
+  <subpage name="selectSearchType" w="375" h="30" clip="1" t="bg_landscape_statusbar">
+    <btn j="30" x="5" y="2" w="120" h="25" t="setting_button" flip="None" sim="2" l="0" s="1" js="sonosGUI.setSearchType(&quot;Album&quot;);">
+      <inactive s="0">Albums</inactive>
+      <active s="0">Albums</active>
+    </btn>
+    <btn j="31" x="128" y="2" w="120" h="25" t="setting_button" flip="None" sim="2" l="0" s="1" js="sonosGUI.setSearchType(&quot;Artist&quot;);">
+      <inactive s="0">Artists</inactive>
+      <active s="0">Artists</active>
+    </btn>
+    <btn j="32" x="255" y="2" w="120" h="25" t="setting_button" flip="None" sim="2" l="0" s="1" js="sonosGUI.setSearchType(&quot;Track&quot;);">
+      <inactive s="0">Tracks</inactive>
+      <active s="0">Tracks</active>
+    </btn>
   </subpage>
   <subpage name="popup_zones" w="296" h="410" clip="1" t="popup_zones">
     <list j="11" x="29" y="72" w="239" h="298" headerSub="" titleSub="" contentSub="popup_zones_listitem" footerSub="" orientation="v" l="0" swipedelete="0" />

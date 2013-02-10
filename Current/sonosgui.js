@@ -43,6 +43,9 @@ var SONOS_GUI = function () {
         joinBtnQueueRemoveTrack:"27",
         joinBtnZoneMute:"28",
         joinBtnAutoDiscovery:"29",
+        joinBtnSearchAlbums:"30",
+        joinBtnSearchArtists:"31",
+        joinBtnSearchTracks:"32",
 
         // Text Button Joins
         joinBtnTxtZoneGrouping:'200',
@@ -54,13 +57,14 @@ var SONOS_GUI = function () {
         joinBtnTxtMusicSourcesItemLine2:"206",
 
 
-
         // Sub Page Joins
         subPagePopupPlayMode:"10000",
         subpagePopupZones:'10010',
         subpageQueueActions:"10011",
         subpagePopupZoneVol:'10003',
         subpageSonosConfig:"10004",
+        subpageSelectMusicSource:"10005",
+        subpageSearchType:"10006",
 
         // List Joins
         joinListZones:'10',
@@ -88,6 +92,7 @@ var SONOS_GUI = function () {
 
         joinInpPlayerIP:"400",
         joinInpSpotifyID:"401",
+        joinInpSearch:"402",
 
         // Slider Joins
         joinSliderAnalVol:'10',
@@ -95,10 +100,12 @@ var SONOS_GUI = function () {
         joinAnalZoneVolList:"12",
 
         // Image Joins
-        joinImgZoneList:'200',
-        joinImgQueueAlbumIcon:'201',
-        joinImgNowPlayingArt:"202",
-        joinImgMusicSourcesItem:"203",
+        joinImgZoneList:'700',
+        joinImgQueueAlbumIcon:'701',
+        joinImgNowPlayingArt:"702",
+        joinImgMusicSourcesItem:"703",
+        joinImgSearchProvider:"704",
+
 
         // joinSliderDigVol:'d20',
         // joinSliderDigTime:'d23',
@@ -115,6 +122,9 @@ var SONOS_GUI = function () {
         subpageZoneGroupCoordinatorList:'zone_group_coordinator_list',
         subpageZoneGroupMemberList:'zone_group_member_list',
         subpageZoneGroupMusicList:'zone_group_music_list',
+        subPageSelectMusicSource:'selectMusicSource',
+        subPageSelectSearchType:'selectSearchType',
+
 
         // Various other variables used throughout sonosgui
         // playerListGUI:{},
@@ -137,7 +147,8 @@ var SONOS_GUI = function () {
         discoveryComplete:false,
         notificationObjQueue:[],
         notificationTypeQueue:[],
-        notificationVar1Queue:[]
+        notificationVar1Queue:[],
+        firstSearch: true
     };
 
     self.init = function () {
@@ -151,6 +162,7 @@ var SONOS_GUI = function () {
         CF.log("Finding Players");
         CF.watch(CF.GUISuspendedEvent, self.onGUISuspended);
         CF.watch(CF.GUIResumedEvent, self.onGUIResumed);
+        CF.setJoin("d" + self.subpageSelectMusicSource, 1) // Show the select music subpage which gets replaced by search when anything entered in the search bar
         sonosPlayers = new SonosPlayers();
         sonosPlayers.sonosPlayersCallback = self.setDiscoveredPlayerlist; // sets up the callback to tell the UI when new players are found
         sonosPlayers.init();
@@ -169,6 +181,8 @@ var SONOS_GUI = function () {
         self.discoveryComplete = true;
         // Call the GUI notificaiton with the last zone group message to set up the zones
         self.processNotificationEvent("ZoneGroupEvent", self.lastZoneGroupNotifcation);
+        CF.watch(CF.InputFieldEditedEvent, "s" + self.joinInpSearch, self.searchFieldChanged);
+
 
     }
 
@@ -240,7 +254,22 @@ var SONOS_GUI = function () {
                 case "ScrollToMusicSource":
                     CF.listScroll("l" + self.joinListMusicSources, notificationObj, CF.MiddlePosition, true);
                     break;
-
+                case "ChangeSearchLogo":
+                    CF.setJoin("s" + self.joinImgSearchProvider, notificationObj);
+                    break;
+                case "ResetSelectMusicSources":
+                    CF.setJoin("d" + self.subpageSelectMusicSource, 1) // Hide the selectMusicSource subpage
+                    CF.setJoin("d" + self.subpageSearchType, 0)
+                    break;
+                case "ContentDirectoryChange":
+                    CF.log("Got a content directory event at the GUI level");
+                    if (self.selectedZoneCoordinator === notificationObj) {
+                        CF.log("Processing a change in the queue");
+                        CF.listRemove("l" + self.joinListQueue);
+                        self.currentPlayer.resetQueueNumberReturned();
+                        self.currentPlayer.getQueueForCurrentZone();
+                    }
+                    break;
                 default:
                     CF.log("Invalid GUI notification type");
             }
@@ -270,11 +299,15 @@ var SONOS_GUI = function () {
         //CF.log("Gui is sending a music source press");
         CF.getJoin(list + ":" + listIndex + ":s" + self.joinBtnTxtMusicSourcesItemLine1, function (join, value) {
             //CF.log("Source selected is: "+ value);
-            self.sonosMusicSource.selectMusicSource(value, listIndex);
+            self.sonosMusicSource.selectMusicSource(value, listIndex, false);  // false indicates not coming from a search
         });
 
         //self.sonosMusicSource.selectMusicSource(join, list, listIndex)
 
+    }
+
+    self.testMusicSource = function (join, list, listIndex) {
+        self.sonosMusicSource.testMusicSource();
     }
 
     self.clearMusicSources = function () {
@@ -292,7 +325,7 @@ var SONOS_GUI = function () {
         var displayArray = [];
         for (var i = var1; i < notificationObj.length; i++) { // loop around for the number of grouped zones
             //CF.log("Source art is:" + notificationObj[i].sourceArt);
-            displayArray.push({s203:notificationObj[i].sourceArt, s201:notificationObj[i].sourceName, s206:notificationObj[i].sourceCreator});
+            displayArray.push({s703:notificationObj[i].sourceArt, s201:notificationObj[i].sourceName, s206:notificationObj[i].sourceCreator});
         }
         CF.listAdd("l" + self.joinListMusicSources, displayArray);
     }
@@ -361,6 +394,13 @@ var SONOS_GUI = function () {
                 self.currentPlayer = self.discoveredPlayerList[self.selectedZoneCoordinator];
                 self.currentPlayer.getPositionInfo();
                 self.trackStartTime = new Date().getTime();
+                CF.log("Updating the playing indicator in the queue and the length of the queue is:" + self.currentPlayer.queueData.length);
+                if (self.currentPlayer.queueData.length > 0 && (self.currentPlayer.lastTrackNbr-1) <= self.currentPlayer.queueData.length) {
+                    if (self.currentPlayer.lastTrackNbr != -1) {CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.lastTrackNbr-1)+":s"+self.joinImgQueueAlbumIcon, self.currentPlayer.queueData[self.currentPlayer.lastTrackNbr-1].art );}
+                    CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.currentTrackNbr-1)+":s"+self.joinImgQueueAlbumIcon, "transports_grey_play_on_20.png");
+                    CF.listScroll("l" + self.joinListQueue, self.currentPlayer.lastTrackNbr-1, CF.MiddlePosition, true);
+
+                }
                 self.updateTimerWithoutGetPosInfo();
                 //self.updateTimerWithGetPosInfo();
                 self.updateNowPlayingGUI();
@@ -418,7 +458,7 @@ var SONOS_GUI = function () {
         if (self.currentPlayer.transportState === "PLAYING") {
             self.trackCurrentTime = new Date().getTime() + self.currentPlayer.trackCurrentPosSecs * 1000;
             var timeDifference = (self.trackCurrentTime - self.trackStartTime) / 1000;
-            CF.log("trackDuration is : " + self.currentPlayer.trackDurationSecs + "trackCurrentPosSecs is :" + self.currentPlayer.trackCurrentPosSecs);
+            //CF.log("trackDuration is : " + self.currentPlayer.trackDurationSecs + "trackCurrentPosSecs is :" + self.currentPlayer.trackCurrentPosSecs);
             if (self.currentPlayer.radioPlaying) { // when playing radio we will get a track duration of zero so dont want to keep updating timing etc
                 CF.setJoin("a" + self.joinSliderAnalTime, 0);
                 CF.setJoin("s" + self.joinTxtTimeToEnd, "00:00:00");
@@ -438,9 +478,11 @@ var SONOS_GUI = function () {
     }
 
     self.updateTimerWithGetPosInfo = function () {
-         self.currentPlayer.getPositionInfo();
-         setTimeout(function() { self.updateTimerWithGetPosInfo(); }, 8000);
-     }
+        self.currentPlayer.getPositionInfo();
+        setTimeout(function () {
+            self.updateTimerWithGetPosInfo();
+        }, 8000);
+    }
 
 
     self.turnSecondstoSonosString = function (numSeconds) {
@@ -573,13 +615,13 @@ var SONOS_GUI = function () {
             if (self.zoneDisplay[i].isFirstOfGroup) {
                 listCounter++;
                 CF.listAdd("l" + self.joinListZones, [
-                    {subpage:self.subpageZoneGroupCoordinatorList, s202:self.zoneDisplay[i].roomName, s200:zoneIcon, s304:self.zoneDisplay[i].coordinatorRINCON }
+                    {subpage:self.subpageZoneGroupCoordinatorList, s202:self.zoneDisplay[i].roomName, s700:zoneIcon, s304:self.zoneDisplay[i].coordinatorRINCON }
                 ])
             }
             else {
                 listCounter++;
                 CF.listAdd("l" + self.joinListZones, [
-                    {subpage:self.subpageZoneGroupMemberList, s202:self.zoneDisplay[i].roomName, s200:zoneIcon}
+                    {subpage:self.subpageZoneGroupMemberList, s202:self.zoneDisplay[i].roomName, s700:zoneIcon}
                 ])
             }
 
@@ -704,11 +746,16 @@ var SONOS_GUI = function () {
             if (joinData[i].art === undefined) {
                 joinData[i].art = "";
             }
-            displayQueue.push({s201:joinData[i].art, s205:joinData[i].artist, s204:joinData[i].title, s305:joinData[i].trackNo});
+            displayQueue.push({s701:joinData[i].art, s205:joinData[i].artist, s204:joinData[i].title, s305:joinData[i].trackNo});
         }
-
-
         CF.listAdd("l" + self.joinListQueue, displayQueue);
+        CF.log("Updating the playing indicator in the queue and the length of the queue is:" + self.currentPlayer.queueData.length);
+        if (self.currentPlayer.queueData.length > 0 && (self.currentPlayer.lastTrackNbr-1) <= self.currentPlayer.queueData.length) {
+            if (self.currentPlayer.lastTrackNbr != -1) {CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.lastTrackNbr-1)+":s"+self.joinImgQueueAlbumIcon, self.currentPlayer.queueData[self.currentPlayer.lastTrackNbr-1].art );}
+            CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.currentTrackNbr-1)+":s"+self.joinImgQueueAlbumIcon, "transports_grey_play_on_20.png");
+            //CF.listScroll("l" + self.joinListQueue, self.currentPlayer.lastTrackNbr-1, CF.MiddlePosition, true);
+
+        }
     }
 
     /*
@@ -1102,20 +1149,45 @@ var SONOS_GUI = function () {
         });
     }
 
+    self.searchFieldChanged = function (join, value, tokens) {
+        if (self.firstSearch) {
+            CF.setJoin("d" + self.joinBtnSearchAlbums, 1);
+            self.firstSearch = false;
+        }
+        CF.log("Search " + join + " just changed to value " + value);
+        CF.setJoin("d" + self.subpageSelectMusicSource, 0) // Hide the selectMusicSource subpage
+        CF.setJoin("d" + self.subpageSearchType, 1)  // And show the selectMusicSearchType
+        self.sonosMusicSource.searchMusicSource(value);
+
+    }
+
+    self.setSearchType = function (value) {
+        CF.log("Search type just changed to value " + value);
+        switch (value) {
+            case "Album":
+                CF.setJoin("d" + self.joinBtnSearchArtists, 0);
+                CF.setJoin("d" + self.joinBtnSearchTracks, 0);
+                break;
+            case "Artist":
+                CF.setJoin("d" + self.joinBtnSearchAlbums, 0);
+                CF.setJoin("d" + self.joinBtnSearchTracks, 0);
+                break;
+            case "Track":
+                CF.setJoin("d" + self.joinBtnSearchAlbums, 0);
+                CF.setJoin("d" + self.joinBtnSearchArtists, 0);
+                break;
+        }
+        self.sonosMusicSource.setSearchType(value);
+    }
+
     self.unSubscribeToPlayers = function () {
         /*//CF.log("unsbscribing " + self.zoneMembers.length + " players");
 
-        for (var i = 0; i < self.zoneMembers.length; i++) {
-            curPlayer = self.discoveredPlayerList[self.zoneMembers[i].RINCON];
-            //CF.log("Unsubscribing zone" + curPlayer.roomName);
-            curPlayer.unSubscribeEvents();
-        }*/
-        var xml = '<CurrentTrackMetaData val="<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="-1" parentID="-1" restricted="true"><res protocolInfo="sonos.com-http:*:*:*">x-sonosapi-stream:s117787?sid=254&flags=32</res><r:streamContent></r:streamContent><r:radioShowMd>Christian OConnell Breakfast Show,p149945</r:radioShowMd><upnp:albumArtURI>/getaa?s=1&u=x-sonosapi-stream:s117787?sid=254&flags=32</upnp:albumArtURI><dc:title>x-sonosapi-stream:s117787?sid=254&flags=32</dc:title><upnp:class>object.item</upnp:class></item></DIDL-Lite>"/><r:NextTrackURI val="mms://mp3-a8-128.timlradio.co.uk"/><r:NextTrackMetaData val="<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="-1" parentID="-1" restricted="true"><res protocolInfo="mms:*:*:*">mms://mp3-a8-128.timlradio.co.uk</res><dc:title>mp3-a8-128.timlradio.co.uk</dc:title><upnp:class>object.item</upnp:class></item></DIDL-Lite>"</CurrentTrackMetaData>';
-        //var xml = '<CurrentTrackMetaData xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="-1" parentID="-1" restricted="true"><res protocolInfo="sonos.com-http:*:*:*">x-sonosapi-stream:s117787?sid=254&flags=32</res><r:streamContent></r:streamContent><r:radioShowMd>Christian OConnell Breakfast Show,p149945</r:radioShowMd><upnp:albumArtURI>/getaa?s=1&u=x-sonosapi-stream:s117787?sid=254&flags=32</upnp:albumArtURI><dc:title>x-sonosapi-stream:s117787?sid=254&flags=32</dc:title><upnp:class>object.item</upnp:class></item></DIDL-Lite>"/>';
-        var parser = new DOMParser();
-        var xmlDoc = parser.parseFromString(xml, 'text/xml');
-        debugger;
-        var results = xml.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/",'CurrentTrackMetaData');
+         for (var i = 0; i < self.zoneMembers.length; i++) {
+         curPlayer = self.discoveredPlayerList[self.zoneMembers[i].RINCON];
+         //CF.log("Unsubscribing zone" + curPlayer.roomName);
+         curPlayer.unSubscribeEvents();
+         }*/
 
     }
 
