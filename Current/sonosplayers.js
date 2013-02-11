@@ -27,19 +27,19 @@ var SonosPlayers = function (params) {
 	};
 
 	self.init = function () {
-		CF.log("Commencing discovery of Sonos players");
+		Utils.debugLog("Commencing discovery of Sonos players");
         self.notificationSystemNumber = 1;
         self.DiscoveredPlayers = {};
         var sonosDiscover = new SonosDiscovery();
 		sonosDiscover.init();
 		sonosDiscover.SonosDiscoveredCallback = function (sonosDiscovered) {
-			//CF.log("Found Sonos Zone within SonosPlayers.js: " + sonosDiscovered.roomName);
-			//CF.logObject(sonosDiscovered);
+			//Utils.debugLog("Found Sonos Zone within SonosPlayers.js: " + sonosDiscovered.roomName);
+			//Utils.debugLogObject(sonosDiscovered);
             if (sonosDiscovered.modelName != "Sonos DOCK WD100" && sonosDiscovered.modelName != "Sonos SUB") {
                 var sonosObj = new SonosPlayer();
                 sonosObj.init(sonosDiscovered, self.notificationSystemNumber);
-                //CF.log("Initialised sonos player " + sonosObj.roomName);
-                //CF.logObject(sonosObj);
+                //Utils.debugLog("Initialised sonos player " + sonosObj.roomName);
+                //Utils.debugLogObject(sonosObj);
                 self.notificationSystemNumber++;
                 self.discoveredPlayers[sonosDiscovered.RINCON] = sonosObj;
                 if (self.sonosPlayersCallback !== null) {
@@ -47,10 +47,20 @@ var SonosPlayers = function (params) {
                 }
             }
             else {
-                CF.log("found and ignored a sub or dock");
+                Utils.debugLog("found and ignored a sub or dock");
             }
 		};
 	};
+
+    self.returnIPAddrFromRINCON = function (RINCON) {
+        Utils.debugLog("getting IP address from RINCON " + RINCON);
+        for (var player in self.discoveredPlayers) {
+            if (RINCON === self.discoveredPlayers[player].RINCON) {
+                Utils.debugLog("Player with RINCON " + RINCON + " has IP: " + self.discoveredPlayers[player].IP);
+                return self.discoveredPlayers[player].IP
+            }
+        }
+    }
 
 
 	return self;

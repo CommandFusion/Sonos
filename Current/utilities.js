@@ -85,17 +85,17 @@ var Utils = {
     },
 
     savePersistentData:function (dataObject, token) {
-        CF.log("saving global token");
+        Utils.debugLog("saving global token");
         CF.setToken(CF.GlobalTokensJoin, token, JSON.stringify(dataObject));
     },
 
     restorePersistentData:function (token, callback) {
-        CF.log("Getting global token");
+        Utils.debugLog("Getting global token");
         CF.getJoin(CF.GlobalTokensJoin, function (j, v, t) {
             //restored = JSON.parse(t[token]);
             restored = t[token];
-            CF.log("Token restored is:");
-            CF.logObject(restored);
+            Utils.debugLog("Token restored is:");
+            Utils.debugLogObject(restored);
             callback(restored);
         });
     },
@@ -124,6 +124,12 @@ var Utils = {
         function(str, item) {
             return escaped_one_to_xml_special_map[item];
         });
+    },
+
+    debugLog:function(string) {
+        if (debugTrace) {
+            CF.log(string);
+        }
     }
 
 }

@@ -25,6 +25,7 @@
 
 sonosGUI = new SONOS_GUI();
 CF.userMain = function () {
-	CF.log("Starting the Sonos iViewer Application");
+	debugTrace = true;
+    Utils.debugLog("Starting the Sonos iViewer Application");
 	sonosGUI.init();
 };

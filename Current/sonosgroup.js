@@ -109,7 +109,7 @@ if (!self.userZoneGroupingUnderway) { // this is set if a user is doing a zone g
 		}
 		zoneCoordinatorRINCON = groupNodes[i].attributes["Coordinator"].value;  //  get the UUID of the coordinator of the zone
 		self.zoneCoordinators.push({RINCON:zoneCoordinatorRINCON, roomName:zoneCoordinatorName})
-		//CF.log("zoneCoordinatorName is: " + zoneCoordinatorName);
+		//Utils.debugLog("zoneCoordinatorName is: " + zoneCoordinatorName);
 		for (var j = 0; j < groupNodes[i].childNodes.length; j++) {
 			if (groupNodes[i].childNodes[j].hasAttribute("Invisible")) {  //all devices such as wireless docks, subs etc carry an invisible flag that we can use to exclude them from the zone group
 				continue;

@@ -23,10 +23,10 @@ var SonosMusicSources2 = function () {
         // the '0' represents the level you are in the music sources tree, i.e. 0 is the main menu
         musicSources:{0:[
             {Name:"Music Library", type:"ML", id:"A:", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://maisonbisson.com/files/2011/08/apple-itunes-9-icon.png", creator:"", album:"", originalTrackNumber:"", userID:""},
-            {Name:"Docked iPods", type:"DiPod", id:"A:", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://icdn.pro/images/en/i/p/ipod-dock-icone-9168-96.png", creator:"", album:"", originalTrackNumber:"", userID:""},
+            //{Name:"Docked iPods", type:"DiPod", id:"A:", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://icdn.pro/images/en/i/p/ipod-dock-icone-9168-96.png", creator:"", album:"", originalTrackNumber:"", userID:""},
             {Name:"Radio", type:"Radio", id:"root", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://d3bwsr3zpy54hy.cloudfront.net/201301171700/img/products/appicon-free.png", creator:"", album:"", originalTrackNumber:"", userID:""},
             {Name:"Sonos Playlists", type:"ML", id:"SQ:", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://cdn1.iconfinder.com/data/icons/DarkGlass_Reworked/128x128/mimetypes/playlist.png", creator:"", album:"", originalTrackNumber:"", userID:""},
-            {Name:"Line In", type:"LI", id:"A:", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://www.absolutemusic.co.uk/wp/wp-content/uploads/2011/05/RCA-Cable.png", creator:"", album:"", originalTrackNumber:"", userID:""}
+            //{Name:"Line In", type:"LI", id:"A:", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://www.absolutemusic.co.uk/wp/wp-content/uploads/2011/05/RCA-Cable.png", creator:"", album:"", originalTrackNumber:"", userID:""}
         ]
         }, /*,
          1:[{containerID:"container3", parentID: "P3"},
@@ -43,7 +43,7 @@ var SonosMusicSources2 = function () {
         zoneGroupNotificationCallback:sonosGUI.processNotificationEvent, // used to point to the CF system that is handling notification messages for this player
         currentMusicSource:"", // Used to track the current music source to make it easier when it comes to processing the different formats of the music sources
         musicSourceNumberReturned:0, // Tracks the value of the last row returned from a music source browse
-        musicSourceRowsToReturn:100, // Sets how many rows to return in each call to a music source browse
+        musicSourceRowsToReturn:1000, // Sets how many rows to return in each call to a music source browse
         lastClassReturned:"", // used to track the last type of music class returned which is used to decide certain UI features
         musicSourceTrackLevel:false, // Used ot track whether we have reached the track level or equivalent for a music source
         musicSourceDisplayID:"", // Used to track the value of the last displayed ID to avoid alot indexing into the musicSOurces array
@@ -59,13 +59,15 @@ var SonosMusicSources2 = function () {
         lastPlayedSource: "", // used to track the last played source.  This is used to see if it was radio and if so issue a command to point the player back at is own queue
         searchInProcess: false,
         musicSourceSearchID: "",
-        currentSearchText: ""
+        currentSearchText: "",
+        searchTimeDelay: 1000, // Used to set how long before each key press a search waits before going to try and get data.  Stops lots of data coming back as the person keys in the search string
+        searchTimeOutVar: ""
     };
 
 
     self.init = function () {
         // This initialises the musicSource functionality
-        CF.log("Initialising musicSources2");
+        Utils.debugLog("Initialising musicSources2");
         // Get a player as we need to talk to a player, any player, to get various bits of info
         self.currentPlayer = sonosGUI.getCurrentPlayer();
         // Get various variables that will be used throughout music Sources
@@ -74,12 +76,12 @@ var SonosMusicSources2 = function () {
             self.R_RadioLocation = result.StringValue;
             self.radioURILocation = self.R_RadioLocation.substr(0, 9);
             self.radioLocationForTuneIn = self.R_RadioLocation.substr(9, 7);
-            CF.log("Music Source Radio Locations is: " + self.R_RadioLocation + " tunein location is: " + self.radioLocationForTuneIn + " and the URI location is: " + self.radioURILocation);
+            Utils.debugLog("Music Source Radio Locations is: " + self.R_RadioLocation + " tunein location is: " + self.radioLocationForTuneIn + " and the URI location is: " + self.radioURILocation);
         }, "R_RadioLocation");
         // Get the R_TrialZPSerial variable which will be used as the deviceID throughout
         self.currentPlayer.SystemPropertiesGetString(function (result) {
             self.R_TrialZPSerial = result.StringValue;
-            CF.log("Music Source Device ID is: " + self.R_TrialZPSerial);
+            Utils.debugLog("Music Source Device ID is: " + self.R_TrialZPSerial);
         }, "R_TrialZPSerial");
         // Get all music sources from sonos, work out which ones we are subscribed to and and them to musicSources
         self.getMusicServicesInfo();
@@ -105,7 +107,7 @@ var SonosMusicSources2 = function () {
                     var serviceID = infoItem.getAttribute("id");
                     var serviceName = infoItem.childNodes[1].nodeValue;
                     var serviceImage = infoItem.getElementsByTagName("image")[0].childNodes[0].nodeValue;
-                    //CF.log("id is: " + serviceID + " name is: " + serviceName + " image is: " + serviceImage);
+                    //Utils.debugLog("id is: " + serviceID + " name is: " + serviceName + " image is: " + serviceImage);
                     // Create a new music service using the serviceID as the key
                     self.allMusicServicesDetails[serviceID] = {"serviceName":serviceName, "serviceImage":serviceImage};
                     infoItem = results.iterateNext();
@@ -114,7 +116,7 @@ var SonosMusicSources2 = function () {
                 self.getSubscribedMusicServices();
             }
             else {
-                CF.log('Sonos Music Service call failed with status ' + status);
+                Utils.debugLog('Sonos Music Service call failed with status ' + status);
             }
         });
     };
@@ -127,13 +129,20 @@ var SonosMusicSources2 = function () {
         var host = "http://" + self.currentPlayer.IP;
         var url = ':1400/status/securesettings';
         var url = host + url;
-        //CF.log("the url is: " + url);
+        //Utils.debugLog("the url is: " + url);
         CF.request(url, function (status, headers, body) {
             if (status == 200) {
                 // Get the xml and extract the data
                 body = Encoder.htmlDecode(body);
                 body = self.extractTag(body, 'Setting Name="R_SvcAccounts" Value="', '"');
+                if (body === "") {
+                    Utils.debugLog("There are no music services subscribed to");
+                    // Add their details to the musicSources object
+                    self.addSubscribedMusicSource();
+                    return;
+                }
                 body = body.split(",");
+                //Utils.debugLog("the subscribed music services body is: " + body + " and has length:" + body.length);
                 // Cycle through each of the services and extract the relevant details from the Sonos music services returned above
                 for (i = 0; i < body.length; i += 4) {
                     // Get the details of the service we are subscribed to
@@ -141,15 +150,15 @@ var SonosMusicSources2 = function () {
                     // Add the userID to these details.  Will need this later
                     self.subscribedMusicServicesDetails[body[i]].userID = body[i + 1];
                     self.subscribedMusicServicesDetails[body[i]].serviceID = body[i];
-                    //CF.log(body[i] +":"+ body[i+1]);
+                    //Utils.debugLog(body[i] +":"+ body[i+1]);
                 }
                 // Add their details to the musicSources object
                 self.addSubscribedMusicSource();
 
-                //CF.logObject(self.subscribedMusicServicesDetails);
+                //Utils.debugLogObject(self.subscribedMusicServicesDetails);
             }
             else {
-                CF.log('Sonos Music Subscribed Music Services call failed with status ' + status);
+                Utils.debugLog('Sonos Music Subscribed Music Services call failed with status ' + status);
             }
         });
     }
@@ -159,15 +168,15 @@ var SonosMusicSources2 = function () {
     self.addSubscribedMusicSource = function () {
         // First get the number of sources already in the object
         var numMusicSourcesAlready = self.musicSources[0].length;
-        //CF.logObject(self.subscribedMusicServicesDetails);
-        //CF.log("number of music sources already is: " + numMusicSourcesAlready);
+        //Utils.debugLogObject(self.subscribedMusicServicesDetails);
+        //Utils.debugLog("number of music sources already is: " + numMusicSourcesAlready);
         for (var i in self.subscribedMusicServicesDetails) {
             //for (i=0; i < self.subscribedMusicServicesDetails.length; i++) {
-            //CF.log("The service name is: " + self.subscribedMusicServicesDetails[i].serviceName);
+            //Utils.debugLog("The service name is: " + self.subscribedMusicServicesDetails[i].serviceName);
             self.musicSources[0][numMusicSourcesAlready] = {Name:self.subscribedMusicServicesDetails[i].serviceName, type:self.subscribedMusicServicesDetails[i].serviceName, id:"root", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:self.subscribedMusicServicesDetails[i].serviceImage, creator:"", album:"", originalTrackNumber:"", userID:self.subscribedMusicServicesDetails[i].userID, serviceID:self.subscribedMusicServicesDetails[i].serviceID};
             numMusicSourcesAlready++;
         }
-        //CF.logObject(self.musicSources);
+        //Utils.debugLogObject(self.musicSources);
         self.musicSourceAppend = false;
         self.buildDisplayArray();
         self.getSpotifySessionID();
@@ -177,7 +186,7 @@ var SonosMusicSources2 = function () {
     self.getSpotifySessionID = function () {
         for (var i in self.subscribedMusicServicesDetails) {
             if (self.subscribedMusicServicesDetails[i].serviceName === " Spotify ") {
-                CF.log("Found a Spotify suscribed service");
+                Utils.debugLog("Found a Spotify suscribed service");
                 // Have hard coded the spotify ID number for the time being
                 self.spotifyUserID = self.subscribedMusicServicesDetails[i].userID;
                 self.spotifyImage = self.subscribedMusicServicesDetails[i].serviceImage;
@@ -185,12 +194,12 @@ var SonosMusicSources2 = function () {
                 return
             }
         }
-        CF.log("No Spotify service is subscribed to");
+        Utils.debugLog("No Spotify service is subscribed to");
     }
 
     self.processSpotifySessionID = function (response) {
         self.spotifySessionID = response.SessionId;
-        CF.log("SpotifySessionID is: " + self.spotifySessionID)
+        Utils.debugLog("SpotifySessionID is: " + self.spotifySessionID)
     }
 
     // This routine builds the display array which is passed by the GUI by parsing musicSources at the current selected level
@@ -198,22 +207,22 @@ var SonosMusicSources2 = function () {
     self.buildDisplayArray = function () { // append set as true will mean the existing music sources are not cleared
         //  The current selected level is in musicSourceLevel
         var musicDisplayArray = []; // array used to pass to the GUI
-        /*CF.log("the number of records we are about to display is: " + self.musicSources[self.musicSourceLevel].length);
-         CF.log("And the music source object is:");
-         CF.logObject(self.musicSources[self.musicSourceLevel]);
+        /*Utils.debugLog("the number of records we are about to display is: " + self.musicSources[self.musicSourceLevel].length);
+         Utils.debugLog("And the music source object is:");
+         Utils.debugLogObject(self.musicSources[self.musicSourceLevel]);
          */
         for (i = 0; i < self.musicSources[self.musicSourceLevel].length; i++) {
             musicDisplayArray.push({sourceName:self.musicSources[self.musicSourceLevel][i].Name, sourceArt:self.musicSources[self.musicSourceLevel][i].albumArtURI, sourceCreator:self.musicSources[self.musicSourceLevel][i].creator});
         }
-        /*CF.log("We are about to display:");
-         CF.logObject(musicDisplayArray);
+        /*Utils.debugLog("We are about to display:");
+         Utils.debugLogObject(musicDisplayArray);
          */
         if (self.musicSourceAppend) {
-            CF.log("Appending music source");
+            Utils.debugLog("Appending music source");
             self.zoneGroupNotificationCallback("AppendMusicSources", musicDisplayArray, self.musicSourceNumberReturned);  // process this message in the GUI layer
         }
         else {
-            CF.log("Replacing music source");
+            Utils.debugLog("Replacing music source");
             self.zoneGroupNotificationCallback("ReplaceMusicSources", musicDisplayArray);  // process this message in the GUI layer
         }
 
@@ -222,12 +231,12 @@ var SonosMusicSources2 = function () {
     // Handles what happens when you press a music source in the GUI
 
     self.selectMusicSource = function (name, listIndex, searchFlag) {
-        CF.log("A music source was selected of name: " + name + " was selected and searchFlag is " + searchFlag);
+        Utils.debugLog("A music source was selected of name: " + name + " was selected and searchFlag is " + searchFlag);
 
         self.currentPlayer = sonosGUI.getCurrentPlayer();
         if (self.musicSourceTrackLevel) {
             // We have reached the track level therefore need to process request
-            CF.log("We are at the track level");
+            Utils.debugLog("We are at the track level");
             if (self.zoneGroupNotificationCallback !== null) {
                 self.zoneGroupNotificationCallback("ShowMusicSourceActions", self.RINCON);  // process this message in the GUI layer
             }
@@ -237,13 +246,13 @@ var SonosMusicSources2 = function () {
         }
         if (self.musicSourceLevel === 0) {// We are currently at the top menu and moving way therefore want to set the currentMusicSource
             self.currentMusicSource = self.musicSources[0][listIndex].type;
-            CF.log("The music source is: " + self.currentMusicSource);
+            Utils.debugLog("The music source is: " + self.currentMusicSource);
         }
         if (searchFlag) {
             self.musicSourcesIndex = 1;
             self.musicSources[self.musicSourceLevel].listRowToReturnTo = 1;
             self.musicSourceDisplayID = self.musicSourceSearchID;
-            //CF.log("The musicSourceDisplayID for the search is: " + self.musicSourceDisplayID);
+            //Utils.debugLog("The musicSourceDisplayID for the search is: " + self.musicSourceDisplayID);
             self.musicSources[self.musicSourceLevel] = [];
             self.musicSourceLevel--;
         }
@@ -253,17 +262,17 @@ var SonosMusicSources2 = function () {
                 self.zoneGroupNotificationCallback("ResetSelectMusicSources");  // process this message in the GUI layer
                 self.searchInProcess = false;
             }
-            //CF.log("listIndex is: " + listIndex);
+            //Utils.debugLog("listIndex is: " + listIndex);
             self.musicSourcesIndex = listIndex;
             self.musicSources[self.musicSourceLevel].listRowToReturnTo = listIndex;
             self.musicSourceDisplayID = self.musicSources[self.musicSourceLevel][listIndex].id;
-            //CF.log("The musicSourceDisplayID is: " + self.musicSourceDisplayID);
+            //Utils.debugLog("The musicSourceDisplayID is: " + self.musicSourceDisplayID);
         }
         self.musicSourceLevel++;
         // Add one to the music source level to effectively move down the tree
         self.musicSourceAppend = false;
         self.newLevelSelected = true;
-        //CF.log("The music source type is:" + self.musicSources[self.musicSourceLevel-1][listIndex].type);
+        //Utils.debugLog("The music source type is:" + self.musicSources[self.musicSourceLevel-1][listIndex].type);
         // switch (self.musicSources[self.musicSourceLevel-1][listIndex].type) {
         switch (self.currentMusicSource) {
             case "ML":  // will be a standard iTunes or Sonos music library
@@ -281,7 +290,7 @@ var SonosMusicSources2 = function () {
                 // LastFM is very different as there are limited levels and the data is farily fixed and got at initialisation time
                 break;
             case " Spotify ":  // will be Spotify
-                //CF.log("Processing a Spotify selection");
+                //Utils.debugLog("Processing a Spotify selection");
                 if (self.zoneGroupNotificationCallback !== null) {
                     self.zoneGroupNotificationCallback("ChangeSearchLogo", self.spotifyImage);  // process this message in the GUI layer
                 }
@@ -294,17 +303,17 @@ var SonosMusicSources2 = function () {
                 //
                 break
             default:
-                CF.log("Received an unknown music type");
+                Utils.debugLog("Received an unknown music type");
         }
     }
 
     self.musicSourceListEnd = function () {
-        CF.log("Total matches is: " + self.musicSources[self.musicSourceLevel].TotalMatches + " and the current record count is: " + self.musicSourceNumberReturned);
+        Utils.debugLog("Total matches is: " + self.musicSources[self.musicSourceLevel].TotalMatches + " and the current record count is: " + self.musicSourceNumberReturned);
         if (self.musicSourceNumberReturned == self.musicSources[self.musicSourceLevel].TotalMatches) {
-            CF.log("Got a list end but there is no more to get");
+            Utils.debugLog("Got a list end but there is no more to get");
             return
         }
-        CF.log("Got a list end command");
+        Utils.debugLog("Got a list end command");
         self.musicSourceAppend = true;
         self.newLevelSelected = false;
         switch (self.currentMusicSource) {
@@ -320,7 +329,7 @@ var SonosMusicSources2 = function () {
                 // LastFM is very different as there are limited levels and the data is farily fixed and got at initialisation time
                 break;
             case " Spotify ":  // will be Spotify
-                CF.log("Processing a fetch further records for Spotify");
+                Utils.debugLog("Processing a fetch further records for Spotify");
                 self.getMusicSourceSpotify();
                 break;
             case "SP":  // will be Sonos Playlists
@@ -349,10 +358,10 @@ var SonosMusicSources2 = function () {
             self.musicSourceNumberReturned = 0; // reset the number of rows returned as we are at a new level
             self.musicSourceAppend = false;
             self.musicSourceNumberReturned = self.musicSources[self.musicSourceLevel].length;
-            CF.log("The number of sources at this level is: " + self.musicSourceNumberReturned);
+            Utils.debugLog("The number of sources at this level is: " + self.musicSourceNumberReturned);
             self.newLevelSelected = true;
             self.musicSourceDisplayID = self.musicSources[self.musicSourceLevel][0].parentID;
-            CF.log("The display ID after going back is: " + self.musicSourceDisplayID);
+            Utils.debugLog("The display ID after going back is: " + self.musicSourceDisplayID);
             self.buildDisplayArray();  // display the level
             // tell the GUI to go back to the last point the user was in the GUI
             if (self.zoneGroupNotificationCallback !== null) {
@@ -379,22 +388,22 @@ var SonosMusicSources2 = function () {
     self.musicSourcePlayNext = function () {
         // Set the current player to be looking at its queue in case it was looking at something like radio before
         // Send as the playNextTrackNumber
-        CF.log("Processing a play next command");
+        Utils.debugLog("Processing a play next command");
         self.playNow = false; //Used later in the process
-        CF.log("Track number playing is: " + parseInt(self.currentPlayer.currentTrackNbr) + 1);
+        Utils.debugLog("Track number playing is: " + parseInt(self.currentPlayer.currentTrackNbr) + 1);
         //self.currentPlayer.AVTransportSetAVTransportURI(self.musicSourcePlayNow1(self.currentPlayer.currentTrackNbr,1), 0, "x-rincon-queue:" + self.currentPlayer.RINCON + "#0", "");
         self.musicSourcePlayNow1(parseInt(self.currentPlayer.currentTrackNbr) + 1, 1);
     }
 
     self.sendPlayPostSetAVTransport = function (response) {
-        CF.log("Process play");
-        //CF.logObject(response);
+        Utils.debugLog("Process play");
+        //Utils.debugLogObject(response);
         if (self.zoneGroupNotificationCallback !== null) {
             self.zoneGroupNotificationCallback("ClearQueueUI", self.musicSourceList, self.musicSourceNumberReturned);  // process this message in the GUI layer
         }
         self.currentPlayer.resetQueueNumberReturned();
         if (self.playNow) { // need to do a seek to the track number first
-            CF.log("Playing now");
+            Utils.debugLog("Playing now");
             //self.currentPlayer.AVTransportSeek(self.currentPlayer.AVTransportPlay(self.currentPlayer.getQueueForCurrentZone(), 0, 1), 0, "TRACK_NR", response.FirstTrackNumberEnqueued);
             self.currentPlayer.AVTransportSeek(self.currentPlayer.AVTransportPlay("", 0, 1), 0, "TRACK_NR", response.FirstTrackNumberEnqueued);
         }
@@ -411,7 +420,7 @@ var SonosMusicSources2 = function () {
     }
 
     self.musicSourceReplaceQueue = function () {
-        CF.log("Clearing the queue");
+        Utils.debugLog("Clearing the queue");
         self.currentPlayer.AVTransportRemoveAllTracksFromQueue(self.transportEventRemoveAllTracks, 0);
         //self.currentPlayer.AVTransportSetAVTransportURI(self.transportEventRemoveAllTracks(), 0, "x-rincon-queue:" + self.currentPlayer.RINCON + "#0", "");
         //self.currentPlayer.AVTransportRemoveAllTracksFromQueue(self.musicSourceAddToQueue(), 0);
@@ -420,7 +429,7 @@ var SonosMusicSources2 = function () {
     }
 
     self.transportEventRemoveAllTracks = function () {
-        CF.log("Returned from Remove All Tracks Call");
+        Utils.debugLog("Returned from Remove All Tracks Call");
         self.musicSourcePlayNow1(0, 0);
         //self.currentPlayer.getQueueForCurrentZone();
 
@@ -433,39 +442,39 @@ var SonosMusicSources2 = function () {
         // check the item type
         var enqueuedURI = "";
         var enqueuedURIMetaData = "";
-        CF.log("Processing a play command for source: " + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].res);
+        Utils.debugLog("Processing a play command for source: " + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].res);
         if (self.currentMusicSource === "ML") {
             // Must be a single library item
-            CF.log("Got a music library item");
+            Utils.debugLog("Got a music library item");
             //sourceToAdd = sourceToAdd.replace("S://","x-file-cifs://");
             sourceToAdd = self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].res;
             enqueuedURI = sourceToAdd;
             enqueuedURIMetaData = self.metaDataHeader + '<item id="' + "1006006c" + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id + '" parentID="' + "1006006c" + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].parentID + '" restricted="' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].restricted + '"><dc:title>' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].sourceName + '<dc:title><upnp:class>' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].sourceClass + '</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">RINCON_AssociatedZPUDN</desc></item></DIDL-Lite>';
-            CF.log("Sending the AddURI Commmand");
+            Utils.debugLog("Sending the AddURI Commmand");
             self.currentPlayer.AVTransportAddURIToQueue(self.sendPlayPostSetAVTransport, 0, enqueuedURI, enqueuedURIMetaData, desiredFirstTrackNumberEnqueued, enqueueAsNext);
             //self.currentPlayer.getQueueForCurrentZone();
             self.lastPlayedSource = "ML";
             return;
         }
         if (self.currentMusicSource === " Spotify ") {
-            CF.log("Got a Spotify item");
-            CF.log("Got a Spotify Item");
+            Utils.debugLog("Got a Spotify item");
+            Utils.debugLog("Got a Spotify Item");
             sourceToAdd = self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].res;
             sourceToAdd = sourceToAdd.replace(/:/g, "%3a");
             if (self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].Name.indexOf("All tracks (") != -1) {
                 // Must be a spotify track
-                CF.log("Got a Spotify All");
+                Utils.debugLog("Got a Spotify All");
                 enqueuedURI = 'x-rincon-cpcontainer:1006008c' + sourceToAdd;
                 enqueuedURIMetaData = self.metaDataHeader + '<item id="1006008c' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id + '" parentID="100a0084' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].parentID + '" restricted="true"><dc:title>' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].title + '<dc:title><upnp:class>' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].uPNPClass + '</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">SA_RINCON2311_' + self.spotifyUserID + '</desc></item></DIDL-Lite>';
             }
             else {
                 sourceToAdd = self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id;
                 sourceToAdd = sourceToAdd.replace(/:/g, "%3a");
-                CF.log("Got a Spotify Item with id " + sourceToAdd);
+                Utils.debugLog("Got a Spotify Item with id " + sourceToAdd);
                 enqueuedURI = 'x-sonos-spotify:' + sourceToAdd + '?sid=9&amp;flags=0';
                 enqueuedURIMetaData = self.metaDataHeader + '<item id="1006008c' + Utils.escape(self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id).replace(/:/g, "%3a") + '" parentID="100a0084' + Utils.escape(self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].parentID).replace(/:/g, "%3a") + '" restricted="true"><dc:title>' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].title + '<dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">SA_RINCON2311_' + self.spotifyUserID + '</desc></item></DIDL-Lite>';
             }
-            CF.log("Sending the AddURI Commmand");
+            Utils.debugLog("Sending the AddURI Commmand");
             self.currentPlayer.AVTransportAddURIToQueue(self.sendPlayPostSetAVTransport, 0, enqueuedURI, enqueuedURIMetaData, desiredFirstTrackNumberEnqueued, enqueueAsNext);
             //self.currentPlayer.getQueueForCurrentZone();
             self.lastPlayedSource = " Spotify ";
@@ -488,7 +497,7 @@ var SonosMusicSources2 = function () {
          */
         if (self.currentMusicSource === "Radio") {
             // Must be a radio item.  Since you can't queue radio we call SETAVTransport not AddURIToQueue
-            CF.log("Got a Radio Item");
+            Utils.debugLog("Got a Radio Item");
             sourceToAdd = self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id
             var currentURI = "x-sonosapi-stream:" + sourceToAdd + "?sid=254&flags=32";
             var currentURIMetaData = self.metaDataHeader + '<item id="F00090020' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id + '" parentID="F00080064' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].parentID.replace(/:/g, "%3a") + '" restricted="true"><dc:title>' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].title + '</dc:title><upnp:class>object.item.audioItem.audioBroadcast</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">SA_RINCON65031_</desc></item></DIDL-Lite>';
@@ -508,7 +517,7 @@ var SonosMusicSources2 = function () {
     // Get the music details when the source is a Sonos player
 
     self.getMusicSourceForLibrary = function () {
-        //CF.log("the music source display id is: " + self.musicSourceDisplayID);
+        //Utils.debugLog("the music source display id is: " + self.musicSourceDisplayID);
         if (self.newLevelSelected) {
             // Reset the number of records we have returned so far
             self.newLevelSelected = false;
@@ -547,12 +556,12 @@ var SonosMusicSources2 = function () {
      */
 
     self.processGetMusicSourceForLibrary = function (response) {
-        //CF.log("Processing music source list");
-        //CF.log("self.nusicSourcePressed is: "  + self.musicSourcePressed)
+        //Utils.debugLog("Processing music source list");
+        //Utils.debugLog("self.nusicSourcePressed is: "  + self.musicSourcePressed)
         var body = response.Result//.replace('xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"',"");;
         var parser = new DOMParser();
         var xmlDoc = parser.parseFromString(body, 'text/xml');
-        //CF.log("The music library response is:" + body);
+        //Utils.debugLog("The music library response is:" + body);
         // Check to see whether we have reached the track level.  tracks have an item tag and others have a container tag
         if (body.indexOf('</container>') > 0) {
             var results = xmlDoc.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/", 'container');
@@ -566,12 +575,12 @@ var SonosMusicSources2 = function () {
         // Bear in mind that when we get to the track level this 'container' element will not be here as the track level is tagged with 'item'
         // Set the starting number at the current length so that we add to the musicSources not replace.  If this is undefined then we are adding stuff to this level for the first time
         if (self.musicSources[self.musicSourceLevel] === undefined) {
-            //CF.log("This is the beginning of a new level");
+            //Utils.debugLog("This is the beginning of a new level");
             var numMusicSourcesAlready = 0;
             self.musicSources[self.musicSourceLevel] = [];
         }
         else {
-            //CF.log("We are adding items to an existing level starting at: " + self.musicSources[self.musicSourceLevel].length);
+            //Utils.debugLog("We are adding items to an existing level starting at: " + self.musicSources[self.musicSourceLevel].length);
             var numMusicSourcesAlready = self.musicSources[self.musicSourceLevel].length
         }
         var id = "", parentID = "", restricted = "", title = "", uPNPClass = "", res = "", creator = "", albumArt = "", protocolInfo, origTrackNbr = 0;
@@ -625,7 +634,7 @@ var SonosMusicSources2 = function () {
             // if we come down the album route then the uPNPClass the previous level will be object.container.album.musicAlbum
             if (numMusicSourcesAlready === 0) { // Check to see whether we are at the first row
                 if ((!self.searchInProcess) && (self.musicSourceLevel > 1) && (self.musicSources[self.musicSourceLevel - 1][0].uPNPClass = "object.container.album.musicAlbum") && self.musicSourceTrackLevel) { // We can use any of the rows in the above level as they will all be of the same uPNPClass
-                    CF.log("Previous parent id is: " + self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].id + " And previous res is: " + self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].res);
+                    Utils.debugLog("Previous parent id is: " + self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].id + " And previous res is: " + self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].res);
                     self.musicSources[self.musicSourceLevel][0] = {Name:"Complete Album (" + results.length + ") tracks", type:"ML", id:self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].id, parentID:parentID, restricted:restricted, title:title, uPNPClass:uPNPClass, res:self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].res, protocolInfo:protocolInfo, albumArtURI:albumArt, creator:creator, album:"", originalTrackNumber:origTrackNbr, userID:""};
                     numMusicSourcesAlready = 1; // Set up for the next row
                 }
@@ -637,12 +646,12 @@ var SonosMusicSources2 = function () {
         self.buildDisplayArray();
         self.musicSourceNumberReturned = self.musicSourceNumberReturned + parseInt(response.NumberReturned);
         self.musicSources[self.musicSourceLevel].TotalMatches = parseInt(response.TotalMatches);
-        //CF.log("Next starting index is: " + self.musicSourceNumberReturned);
+        //Utils.debugLog("Next starting index is: " + self.musicSourceNumberReturned);
 
     };
 
     self.getMusicSourceSpotify = function () {
-        CF.log("Retrieving Spotify data");
+        Utils.debugLog("Retrieving Spotify data");
         if (self.newLevelSelected) {
             // Reset the number of records we have returned so far
             self.newLevelSelected = false;
@@ -747,7 +756,7 @@ var SonosMusicSources2 = function () {
     self.processGetMusicSourceSpotify = function (body) {
         var parser = new DOMParser();
         var xmlDoc = parser.parseFromString(body, 'text/xml');
-        //CF.log("The Spotify response is:" + body);
+        //Utils.debugLog("The Spotify response is:" + body);
         // Check to see whether we have reached the track level.  tracks have an item tag and others have a container tag
         if (body.indexOf('</mediaCollection>') > 0) {
             var results = xmlDoc.getElementsByTagNameNS("http://www.sonos.com/Services/1.1", 'mediaCollection');
@@ -756,24 +765,24 @@ var SonosMusicSources2 = function () {
         else {
             var results = xmlDoc.getElementsByTagNameNS("http://www.sonos.com/Services/1.1", 'mediaMetadata');
             self.musicSourceTrackLevel = true;
-            //CF.log("The Spotify response is:" + body);
+            //Utils.debugLog("The Spotify response is:" + body);
         }
         // Cycle through and get the various components
         // Bear in mind that when we get to the track level this 'container' element will not be here as the track level is tagged with 'item'
         // Set the starting number at the current length so that we add to the musicSources not replace.  If this is undefined then we are adding stuff to this level for the first time
         if (self.musicSources[self.musicSourceLevel] === undefined) {
-            //CF.log("This is the beginning of a new level");
+            //Utils.debugLog("This is the beginning of a new level");
             var numMusicSourcesAlready = 0;
             self.musicSources[self.musicSourceLevel] = [];
         }
         else {
-            CF.log("We are adding items to an existing level starting at: " + self.musicSources[self.musicSourceLevel].length);
+            Utils.debugLog("We are adding items to an existing level starting at: " + self.musicSources[self.musicSourceLevel].length);
             var numMusicSourcesAlready = self.musicSources[self.musicSourceLevel].length;
         }
         var id = "", parentID = "", restricted = "", title = "", uPNPClass = "", res = "", creator = "", albumArt = "", protocolInfo, origTrackNbr = 0;
         var numberReturned = parseInt(xmlDoc.getElementsByTagNameNS("http://www.sonos.com/Services/1.1", 'count')[0].textContent);
         var totalTracks = parseInt(xmlDoc.getElementsByTagNameNS("http://www.sonos.com/Services/1.1", 'total')[0].textContent);
-        CF.log("the number fo tracks in the XML is:" + results.length);
+        Utils.debugLog("the number fo tracks in the XML is:" + results.length);
         for (var i = 0; i < results.length; i++) {
             var id = "", parentID = "", restricted = "", title = "", uPNPClass = "", res = "", creator = "", albumArt = "", protocolInfo, origTrackNbr = 0;
             if (results[i].getElementsByTagNameNS("http://www.sonos.com/Services/1.1", "id")[0] !== undefined) {
@@ -798,25 +807,25 @@ var SonosMusicSources2 = function () {
             ;
             if (numMusicSourcesAlready === 0) { // Check to see whether we are at the first row
                 if ((!self.searchInProcess) && (self.musicSourceLevel > 1) && self.musicSourceTrackLevel) { // We can use any of the rows in the above level as they will all be of the same uPNPClass
-                    //CF.log("Previous parent id is: " + self.musicSources[self.musicSourceLevel-1][self.musicSourcesIndex].id + " And previous res is: " +self.musicSources[self.musicSourceLevel-1][self.musicSourcesIndex].res );
+                    //Utils.debugLog("Previous parent id is: " + self.musicSources[self.musicSourceLevel-1][self.musicSourcesIndex].id + " And previous res is: " +self.musicSources[self.musicSourceLevel-1][self.musicSourcesIndex].res );
                     self.musicSources[self.musicSourceLevel][0] = {Name:"All tracks (" + totalTracks + ")", type:" Spotify ", id:self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].id, parentID:self.musicSourceDisplayID, restricted:restricted, title:title, uPNPClass:uPNPClass, res:self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].res, protocolInfo:"", albumArtURI:albumArt, creator:creator, album:"", originalTrackNumber:"", userID:""};
                     numMusicSourcesAlready = 1; // Set up for the next row
                 }
             }
             self.musicSources[self.musicSourceLevel][numMusicSourcesAlready] = {Name:title, type:" Spotify ", id:id, parentID:self.musicSourceDisplayID, restricted:"", title:title, uPNPClass:uPNPClass, res:id, resProtocol:"", albumArtURI:albumArt, creator:creator, album:"", originalTrackNumber:"", userID:""};
-            //CF.log("spotify id is: " + id);
+            //Utils.debugLog("spotify id is: " + id);
             numMusicSourcesAlready++;
         }
         ;
         self.buildDisplayArray();
         self.musicSourceNumberReturned = self.musicSourceNumberReturned + numberReturned;
         self.musicSources[self.musicSourceLevel].TotalMatches = totalTracks;
-        //CF.log("Next starting index is: " + self.musicSourceNumberReturned);
+        //Utils.debugLog("Next starting index is: " + self.musicSourceNumberReturned);
 
     }
 
     self.getMusicSourceRadio = function () {
-        CF.log("Retrieving Radio data");
+        Utils.debugLog("Retrieving Radio data");
         if (self.newLevelSelected) {
             // Reset the number of records we have returned so far
             self.newLevelSelected = false;
@@ -835,7 +844,7 @@ var SonosMusicSources2 = function () {
     self.processGetMusicSourceRadio = function (body) {
         var parser = new DOMParser();
         var xmlDoc = parser.parseFromString(body, 'text/xml');
-        //CF.log("The Radio response is:" + body);
+        //Utils.debugLog("The Radio response is:" + body);
         // Check to see whether we have reached the track level.  tracks have an item tag and others have a container tag
         if (body.indexOf('</mediaCollection>') > 0) {
             var results = xmlDoc.getElementsByTagNameNS("http://www.sonos.com/Services/1.1", 'mediaCollection');
@@ -849,18 +858,18 @@ var SonosMusicSources2 = function () {
         // Bear in mind that when we get to the track level this 'container' element will not be here as the track level is tagged with 'item'
         // Set the starting number at the current length so that we add to the musicSources not replace.  If this is undefined then we are adding stuff to this level for the first time
         if (self.musicSources[self.musicSourceLevel] === undefined) {
-            //CF.log("This is the beginning of a new level");
+            //Utils.debugLog("This is the beginning of a new level");
             var numMusicSourcesAlready = 0;
             self.musicSources[self.musicSourceLevel] = [];
         }
         else {
-            CF.log("We are adding items to an existing level starting at: " + self.musicSources[self.musicSourceLevel].length);
+            Utils.debugLog("We are adding items to an existing level starting at: " + self.musicSources[self.musicSourceLevel].length);
             var numMusicSourcesAlready = self.musicSources[self.musicSourceLevel].length;
         }
         var id = "", parentID = "", restricted = "", title = "", uPNPClass = "", res = "", creator = "", albumArt = "", protocolInfo, origTrackNbr = 0;
         var numberReturned = parseInt(xmlDoc.getElementsByTagNameNS("http://www.sonos.com/Services/1.1", 'count')[0].textContent);
         var totalTracks = parseInt(xmlDoc.getElementsByTagNameNS("http://www.sonos.com/Services/1.1", 'total')[0].textContent);
-        CF.log("the number fo tracks in the XML is:" + results.length);
+        Utils.debugLog("the number fo tracks in the XML is:" + results.length);
         for (var i = 0; i < results.length; i++) {
             var id = "", parentID = "", restricted = "", title = "", uPNPClass = "", res = "", creator = "", albumArt = "", protocolInfo, origTrackNbr = 0;
             // when we are retrieving from a search the tag is not id, it is searchType+id
@@ -892,7 +901,7 @@ var SonosMusicSources2 = function () {
             ;
             /*if (numMusicSourcesAlready === 0) { // Check to see whether we are at the first row
                 if ((self.musicSourceLevel > 1) && self.musicSourceTrackLevel) { // We can use any of the rows in the above level as they will all be of the same uPNPClass
-                    //CF.log("Previous parent id is: " + self.musicSources[self.musicSourceLevel-1][self.musicSourcesIndex].id + " And previous res is: " +self.musicSources[self.musicSourceLevel-1][self.musicSourcesIndex].res );
+                    //Utils.debugLog("Previous parent id is: " + self.musicSources[self.musicSourceLevel-1][self.musicSourcesIndex].id + " And previous res is: " +self.musicSources[self.musicSourceLevel-1][self.musicSourcesIndex].res );
                     self.musicSources[self.musicSourceLevel][0] = {Name:"All tracks (" + totalTracks + ")", type:" Spotify ", id:self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].id, parentID:self.musicSourceDisplayID, restricted:restricted, title:title, uPNPClass:uPNPClass, res:self.musicSources[self.musicSourceLevel - 1][self.musicSourcesIndex].res, protocolInfo:"", albumArtURI:albumArt, creator:creator, album:"", originalTrackNumber:"", userID:""};
                     numMusicSourcesAlready = 1; // Set up for the next row
                 }
@@ -903,11 +912,11 @@ var SonosMusicSources2 = function () {
         self.buildDisplayArray();
         self.musicSourceNumberReturned = self.musicSourceNumberReturned + numberReturned;
         self.musicSources[self.musicSourceLevel].TotalMatches = totalTracks;
-        //CF.log("Next starting index is: " + self.musicSourceNumberReturned);
+        //Utils.debugLog("Next starting index is: " + self.musicSourceNumberReturned);
 
         /*        body = Utils.unescape(body);
                 body = Utils.unescape(body);
-                //CF.log("Radio response is: " + body);
+                //Utils.debugLog("Radio response is: " + body);
                 var i = 0, j = 0, k = 0, l = 0, artist = "", title = "", res = "", art = "", nextTag = "", endTag = ""
                 // having got the response, we can check to see whether we have reached track level by checking to see what object types are in the response
                 if (body.indexOf("<itemType>stream</itemType>") > 0) {
@@ -928,7 +937,7 @@ var SonosMusicSources2 = function () {
                 // now we can get and process the records
                 radioNumberReturned = self.extractTag(body, "<count>", "</count>");
                 parentID = self.musicSourceLevelQuery[self.musicSourceLevel - 1];
-                CF.log("ParentiD is: " + parentID);
+                Utils.debugLog("ParentiD is: " + parentID);
                 i = body.indexOf(startTag, j);
                 while (i >= 0) {
                     // Loop over all items, where each item is a track on the queue.
@@ -977,16 +986,16 @@ var SonosMusicSources2 = function () {
         //var SOAPBody = '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Header><credentials xmlns="http://www.sonos.com/Services/1.1"><deviceId>00-0E-58-28-3B-D4:8</deviceId><deviceProvider>Sonos</deviceProvider><sessionId>OKf4W1Y+Lmp/dRaFevzptAZFDRbkz8GAkyPVZQCRDnk=</sessionId></credentials></s:Header><s:Body><getMetadata xmlns="http://www.sonos.com/Services/1.1"><id>root</id><index>0</index><count>100</count></getMetadata></s:Body></s:Envelope>';
 
         var url = host + url;
-        //CF.log("url is: " + url);
-        CF.log("SOAP Action is: " + SOAPAction + "\r\n");
-        CF.log("SOAP Body is: " + SOAPBody + "\r\n");
+        //Utils.debugLog("url is: " + url);
+        Utils.debugLog("SOAP Action is: " + SOAPAction + "\r\n");
+        Utils.debugLog("SOAP Body is: " + SOAPBody + "\r\n");
         CF.request(url, 'POST', {'ACCEPT-ENCODING':'gzip', 'ACCEPT-LANGUAGE':'en-US', 'USER-AGENT':'Linux UPnP/1.0 Sonos/19.4-59140 (MDCR_iMac12,2)', 'CONTENT-TYPE':'text/xml; charset="utf-8"', 'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
             if (status == 200) {
-                //CF.log("Spotify response is: " + body)
+                //Utils.debugLog("Spotify response is: " + body)
                 callback(body)
             }
             else {
-                CF.log('Spotify music retrieval failed with status ' + status);
+                Utils.debugLog('Spotify music retrieval failed with status ' + status);
                 self.getSpotifySessionID;
             }
         });
@@ -1003,16 +1012,16 @@ var SonosMusicSources2 = function () {
             + DeviceProvider + '</deviceProvider></credentials></s:Header><s:Body><getMetadata xmlns="http://www.sonos.com/Services/1.1"><id>'
             + ItemID + '</id><index>' + StartingIndex + '</index><count>' + RequestedCount + '</count></getMetadata></s:Body></s:Envelope>';
         var url = host + url;
-        //CF.log("url is: " + url);
-        //CF.log("SOAPAction is : " + SOAPAction);
-        //CF.log("SOAP Body is: " + SOAPBody);
+        //Utils.debugLog("url is: " + url);
+        //Utils.debugLog("SOAPAction is : " + SOAPAction);
+        //Utils.debugLog("SOAP Body is: " + SOAPBody);
         CF.request(url, 'POST', {"CONTENT-TYPE":'text/xml; charset="utf-8"', 'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
             if (status == 200) {
-                //CF.log("Radio response is: " + body)
+                //Utils.debugLog("Radio response is: " + body)
                 callback(body)
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1031,7 +1040,7 @@ var SonosMusicSources2 = function () {
     }
 
     self.testMusicSource = function () {
-        CF.log("Testing music source code");
+        Utils.debugLog("Testing music source code");
         self.musicSources[self.musicSourceLevel] = self.musicSources[self.musicSourceLevel-1];
         self.musicSourceAppend = false;
         self.buildDisplayArray();
@@ -1041,10 +1050,17 @@ var SonosMusicSources2 = function () {
 
     self.searchMusicSource = function (searchText) {
         if (searchText === "") {
-            CF.log("Got an empty searchText");
+            Utils.debugLog("Got an empty searchText");
             return;
         }
-        CF.log("Search text is " + searchText);
+        clearTimeout(self.searchTimeOutVar);
+        self.searchTimeOutVar = setTimeout(function () {
+            self.getSearchAfterTimeDelay(searchText);
+        }, self.searchTimeDelay);
+    }
+
+    self.getSearchAfterTimeDelay = function (searchText) {
+        Utils.debugLog("Search text is " + searchText);
         if (!self.searchInProcess) {
             self.searchType = "Album";
         }
@@ -1095,10 +1111,11 @@ var SonosMusicSources2 = function () {
         }
         self.musicSourceTrackLevel = false;
         self.selectMusicSource(self.musicSourceSearchID, 1, true);
+
     }
 
     self.setSearchType = function (searchType) {
-        CF.log("Music Source got a search type" + searchType);
+        Utils.debugLog("Music Source got a search type" + searchType);
         self.searchType = searchType;
         self.searchMusicSource(self.currentSearchText);
     }

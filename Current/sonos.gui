@@ -1034,7 +1034,7 @@
     </btn>
   </subpage>
   <subpage name="now_playing_details" w="350" h="254" clip="1">
-    <img x="0" y="0" w="140" h="140" j="702" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">img_nowplaying_overlay.png</img>
+    <img x="0" y="0" w="140" h="140" j="702" clickthrough="1" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
     <txt j="306" x="142" y="25" w="208" h="23" t="nowplayingdetail" wrap="True" l="0">Song Name</txt>
     <txt j="0" x="142" y="0" w="208" h="25" t="nowplayingtitle" wrap="True" l="0">Track [1/100]</txt>
     <img x="10" y="177" w="11" h="57" j="0" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">slider_h_thin_left.png</img>

@@ -63,7 +63,7 @@ var SonosPlayer = function () {
         notificationSystemNumber:0,
         zoneGroupNotificationCallback:sonosGUI.processNotificationEvent, // used to point to the CF system that is handling notification messages for this player
         queueNumberReturned:0,
-        queueRowsToReturn:50,
+        queueRowsToReturn:1000,
         currentTrackAlbumArtAddr:"",
         currentTrackName:"",
         currentTrackAlbum:"",
@@ -97,7 +97,7 @@ var SonosPlayer = function () {
     }
 
     self.init = function (sonosPlayer, systemNumber) {
-        //CF.log("SonosPlayer: Init called with systemNumber of: " + systemNumber);
+        //Utils.debugLog("SonosPlayer: Init called with systemNumber of: " + systemNumber);
         // setup the player information
         self.roomName = sonosPlayer.roomName;
         self.zoneType = sonosPlayer.zoneType;
@@ -136,14 +136,14 @@ var SonosPlayer = function () {
         // for example: "192.168.0.16:5050"
         // When getting initial status, if the system is not connected, remote is null.
         if (connected) {
-            //CF.log("System " + system + " connected with " + remote);
+            //Utils.debugLog("System " + system + " connected with " + remote);
         }
         else {
             if (remote == null) {
-                //CF.log("Initial status: system " + system + " is not connected.");
+                //Utils.debugLog("Initial status: system " + system + " is not connected.");
             }
             else {
-                //CF.log("System " + system + " disconnected from " + remote);
+                //Utils.debugLog("System " + system + " disconnected from " + remote);
                 self.msgDone = true;
                 self.sendUnsubscribeMessage();
             }
@@ -152,7 +152,7 @@ var SonosPlayer = function () {
 
 
     self.subscribeEvents = function () {
-        CF.log("Subscribing to services for room: " + self.roomName);
+        //Utils.debugLog("Subscribing to services for room: " + self.roomName);
         for (var service in self.services) {
             self.subscribeEvent(self.IP, self.services[service].Service, self.services[service].Description);
         }
@@ -186,18 +186,18 @@ var SonosPlayer = function () {
             "NT":"upnp:event",
             "TIMEOUT":"Second-1800"
         };
-        //CF.log("Subscribing to service " + path + " for room: " + self.roomName);
+        //Utils.debugLog("Subscribing to service " + path + " for room: " + self.roomName);
         CF.request("http://" + ipaddr + ":1400" + path, "SUBSCRIBE", headers, function (status, headers, body) {
-            //CF.log(status + ", " + headers + ", " + body);
+            //Utils.debugLog(status + ", " + headers + ", " + body);
         });
 
     };
 
     self.unSubscribeEvents = function () {
-        CF.log("unsuscribing player " + self.roomName);
+        Utils.debugLog("Unsubscribing player " + self.roomName);
         CF.setSystemProperties("Unsubscribe_" + self.notificationSystemNumber, {enabled:true});
         for (var service in self.services) {
-            //CF.log("Subscribing to services for room: " + self.roomName);
+            //Utils.debugLog("Subscribing to services for room: " + self.roomName);
             self.unSubscribeEvent(self.IP, self.services[service].Service, self.services[service].Description, self.services[service].Sub);
         }
         //CF.setSystemProperties(self.systemNameSubscription, {address: sonosDevice.IP});
@@ -206,6 +206,22 @@ var SonosPlayer = function () {
          self.subscribeEvent(sonosDevice.IP, self.services[service].Service, self.services[service].Description);
          }*/
     };
+
+    self.unSubscribeExtraneousMessages = function (notifyMessage) {
+        //Utils.debugLog("the Notify message from the extraneous notify is:" + self.currentNotifyMessage);
+        var findRINCON = /RINCON_[A-Z0-9]{17}/;  //  get RINCON which is unique ID of componenet
+        var ipAddr = sonosPlayers.returnIPAddrFromRINCON(findRINCON.exec(self.currentNotifyMessage));
+        if (ipAddr !="") {
+
+        }
+        for (var service in self.services) {
+            Utils.debugLog("Unubscribing to extraneous notifications for services for room: " + self.roomName);
+            self.unSubscribeEvent(ipAddr, self.services[service].Service, self.services[service].Description, self.services[service].Sub);
+        }
+
+        // First get the ip address of the player that sent the message from the RINCON
+
+    }
 
     self.unSubscribeEvent = function (ipaddr, path, subURL, subIndex) {
 
@@ -228,11 +244,11 @@ var SonosPlayer = function () {
         self.unSubscribeCommands.push(msg);
         self.sendUnsubscribeMessage();
         //CF.send("Unsubscribe_" + self.notificationSystemNumber, msg);
-        //CF.log("Unsubscribe msg is : " + msg);
-        //CF.logObject(headers);
-        //CF.log("Subscribing to service " + path + " for room: " + self.roomName);
+        //Utils.debugLog("Unsubscribe msg is : " + msg);
+        //Utils.debugLogObject(headers);
+        //Utils.debugLog("Subscribing to service " + path + " for room: " + self.roomName);
         /*        CF.request("http://" + ipaddr + ":1400" + path, "UNSUBSCRIBE", headers, function (status, headers, body) {
-         CF.log(" Response to unsubcribe " + path + " for room " + self.roomName + " is : " + status + ", " + headers + ", " + body);
+         Utils.debugLog(" Response to unsubcribe " + path + " for room " + self.roomName + " is : " + status + ", " + headers + ", " + body);
          });*/
 
     };
@@ -241,25 +257,25 @@ var SonosPlayer = function () {
         if (self.msgDone && self.unSubscribeCommands.length != 0) {
             self.msgDone = false;
             var cmdtosend = self.unSubscribeCommands.shift();
-            //CF.log("Sending command: " + cmdtosend + " to " + self.roomName);
+            //Utils.debugLog("Sending command: " + cmdtosend + " to " + self.roomName);
             CF.send("Unsubscribe_" + self.notificationSystemNumber, cmdtosend);
         }
         else {
             if (self.unSubscribeCommands.length === 0)
-                CF.log("Unsubscribe Finished");
+                Utils.debugLog("Unsubscribe Finished");
         }
     }
 
     self.parseUnsubscribe = function (regex, data) {
-        //CF.log("SonosDiscovery Unsubscribe Returned:\n" + data);
+        //Utils.debugLog("SonosDiscovery Unsubscribe Returned:\n" + data);
     };
 
     self.parseFeedbackSubscription = function (regex, data) {
-        //CF.log("SonosDiscovery Subscription Returned:\n" + data);
+        //Utils.debugLog("SonosDiscovery Subscription Returned:\n" + data);
     };
 
     self.onProcessNotifyEvent = function (theSystem, feedback) {
-        //CF.log("got notify feedback of:\n" + feedback);
+        //Utils.debugLog("got notify feedback of:\n" + feedback);
         self.notifyMsgQueue.push(feedback);
         self.parseNotifyEvent();
     };
@@ -268,43 +284,45 @@ var SonosPlayer = function () {
         if (self.notifyMsgQueue.length != 0 && !self.parseUnderway) {
             self.parseUnderway = true;
             self.currentNotifyMessage = self.notifyMsgQueue.shift();
-            //CF.log("notify message is: " + self.currentNotifyMessage);
+            //Utils.debugLog("notify message is: " + self.currentNotifyMessage);
             var findSub = /sub[A-Z0-9]{10}/;
             self.lastSubIndex = findSub.exec(self.currentNotifyMessage);
-            //CF.log("Sub extension for player " + self.roomName + " incoming notify is: " + self.lastSubIndex);
+            //Utils.debugLog("Sub extension for player " + self.roomName + " incoming notify is: " + self.lastSubIndex);
             var description = self.currentNotifyMessage.substring(self.currentNotifyMessage.indexOf("NOTIFY /") + 8, self.currentNotifyMessage.indexOf("HTTP") - 1);
-            //CF.log("parsing notify event for player - " + self.roomName + " of type:" + description);
+            //Utils.debugLog("parsing notify event for player - " + self.roomName + " of type:" + description);
             var findRINCON = /RINCON_[A-Z0-9]{17}/;  //  get RINCON which is unique ID of componenet
 
-            // CF.log("Notify RINCON is:" + findRINCON.exec(self.currentNotifyMessage) + " and this RINCON is: " + self.RINCON);
+            // Utils.debugLog("Notify RINCON is:" + findRINCON.exec(self.currentNotifyMessage) + " and this RINCON is: " + self.RINCON);
             if (findRINCON.exec(self.currentNotifyMessage) != self.RINCON) {
-                CF.log("Got extraneous Notify from :" + findRINCON.exec(self.currentNotifyMessage) + " and this RINCON is: " + self.RINCON);
+                //Utils.debugLog("\r\nGot extraneous Notify from :" + findRINCON.exec(self.currentNotifyMessage) + " and this RINCON is: " + self.RINCON);
+                //Utils.debugLog("This is due to restarting the GUI before the subscription period expires which may mean the CommandFusion system assigned\r\neach Sonos Player maybe different but until we unsubscribe it will\r\ncontinue to get messages from that player\r\n\r\n Will now unsubscribe from this player");
+                //self.unSubscribeExtraneousMessages(self.currentNotifyMessage);
             }
             else {
                 switch (description) {
                     case "Alarm Clock":            //self.parseAlarmClock(response);
                         self.services[0].Sub = self.lastSubIndex;
-                        //CF.log("Got a alarm clock event with sub of: " + self.services[0].Sub);
+                        //Utils.debugLog("Got a alarm clock event with sub of: " + self.services[0].Sub);
                         break;
                     case "Music Services":        //self.parseMusicServices(response);
                         self.services[1].Sub = self.lastSubIndex;
-                        //CF.log("Got a music service event");
+                        //Utils.debugLog("Got a music service event");
                         break;
                     case "Audio In":            //self.parseAudioIn(response);
                         self.services[2].Sub = self.lastSubIndex;
-                        //CF.log("Got a audio in event");
+                        //Utils.debugLog("Got a audio in event");
                         break;
                     case "Device Properties":    //self.parseDeviceProperties(response);
                         self.services[3].Sub = self.lastSubIndex;
-                        //CF.log("Got a device properties event");
+                        //Utils.debugLog("Got a device properties event");
                         break;
                     case "System Properties":    //self.parseSystemProperties(response);
                         self.services[4].Sub = self.lastSubIndex;
-                        //CF.log("Got a system properties event");
+                        //Utils.debugLog("Got a system properties event");
                         break;
                     case "Zone Group":
                         self.services[5].Sub = self.lastSubIndex;
-                        //CF.log("Got a zone group event");
+                        //Utils.debugLog("Got a zone group event");
                         //self.currentNotifyMessage = '<e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><ZoneGroupState>&lt;ZoneGroups&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5828A1C401400&quot; ID=&quot;RINCON_000E5828A1C401400:79&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5828A1C401400&quot; Location=&quot;http://192.168.1.90:1400/xml/device_description.xml&quot; ZoneName=&quot;Record Player&quot; Icon=&quot;x-rincon-roomicon:den&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;55&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5855842601400&quot; ID=&quot;RINCON_000E5855842601400:23&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5855842601400&quot; Location=&quot;http://192.168.1.75:1400/xml/device_description.xml&quot; ZoneName=&quot;Office&quot; Icon=&quot;x-rincon-roomicon:office&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; ChannelMapSet=&quot;RINCON_000E5855842601400:LF,RF;RINCON_000E58980FE001400:SW,SW&quot; BootSeq=&quot;13&quot;/&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58980FE001400&quot; Location=&quot;http://192.168.1.62:1400/xml/device_description.xml&quot; ZoneName=&quot;Office&quot; Icon=&quot;x-rincon-roomicon:office&quot; Invisible=&quot;1&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; ChannelMapSet=&quot;RINCON_000E5855842601400:LF,RF;RINCON_000E58980FE001400:SW,SW&quot; BootSeq=&quot;15&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E585445BA01400&quot; ID=&quot;RINCON_000E585445BA01400:10&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E585445BA01400&quot; Location=&quot;http://192.168.1.65:1400/xml/device_description.xml&quot; ZoneName=&quot;Lauren Room&quot; Icon=&quot;x-rincon-roomicon:living&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;17&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5828228801400&quot; ID=&quot;RINCON_000E5828228801400:216&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5828228801400&quot; Location=&quot;http://192.168.1.67:1400/xml/device_description.xml&quot; ZoneName=&quot;Kitchen&quot; Icon=&quot;x-rincon-roomicon:kitchen&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;101&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E5828A20201400&quot; ID=&quot;RINCON_000E58283BD401400:187&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E5828A20201400&quot; Location=&quot;http://192.168.1.74:1400/xml/device_description.xml&quot; ZoneName=&quot;Master Bed&quot; Icon=&quot;x-rincon-roomicon:masterbedroom&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;101&quot;/&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58283BD401400&quot; Location=&quot;http://192.168.1.77:1400/xml/device_description.xml&quot; ZoneName=&quot;Bathroom&quot; Icon=&quot;x-rincon-roomicon:bathroom&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;114&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E58289F2E01400&quot; ID=&quot;RINCON_000E58289F2E01400:111&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58289F2E01400&quot; Location=&quot;http://192.168.1.76:1400/xml/device_description.xml&quot; ZoneName=&quot;Dining Room&quot; Icon=&quot;x-rincon-roomicon:dining&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;103&quot;/&gt;&lt;/ZoneGroup&gt;&lt;ZoneGroup Coordinator=&quot;RINCON_000E58283AC801400&quot; ID=&quot;RINCON_000E58283AC801400:112&quot;&gt;&lt;ZoneGroupMember UUID=&quot;RINCON_000E58283AC801400&quot; Location=&quot;http://192.168.1.73:1400/xml/device_description.xml&quot; ZoneName=&quot;TV Room&quot; Icon=&quot;x-rincon-roomicon:tvroom&quot; SoftwareVersion=&quot;19.3-53220b&quot; MinCompatibleVersion=&quot;19.1-00000&quot; BootSeq=&quot;105&quot;/&gt;&lt;/ZoneGroup&gt;&lt;/ZoneGroups&gt;</ZoneGroupState></e:property></e:propertyset>';
                         //self.currentNotifyMessage = Utils.unescape(self.currentNotifyMessage);
                         self.currentNotifyMessage = Utils.unescape(self.currentNotifyMessage);
@@ -314,18 +332,18 @@ var SonosPlayer = function () {
                         break;
                     case "Group Management":    //self.parseGroupManagement(response);
                         self.services[6].Sub = self.lastSubIndex;
-                        //CF.log("Got a group management event");
+                        //Utils.debugLog("Got a group management event");
                         break;
                     case "Content Directory":
                         self.services[7].Sub = self.lastSubIndex;
-                        CF.log("Got a content directory notify event");
+                        //Utils.debugLog("Got a content directory notify event");
                         if (self.zoneGroupNotificationCallback !== null) {
                             self.zoneGroupNotificationCallback("ContentDirectoryChange", self.RINCON);  // process this message in the GUI layer
                         }
                         break;
                     case "Render Control":
                         self.services[8].Sub = self.lastSubIndex;
-                        //CF.log("got a render control event");
+                        //Utils.debugLog("got a render control event");
                         self.parseRenderControl();
                         break;
                     case "Connection Manager":    //self.parseConnectionManager(response);
@@ -333,11 +351,11 @@ var SonosPlayer = function () {
                         break;
                     case "Transport Event":
                         self.services[10].Sub = self.lastSubIndex;
-                        CF.log("Processing a transport event for room:" + self.roomName);
+                        //Utils.debugLog("Processing a transport event for room:" + self.roomName);
                         self.parseTransportEvent();  // see transport event area
                         break;
                     default:
-                        CF.log("Invalid Response Type");
+                        Utils.debugLog("Invalid Response Type");
                 }
             }
             // Clear the flag saying we have finished processing the notification message
@@ -366,7 +384,7 @@ var SonosPlayer = function () {
 
     self.parseTransportEvent = function () {
         var response = self.extractTag(Utils.xmlUnescapeTransportNotify(self.currentNotifyMessage), "<LastChange>", "</LastChange>");
-        //CF.log("Received a transport event from Sonos of:" + Utils.xmlUnescape(response));
+        //Utils.debugLog("Received a transport event from Sonos of:" + Utils.xmlUnescape(response));
         var trackNo = "", artist = "", nextArtist = "", title = "", nextTitle = "", album = "", nextAlbum = "", art = "", nextArt = "";
         var transportState = "";
         var currentPlayMode = "";
@@ -399,7 +417,7 @@ var SonosPlayer = function () {
         self.nbrOfTracks = parseInt(xmlDoc.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/AVT/", 'NumberOfTracks')[0].getAttribute("val"));
         var tmpTrackNbr = parseInt(xmlDoc.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/AVT/", 'CurrentTrack')[0].getAttribute("val"));
         if (self.lastTrackNbr === -1) { // this means this must the first time we have come thorugh here so lastTrackNbr has to be the same as currentTrackNbr
-            CF.log("Setting the track number for player" + self.roomName);
+            Utils.debugLog("Setting the track number for player" + self.roomName);
             self.lastTrackNbr = tmpTrackNbr;
         }
         else {
@@ -417,7 +435,7 @@ var SonosPlayer = function () {
             self.streamContent = Utils.unescape(xmlCurrentTrackMetaData.getElementsByTagNameNS("urn:schemas-rinconnetworks-com:metadata-1-0/", 'streamContent')[0].textContent);
             if (self.radioShowMD != "") {// Must be a radio show
                 self.radioPlaying = true;
-                CF.log("radioPlaying is: " + self.radioPlaying);
+                Utils.debugLog("A radio channel is playing on player" + self.roomName);
                 self.currentTrackAlbum = self.streamContent;
                 self.currentTrackArtist = self.radioShowMD;
                 // the title is held in the EnqueuedTransportURIMetaData tag so need to get it form there
@@ -428,16 +446,34 @@ var SonosPlayer = function () {
             }
             else {
                 self.radioPlaying = false;
-                CF.log("radioPlaying is: " + self.radioPlaying);
-                self.currentTrackArtist = Utils.unescape(xmlCurrentTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'creator')[0].textContent);
-                self.currentTrackAlbum = Utils.unescape(xmlCurrentTrackMetaData.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", 'album')[0].textContent);
+                if (xmlCurrentTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'creator')[0] !== undefined) {
+                    self.currentTrackArtist = Utils.unescape(xmlCurrentTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'creator')[0].textContent);                }
+                else {
+                    self.currentTrackArtist = "Unknown";
+                }
+                if (xmlCurrentTrackMetaData.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", 'album')[0] !== undefined) {
+                    self.currentTrackAlbum = Utils.unescape(xmlCurrentTrackMetaData.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", 'album')[0].textContent);                }
+                else {
+                    self.currentTrackAlbum = "Unknown";
+                }
                 self.currentTrackName = Utils.unescape(xmlCurrentTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'title')[0].textContent);
+                if (xmlCurrentTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'title')[0] !== undefined) {
+                    self.currentTrackName = Utils.unescape(xmlCurrentTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'title')[0].textContent);
+                }
+                else {
+                    self.currentTrackName = "Unknown";
+                }
                 var nextTrackMetaData = Utils.xmlUnescapeTransportNotify(xmlDoc.getElementsByTagNameNS("urn:schemas-rinconnetworks-com:metadata-1-0/", 'NextTrackMetaData')[0].getAttribute("val"));
                 if (nextTrackMetaData != "") { // If there is nothing playing or in the queue will get "" back in this section
                     var xmlNextTrackMetaData = parser.parseFromString(nextTrackMetaData, 'text/xml');
                     self.nextTrackArtist = Utils.unescape(xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'creator')[0].textContent);
                     self.nextTrackAlbum = Utils.unescape(xmlNextTrackMetaData.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", 'album')[0].textContent);
                     self.nextTrackName = Utils.unescape(xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'title')[0].textContent);
+                }
+                else {
+                    self.nextTrackArtist = "Nothing Playing Next";
+                    self.nextTrackAlbum = "Nothing Playing Next";
+                    self.nextTrackAlbum = "Nothing Playing Next";
                 }
             }
             if (xmlCurrentTrackMetaData.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", "albumArtURI")[0] !== undefined) {
@@ -447,6 +483,13 @@ var SonosPlayer = function () {
                 self.currentTrackAlbumArtAddr = "coverart_blank.png";
             }
 
+        }
+        else {
+            Utils.debugLog("Player " + self.roomName + " has nothing playing");
+            /*self.currentTrackArtist = "Nothing Playing";
+            self.currentTrackAlbum = "Nothing Playing";
+            self.currentTrackAlbum = "Nothing Playing";
+            self.currentTrackAlbumArtAddr = "coverart_blank.png";*/
         }
         if (self.zoneGroupNotificationCallback !== null) {
             if (self.transportState === self.priorTransportState) {
@@ -465,7 +508,7 @@ var SonosPlayer = function () {
     self.parseTransportEventOLD = function () {
         var response = Utils.unescapeLight(self.currentNotifyMessage.substr(self.currentNotifyMessage.indexOf("<e:propertyset")));
         self.parseTransportEventNew();
-        //CF.log("Received a transport event from Sonos of:" + response);
+        //Utils.debugLog("Received a transport event from Sonos of:" + response);
         response = Utils.unescape(response);
         response = Utils.unescape(response);
 
@@ -493,10 +536,10 @@ var SonosPlayer = function () {
         currentPlayMode = self.extractTag(response, 'CurrentPlayMode val="', '"/>');
         currentTrackNbr = self.extractTag(response, 'CurrentTrack val="', '"/>');
         currentCrossFadeMode = parseInt(self.extractTag(response, 'CurrentCrossfadeMode val="', '"/>'));
-        //CF.log("transport state is: " + transportState);
+        //Utils.debugLog("transport state is: " + transportState);
         if (currentClass != "object.item.audioItem.audioBroadcast") {  //  indicates radio type
             self.radioPlaying = false;
-            CF.log("radioPlaying is: " + self.radioPlaying);
+            Utils.debugLog("radioPlaying is: " + self.radioPlaying);
             artist = self.extractTag(currentTrack, "<dc:creator>", "</dc:creator>");
             if (artist == "") {
                 artist = "None";
@@ -522,9 +565,9 @@ var SonosPlayer = function () {
         }
         else {
             self.radioPlaying = true;
-            CF.log("radioPlaying is: " + self.radioPlaying);
+            Utils.debugLog("radioPlaying is: " + self.radioPlaying);
             title = self.extractTag(response, 'restricted="true"><dc:title>', "</dc:title>");
-            //CF.log("Title is :" + title);
+            //Utils.debugLog("Title is :" + title);
             artist = self.extractTag(currentTrack, "<r:radioShowMd>", "</r:radioShowMd>");
             album = self.extractTag(currentTrack, "<r:streamContent>", "</r:streamContent>");
             art = self.host + self.extractTag(currentTrack, "<upnp:albumArtURI>", "</upnp:albumArtURI>");
@@ -570,7 +613,7 @@ var SonosPlayer = function () {
             }
         }
         // Get next track info
-        //CF.log("Prior transport state is: " + self.discoveredDevicesDetails[self.notifyingZone].priorTransportState);
+        //Utils.debugLog("Prior transport state is: " + self.discoveredDevicesDetails[self.notifyingZone].priorTransportState);
         /*if (self.discoveredDevicesDetails[self.notifyingZone].priorTransportState != self.discoveredDevicesDetails[self.notifyingZone].transportState) {
          self.receiveSonosTransportChange(self.discoveredDevicesDetails[self.notifyingZone]);
          }
@@ -602,7 +645,7 @@ var SonosPlayer = function () {
      */
 
     self.parseRenderControl = function () {
-        //CF.log("Render control event was: " + self.currentNotifyMessage);
+        //Utils.debugLog("Render control event was: " + self.currentNotifyMessage);
         var response = Utils.unescapeLight(self.currentNotifyMessage.substr(self.currentNotifyMessage.indexOf("<e:propertyset")));
         response = Utils.unescape(response);
         //response = Utils.unescape(response);
@@ -612,7 +655,7 @@ var SonosPlayer = function () {
             j = response.indexOf("/>", i);
             self.priorVolume = self.volume;
             self.volume = parseInt(self.extractTag(response.substring(i, j), 'val="', '"'));
-            //CF.log("Setting volume for: " + self.roomName + " and Volume is: " + self.volume)
+            //Utils.debugLog("Setting volume for: " + self.roomName + " and Volume is: " + self.volume)
         }
         i = response.indexOf("<Mute", j);
         if (i >= 0) {
@@ -620,13 +663,13 @@ var SonosPlayer = function () {
             j = response.indexOf("/>", i);
             var mute = parseInt(self.extractTag(response.substring(i, j), 'val="', '"'));
             self.mute = mute;
-            //CF.log("Setting mute for: " + self.roomName + "and mute is: " + self.mute)
+            //Utils.debugLog("Setting mute for: " + self.roomName + "and mute is: " + self.mute)
         }
         /*if (self.priorVolume != self.volume) {
          self.receiveSonosVolumeChange(self.discoveredDevicesDetails[self.notifyingZone]);
          }*/
         if (self.zoneGroupNotificationCallback !== null) {
-            //CF.log("Got heere");
+            //Utils.debugLog("Got heere");
             self.zoneGroupNotificationCallback("VolumeChangeEvent", self.RINCON);  // process this message in the GUI layer
         }
         //self.calcMuteAndZoneVolumeDetails();
@@ -646,7 +689,7 @@ var SonosPlayer = function () {
      */
 
     self.addZoneToGroup = function (zoneCoordinator) {
-        CF.log("zoneCoordinator is: " + zoneCoordinator);
+        Utils.debugLog("zoneCoordinator is: " + zoneCoordinator);
         self.AVTransportSetAVTransportURI("", 0, "x-rincon:" + zoneCoordinator, "");
     }
 
@@ -667,7 +710,7 @@ var SonosPlayer = function () {
      */
 
     self.getQueueForCurrentZone = function () {
-        CF.log("Getting queue for player" + self.roomName);
+        Utils.debugLog("Getting queue for player" + self.roomName);
         if (self.queueNumberReturned != self.queueTotalMatches) {
             self.ContentDirectoryBrowse(self.processGetQueueForCurrentZone, "Q:0", "BrowseDirectChildren", "dc:title,res,dc:creator,upnp:artist,upnp:album,upnp:albumArtURI", self.queueNumberReturned, self.queueRowsToReturn, "");
         }
@@ -677,6 +720,7 @@ var SonosPlayer = function () {
     self.resetQueueNumberReturned = function () {
         self.queueNumberReturned = 0;
         self.queueTotalMatches = -1;
+        self.lastTrackNbr = -1;
     }
 
     //<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="Q:0/1" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:08">x-sonos-spotify:spotify%3atrack%3a4OXzeSAf0HMA2eWZkm5lIu?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a4OXzeSAf0HMA2eWZkm5lIu%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Who Needs Love (Like That)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/2" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:21">x-sonos-spotify:spotify%3atrack%3a1L5e14EUQwWLJxpvCq2qiP?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a1L5e14EUQwWLJxpvCq2qiP%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Heavenly Action</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/3" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:08">x-sonos-spotify:spotify%3atrack%3a5NEWfI5edqaEqwG8uiyMdU?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a5NEWfI5edqaEqwG8uiyMdU%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Oh L&apos;Amour</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/4" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:40">x-sonos-spotify:spotify%3atrack%3a5deeOokTNRlC6jpca4lJOU?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a5deeOokTNRlC6jpca4lJOU%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Sometimes</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/5" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:47">x-sonos-spotify:spotify%3atrack%3a335D4JgaPjSprSsrcnhuMV?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a335D4JgaPjSprSsrcnhuMV%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>It Doesn&apos;t Have to Be</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/6" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:39">x-sonos-spotify:spotify%3atrack%3a6fKkXpS7reflhBTg7lWIJJ?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a6fKkXpS7reflhBTg7lWIJJ%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Victim Of Love</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/7" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:07">x-sonos-spotify:spotify%3atrack%3a1KP0TnK3JbijjQ0HCVXcFa?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a1KP0TnK3JbijjQ0HCVXcFa%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>The Circus</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/8" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:04">x-sonos-spotify:spotify%3atrack%3a51oSXA7VrMa3Y99g8ndACE?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a51oSXA7VrMa3Y99g8ndACE%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Ship Of Fools</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/9" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:44">x-sonos-spotify:spotify%3atrack%3a034rX32E6hTm4aJUAIZWZ0?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a034rX32E6hTm4aJUAIZWZ0%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Chains Of Love</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/10" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:32">x-sonos-spotify:spotify%3atrack%3a2Nd4yd1Rd6OnAe5Jun23dX?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a2Nd4yd1Rd6OnAe5Jun23dX%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>A Little Respect</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/11" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:02:55">x-sonos-spotify:spotify%3atrack%3a2Mcfm7O3n8HebvW5PsD14j?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a2Mcfm7O3n8HebvW5PsD14j%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Stop!</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/12" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:06">x-sonos-spotify:spotify%3atrack%3a3ZSx82s8h4sDdJ0bdeOzJf?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a3ZSx82s8h4sDdJ0bdeOzJf%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Drama!</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/13" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:59">x-sonos-spotify:spotify%3atrack%3a3a1UwFICooVrv1pc21Hzcd?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a3a1UwFICooVrv1pc21Hzcd%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>You Surround Me</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/14" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:20">x-sonos-spotify:spotify%3atrack%3a56wmmJoYu05sS26pI6KMFv?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a56wmmJoYu05sS26pI6KMFv%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Blue Savannah</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/15" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:39">x-sonos-spotify:spotify%3atrack%3a0HaHFdtGKubnXE8cwZI3aQ?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a0HaHFdtGKubnXE8cwZI3aQ%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Star</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/16" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:30">x-sonos-spotify:spotify%3atrack%3a1uWe3xPFGnUBIUzM3JBqFO?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a1uWe3xPFGnUBIUzM3JBqFO%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Chorus</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/17" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:57">x-sonos-spotify:spotify%3atrack%3a1cFCKtC942n5wys91JjNNs?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a1cFCKtC942n5wys91JjNNs%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Love To Hate You</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/18" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:18">x-sonos-spotify:spotify%3atrack%3a1Cxsirn2ktwKukwe9dALOT?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a1Cxsirn2ktwKukwe9dALOT%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Am I Right?</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/19" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:56">x-sonos-spotify:spotify%3atrack%3a1wlUeXx7UXMYxMLEkFiRgw?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a1wlUeXx7UXMYxMLEkFiRgw%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Breath Of Life</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/20" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:46">x-sonos-spotify:spotify%3atrack%3a6jUwtzWwl0yYDxJ62Oa4U7?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a6jUwtzWwl0yYDxJ62Oa4U7%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Take A Chance On Me</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/21" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:02">x-sonos-spotify:spotify%3atrack%3a1o84mlZz4sO3mj2ou7cJYG?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a1o84mlZz4sO3mj2ou7cJYG%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Who Needs Love (Like That) (Hamburg Mix)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/22" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:03">x-sonos-spotify:spotify%3atrack%3a7eKmqH5QNAYS6CWFhec1tz?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a7eKmqH5QNAYS6CWFhec1tz%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Always</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/23" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:12">x-sonos-spotify:spotify%3atrack%3a5FMv5knXPc2uV8pTVTc8n1?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a5FMv5knXPc2uV8pTVTc8n1%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Run To The Sun</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/24" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:01">x-sonos-spotify:spotify%3atrack%3a6E9qZ2n1PegvgWlIGfhc7t?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a6E9qZ2n1PegvgWlIGfhc7t%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>I Love Saturday</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/25" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:43">x-sonos-spotify:spotify%3atrack%3a4K40MaTk3l0GCp6EFXpYEg?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a4K40MaTk3l0GCp6EFXpYEg%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Stay With Me</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/26" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:24">x-sonos-spotify:spotify%3atrack%3a26mZMd3GbV9VRMCKLxkzDA?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a26mZMd3GbV9VRMCKLxkzDA%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Fingers And Thumbs (Cold Summer&apos;s Day)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/27" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:08">x-sonos-spotify:spotify%3atrack%3a5Hj3rbWkDuZoaopJnDdZaR?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a5Hj3rbWkDuZoaopJnDdZaR%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Rock Me Gently</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/28" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:28">x-sonos-spotify:spotify%3atrack%3a36i1KyGQCEuuXM4OH7rvot?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a36i1KyGQCEuuXM4OH7rvot%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>In My Arms</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/29" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:48">x-sonos-spotify:spotify%3atrack%3a6vdvPwIvmp6aYLz8FKwBne?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a6vdvPwIvmp6aYLz8FKwBne%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Don&apos;t Say Your Love Is Killing Me</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/30" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:09">x-sonos-spotify:spotify%3atrack%3a0LHEt7VMbc9lcjDvryg2fg?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a0LHEt7VMbc9lcjDvryg2fg%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Rain (Al Stone Mix)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/31" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:02:55">x-sonos-spotify:spotify%3atrack%3a2xVdIYS5dUOD9eIYY1yR4v?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a2xVdIYS5dUOD9eIYY1yR4v%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Freedom</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/32" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:16">x-sonos-spotify:spotify%3atrack%3a4oSI6RG55KsY6axf9XrH2w?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a4oSI6RG55KsY6axf9XrH2w%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Moon And The Sky (JC&apos;s Heaven Scent Radio Re-Work)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/33" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:19">x-sonos-spotify:spotify%3atrack%3a4uKCzLFNVTv5lTpWAFMPGE?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a4uKCzLFNVTv5lTpWAFMPGE%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Solsbury Hill</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/34" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:29">x-sonos-spotify:spotify%3atrack%3a4yAyPgRYdEi6v3EJakPKby?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a4yAyPgRYdEi6v3EJakPKby%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Make Me Smile (Come Up And See Me)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/35" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:49">x-sonos-spotify:spotify%3atrack%3a5LVAio7ffVFGUNI4nARJlN?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a5LVAio7ffVFGUNI4nARJlN%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Breathe</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/36" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:45">x-sonos-spotify:spotify%3atrack%3a4yZYpqmIFunkvGdl1m60dp?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a4yZYpqmIFunkvGdl1m60dp%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Don&apos;t Say You Love Me</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/37" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:30">x-sonos-spotify:spotify%3atrack%3a5jEzze2Fz6j5stL9biRcVv?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a5jEzze2Fz6j5stL9biRcVv%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Here I Go Impossible Again</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/38" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:04:03">x-sonos-spotify:spotify%3atrack%3a50hPBeoT2CwGoXifpUJW71?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a50hPBeoT2CwGoXifpUJW71%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>I Could Fall In Love With You</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/39" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:15">x-sonos-spotify:spotify%3atrack%3a5uKMPEXirAqJr5156MkPCm?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a5uKMPEXirAqJr5156MkPCm%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Sunday Girl</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/40" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:28">x-sonos-spotify:spotify%3atrack%3a2kblGuSqxOGnFEO7M3u4TB?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a2kblGuSqxOGnFEO7M3u4TB%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Storm In A Teacup</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/41" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:59">x-sonos-spotify:spotify%3atrack%3a4C2bzVg1ynViFwNwKgsWwQ?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a4C2bzVg1ynViFwNwKgsWwQ%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Always (2009 Mix)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/42" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:09">x-sonos-spotify:spotify%3atrack%3a51ffVlymm6lqbMFYa0cXAe?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a51ffVlymm6lqbMFYa0cXAe%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Oh L&apos;Amour (August Mix)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/43" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:50">x-sonos-spotify:spotify%3atrack%3a3vF1894QaxBe1Vh30Lv8ky?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a3vF1894QaxBe1Vh30Lv8ky%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>Boy (Acoustic Union Street)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item><item id="Q:0/44" parentID="Q:0" restricted="true"><res protocolInfo="sonos.com-spotify:*:audio/x-spotify:*" duration="0:03:31">x-sonos-spotify:spotify%3atrack%3a0sfLvLEFnQj9CszRpsDtO8?sid=9&amp;flags=0</res><upnp:albumArtURI>/getaa?s=1&amp;u=x-sonos-spotify%3aspotify%253atrack%253a0sfLvLEFnQj9CszRpsDtO8%3fsid%3d9%26flags%3d0</upnp:albumArtURI><dc:title>All This Time Still Falling Out Of Love (Original Mix)</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class><dc:creator>Erasure</dc:creator><upnp:album>Total Pop! - The First 40 Hits</upnp:album></item></DIDL-Lite>
@@ -692,10 +736,10 @@ var SonosPlayer = function () {
         var unc = "";
         var res = "";
         var art = "";
-        //CF.log("body is: " + body);
-        //CF.log("Number of results returned is: " + response.NumberReturned);
-        //CF.log("Total matches is: " + response.TotalMatches)
-        //CF.log("Total result returned is: " + self.queueNumberReturned)
+        //Utils.debugLog("body is: " + body);
+        //Utils.debugLog("Number of results returned is: " + response.NumberReturned);
+        //Utils.debugLog("Total matches is: " + response.TotalMatches)
+        //Utils.debugLog("Total result returned is: " + self.queueNumberReturned)
         var parser = new DOMParser();
         var xmlDoc = parser.parseFromString(body, 'text/xml');
         var queueItems = xmlDoc.getElementsByTagName("item");
@@ -705,7 +749,7 @@ var SonosPlayer = function () {
             art = self.host + Utils.unescape(queueItems[i].childNodes[1].childNodes[0].nodeValue);
             title = queueItems[i].childNodes[2].childNodes[0].nodeValue;
             artist = queueItems[i].childNodes[4].childNodes[0].nodeValue;
-            //CF.log("Artist is: " + artist + " title is: " + title + " art is:" + art + " track no is: " + trackNo);
+            //Utils.debugLog("Artist is: " + artist + " title is: " + title + " art is:" + art + " track no is: " + trackNo);
             self.queueData.push({title:title, artist:artist, art:art, trackNo:trackNo});
         }
         //CF.listAdd("l48", joinData);
@@ -759,21 +803,21 @@ var SonosPlayer = function () {
 
     self.processGetPositionInfo = function (response) {
         var body = response.TrackMetaData;
-        //CF.log("get posinfo body is :" + body);
+        //Utils.debugLog("get posinfo body is :" + body);
         //var xotree = new XML.ObjTree();
         //var dumper = new JKL.Dumper();
-        //CF.log("parseString is: " + parseString);
+        //Utils.debugLog("parseString is: " + parseString);
         //var tree = xotree.parseXML(response.TrackMetaData);
-        //CF.log("JSON version is: " + dumper.dump(tree));
+        //Utils.debugLog("JSON version is: " + dumper.dump(tree));
         if (self.extractTag(body, "<r:streamContent>", "</r:streamContent>") == "" && (body.indexOf("application/octet-stream") == -1)) {
-            /*CF.log("Get position info track metadata is: "+ response.TrackMetaData);
-             CF.log("Get position info track  is: "+ response.Track);
-             CF.log("Get position info track duration  is: "+ response.TrackDuration);
-             CF.log("Get position info TrackURI is: "+ response.TrackURI);
-             CF.log("Get position info track RelTime is: "+ response.RelTime);
-             CF.log("Get position info track AbsTime is: "+ response.AbsTime);
-             CF.log("Get position info track RelCount is: "+ response.RelCount);
-             CF.log("Get position info track AbsCount is: "+ response.AbsCount);*/
+            /*Utils.debugLog("Get position info track metadata is: "+ response.TrackMetaData);
+             Utils.debugLog("Get position info track  is: "+ response.Track);
+             Utils.debugLog("Get position info track duration  is: "+ response.TrackDuration);
+             Utils.debugLog("Get position info TrackURI is: "+ response.TrackURI);
+             Utils.debugLog("Get position info track RelTime is: "+ response.RelTime);
+             Utils.debugLog("Get position info track AbsTime is: "+ response.AbsTime);
+             Utils.debugLog("Get position info track RelCount is: "+ response.RelCount);
+             Utils.debugLog("Get position info track AbsCount is: "+ response.AbsCount);*/
             var durationSeconds = self.turnSonosTimeToSecs(response.TrackDuration);
             var currentSeconds = self.turnSonosTimeToSecs(response.RelTime);
             /*CF.setJoin("a12", currentSeconds/durationSeconds*65536)
@@ -782,10 +826,10 @@ var SonosPlayer = function () {
             var artist = "", title = "", art = "", album = "";
             artist = self.extractTag(body, "<dc:creator>", "</dc:creator>");
             if (artist == "") { // artise will come back as "" if there is nothing playing
-                artist = "None";
-                title = "None";
-                art = "";
-                album = "None"
+                artist = "Nothing Playing";
+                title = "Nothing Playing";
+                art = "coverart_blank.png";
+                album = "Nothing Playing"
             }
             else {
                 title = Utils.unescape(self.extractTag(body, "<dc:title>", "</dc:title>"));
@@ -845,10 +889,10 @@ var SonosPlayer = function () {
      */
     self.sendSoapRequest = function (url, xml, soapAction, callback) {
         url = self.host + url;
-        CF.log("SOAP call made with url of: " + url + " and SOAP Action is: " + soapAction);
+        Utils.debugLog("SOAP call made with url of: " + url + " and SOAP Action is: " + soapAction);
         var response = CF.request(url, "POST", {"SOAPAction":soapAction}, xml, function (status, headers, body) {
             if (status == 200) {
-                CF.log("POST succeeded for SOAP Action: " + soapAction);
+                Utils.debugLog("POST succeeded for SOAP Action: " + soapAction);
                 body = Utils.unescape(body);
                 if (typeof callback === 'function') {
                     callback(true);
@@ -859,7 +903,7 @@ var SonosPlayer = function () {
                 }
             }
             else {
-                CF.log("POST failed with status " + status + ' for SOAP Action: ' + soapAction);
+                Utils.debugLog("POST failed with status " + status + ' for SOAP Action: ' + soapAction);
                 return false;
             }
         });
@@ -910,7 +954,7 @@ var SonosPlayer = function () {
                 callback({"CurrentTimeFormat":xmlDoc.getElementsByTagName("CurrentTimeFormat")[0].textContent, "CurrentDateFormat":xmlDoc.getElementsByTagName("CurrentDateFormat")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -936,7 +980,7 @@ var SonosPlayer = function () {
                 callback({"Index":xmlDoc.getElementsByTagName("Index")[0].textContent, "AutoAdjustDst":xmlDoc.getElementsByTagName("AutoAdjustDst")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -954,7 +998,7 @@ var SonosPlayer = function () {
                 callback({"Index":xmlDoc.getElementsByTagName("Index")[0].textContent, "AutoAdjustDst":xmlDoc.getElementsByTagName("AutoAdjustDst")[0].textContent, "CurrentTimeZone":xmlDoc.getElementsByTagName("CurrentTimeZone")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -972,7 +1016,7 @@ var SonosPlayer = function () {
                 callback({"TimeZone":xmlDoc.getElementsByTagName("TimeZone")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -998,7 +1042,7 @@ var SonosPlayer = function () {
                 callback({"CurrentTimeServer":xmlDoc.getElementsByTagName("CurrentTimeServer")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1024,7 +1068,7 @@ var SonosPlayer = function () {
                 callback({"HouseholdUTCTime":xmlDoc.getElementsByTagName("HouseholdUTCTime")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1042,7 +1086,7 @@ var SonosPlayer = function () {
                 callback({"CurrentUTCTime":xmlDoc.getElementsByTagName("CurrentUTCTime")[0].textContent, "CurrentLocalTime":xmlDoc.getElementsByTagName("CurrentLocalTime")[0].textContent, "CurrentTimeZone":xmlDoc.getElementsByTagName("CurrentTimeZone")[0].textContent, "CurrentTimeGeneration":xmlDoc.getElementsByTagName("CurrentTimeGeneration")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1060,7 +1104,7 @@ var SonosPlayer = function () {
                 callback({"AssignedID":xmlDoc.getElementsByTagName("AssignedID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1094,7 +1138,7 @@ var SonosPlayer = function () {
                 callback({"CurrentAlarmList":xmlDoc.getElementsByTagName("CurrentAlarmList")[0].textContent, "CurrentAlarmListVersion":xmlDoc.getElementsByTagName("CurrentAlarmListVersion")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1120,7 +1164,7 @@ var SonosPlayer = function () {
                 callback({"CurrentDailyIndexRefreshTime":xmlDoc.getElementsByTagName("CurrentDailyIndexRefreshTime")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1138,7 +1182,7 @@ var SonosPlayer = function () {
                 callback({"SessionId":xmlDoc.getElementsByTagName("SessionId")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1156,7 +1200,7 @@ var SonosPlayer = function () {
                 callback({"AvailableServiceDescriptorList":xmlDoc.getElementsByTagName("AvailableServiceDescriptorList")[0].textContent, "AvailableServiceTypeList":xmlDoc.getElementsByTagName("AvailableServiceTypeList")[0].textContent, "AvailableServiceListVersion":xmlDoc.getElementsByTagName("AvailableServiceListVersion")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1174,7 +1218,7 @@ var SonosPlayer = function () {
                 callback({"CurrentTransportSettings":xmlDoc.getElementsByTagName("CurrentTransportSettings")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1208,7 +1252,7 @@ var SonosPlayer = function () {
                 callback({"CurrentName":xmlDoc.getElementsByTagName("CurrentName")[0].textContent, "CurrentIcon":xmlDoc.getElementsByTagName("CurrentIcon")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1234,7 +1278,7 @@ var SonosPlayer = function () {
                 callback({"CurrentLeftLineInLevel":xmlDoc.getElementsByTagName("CurrentLeftLineInLevel")[0].textContent, "CurrentRightLineInLevel":xmlDoc.getElementsByTagName("CurrentRightLineInLevel")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1268,7 +1312,7 @@ var SonosPlayer = function () {
                 callback({"CurrentLEDState":xmlDoc.getElementsByTagName("CurrentLEDState")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1294,7 +1338,7 @@ var SonosPlayer = function () {
                 callback({"CurrentInvisible":xmlDoc.getElementsByTagName("CurrentInvisible")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1352,7 +1396,7 @@ var SonosPlayer = function () {
                 callback({"CurrentZoneName":xmlDoc.getElementsByTagName("CurrentZoneName")[0].textContent, "CurrentIcon":xmlDoc.getElementsByTagName("CurrentIcon")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1370,7 +1414,7 @@ var SonosPlayer = function () {
                 callback({"CurrentHouseholdID":xmlDoc.getElementsByTagName("CurrentHouseholdID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1388,7 +1432,7 @@ var SonosPlayer = function () {
                 callback({"SerialNumber":xmlDoc.getElementsByTagName("SerialNumber")[0].textContent, "SoftwareVersion":xmlDoc.getElementsByTagName("SoftwareVersion")[0].textContent, "DisplaySoftwareVersion":xmlDoc.getElementsByTagName("DisplaySoftwareVersion")[0].textContent, "HardwareVersion":xmlDoc.getElementsByTagName("HardwareVersion")[0].textContent, "IPAddress":xmlDoc.getElementsByTagName("IPAddress")[0].textContent, "MACAddress":xmlDoc.getElementsByTagName("MACAddress")[0].textContent, "CopyrightInfo":xmlDoc.getElementsByTagName("CopyrightInfo")[0].textContent, "ExtraInfo":xmlDoc.getElementsByTagName("ExtraInfo")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1414,7 +1458,7 @@ var SonosPlayer = function () {
                 callback({"IncludeLinkedZones":xmlDoc.getElementsByTagName("IncludeLinkedZones")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1440,7 +1484,7 @@ var SonosPlayer = function () {
                 callback({"RoomUUID":xmlDoc.getElementsByTagName("RoomUUID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1466,7 +1510,7 @@ var SonosPlayer = function () {
                 callback({"CurrentVolume":xmlDoc.getElementsByTagName("CurrentVolume")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1500,7 +1544,7 @@ var SonosPlayer = function () {
                 callback({"UseVolume":xmlDoc.getElementsByTagName("UseVolume")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1534,7 +1578,7 @@ var SonosPlayer = function () {
                 callback({"StringValue":xmlDoc.getElementsByTagName("StringValue")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1552,7 +1596,7 @@ var SonosPlayer = function () {
                 callback({"StringValue":xmlDoc.getElementsByTagName("StringValue")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1578,7 +1622,7 @@ var SonosPlayer = function () {
                 callback({"WebCode":xmlDoc.getElementsByTagName("WebCode")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1604,7 +1648,7 @@ var SonosPlayer = function () {
                 callback({"IsExpired":xmlDoc.getElementsByTagName("IsExpired")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1670,7 +1714,7 @@ var SonosPlayer = function () {
                 callback({"UpdateItem":xmlDoc.getElementsByTagName("UpdateItem")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1704,7 +1748,7 @@ var SonosPlayer = function () {
                 callback({"DiagnosticID":xmlDoc.getElementsByTagName("DiagnosticID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1722,7 +1766,7 @@ var SonosPlayer = function () {
                 callback({"CurrentTransportSettings":xmlDoc.getElementsByTagName("CurrentTransportSettings")[0].textContent, "GroupUUIDJoined":xmlDoc.getElementsByTagName("GroupUUIDJoined")[0].textContent, "ResetVolumeAfter":xmlDoc.getElementsByTagName("ResetVolumeAfter")[0].textContent, "VolumeAVTransportURI":xmlDoc.getElementsByTagName("VolumeAVTransportURI")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1756,7 +1800,7 @@ var SonosPlayer = function () {
                 callback({"SearchCaps":xmlDoc.getElementsByTagName("SearchCaps")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1774,7 +1818,7 @@ var SonosPlayer = function () {
                 callback({"SortCaps":xmlDoc.getElementsByTagName("SortCaps")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1792,7 +1836,7 @@ var SonosPlayer = function () {
                 callback({"Id":xmlDoc.getElementsByTagName("Id")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1810,7 +1854,7 @@ var SonosPlayer = function () {
                 callback({"AlbumArtistDisplayOption":xmlDoc.getElementsByTagName("AlbumArtistDisplayOption")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1828,7 +1872,7 @@ var SonosPlayer = function () {
                 callback({"LastIndexChange":xmlDoc.getElementsByTagName("LastIndexChange")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1838,7 +1882,7 @@ var SonosPlayer = function () {
         var url = '/MediaServer/ContentDirectory/Control';
         var SOAPAction = 'urn:schemas-upnp-org:service:ContentDirectory:1#Browse';
         var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:Browse xmlns:u="urn:schemas-upnp-org:service:ContentDirectory:1"><ObjectID>' + ObjectID + '</ObjectID><BrowseFlag>' + BrowseFlag + '</BrowseFlag><Filter>' + Filter + '</Filter><StartingIndex>' + StartingIndex + '</StartingIndex><RequestedCount>' + RequestedCount + '</RequestedCount><SortCriteria>' + SortCriteria + '</SortCriteria></u:Browse></s:Body></s:Envelope>';
-        //CF.log("Content Broswe is: " + SOAPBody);
+        //Utils.debugLog("Content Broswe is: " + SOAPBody);
         var url = self.host + url;
         CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
             if (status == 200) {
@@ -1847,7 +1891,7 @@ var SonosPlayer = function () {
                 callback({"Result":xmlDoc.getElementsByTagName("Result")[0].textContent, "NumberReturned":xmlDoc.getElementsByTagName("NumberReturned")[0].textContent, "TotalMatches":xmlDoc.getElementsByTagName("TotalMatches")[0].textContent, "UpdateID":xmlDoc.getElementsByTagName("UpdateID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1865,7 +1909,7 @@ var SonosPlayer = function () {
                 callback({"StartingIndex":xmlDoc.getElementsByTagName("StartingIndex")[0].textContent, "UpdateID":xmlDoc.getElementsByTagName("UpdateID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1883,7 +1927,7 @@ var SonosPlayer = function () {
                 callback({"TotalPrefixes":xmlDoc.getElementsByTagName("TotalPrefixes")[0].textContent, "PrefixAndIndexCSV":xmlDoc.getElementsByTagName("PrefixAndIndexCSV")[0].textContent, "UpdateID":xmlDoc.getElementsByTagName("UpdateID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1901,7 +1945,7 @@ var SonosPlayer = function () {
                 callback({"ObjectID":xmlDoc.getElementsByTagName("ObjectID")[0].textContent, "Result":xmlDoc.getElementsByTagName("Result")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1951,7 +1995,7 @@ var SonosPlayer = function () {
                 callback({"IsIndexing":xmlDoc.getElementsByTagName("IsIndexing")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1969,7 +2013,7 @@ var SonosPlayer = function () {
                 callback({"IsBrowseable":xmlDoc.getElementsByTagName("IsBrowseable")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -1995,7 +2039,7 @@ var SonosPlayer = function () {
                 callback({"Source":xmlDoc.getElementsByTagName("Source")[0].textContent, "Sink":xmlDoc.getElementsByTagName("Sink")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2013,7 +2057,7 @@ var SonosPlayer = function () {
                 callback({"ConnectionIDs":xmlDoc.getElementsByTagName("ConnectionIDs")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2031,7 +2075,7 @@ var SonosPlayer = function () {
                 callback({"RcsID":xmlDoc.getElementsByTagName("RcsID")[0].textContent, "AVTransportID":xmlDoc.getElementsByTagName("AVTransportID")[0].textContent, "ProtocolInfo":xmlDoc.getElementsByTagName("ProtocolInfo")[0].textContent, "PeerConnectionManager":xmlDoc.getElementsByTagName("PeerConnectionManager")[0].textContent, "PeerConnectionID":xmlDoc.getElementsByTagName("PeerConnectionID")[0].textContent, "Direction":xmlDoc.getElementsByTagName("Direction")[0].textContent, "Status":xmlDoc.getElementsByTagName("Status")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2049,7 +2093,7 @@ var SonosPlayer = function () {
                 callback({"CurrentMute":xmlDoc.getElementsByTagName("CurrentMute")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2075,7 +2119,7 @@ var SonosPlayer = function () {
                 callback({"Bass":xmlDoc.getElementsByTagName("Bass")[0].textContent, "Treble":xmlDoc.getElementsByTagName("Treble")[0].textContent, "Loudness":xmlDoc.getElementsByTagName("Loudness")[0].textContent, "LeftVolume":xmlDoc.getElementsByTagName("LeftVolume")[0].textContent, "RightVolume":xmlDoc.getElementsByTagName("RightVolume")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2101,7 +2145,7 @@ var SonosPlayer = function () {
                 callback({"CurrentVolume":xmlDoc.getElementsByTagName("CurrentVolume")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2127,7 +2171,7 @@ var SonosPlayer = function () {
                 callback({"NewVolume":xmlDoc.getElementsByTagName("NewVolume")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2145,7 +2189,7 @@ var SonosPlayer = function () {
                 callback({"CurrentVolume":xmlDoc.getElementsByTagName("CurrentVolume")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2171,7 +2215,7 @@ var SonosPlayer = function () {
                 callback({"MinValue":xmlDoc.getElementsByTagName("MinValue")[0].textContent, "MaxValue":xmlDoc.getElementsByTagName("MaxValue")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2189,7 +2233,7 @@ var SonosPlayer = function () {
                 callback({"CurrentBass":xmlDoc.getElementsByTagName("CurrentBass")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2215,7 +2259,7 @@ var SonosPlayer = function () {
                 callback({"CurrentTreble":xmlDoc.getElementsByTagName("CurrentTreble")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2241,7 +2285,7 @@ var SonosPlayer = function () {
                 callback({"CurrentValue":xmlDoc.getElementsByTagName("CurrentValue")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2267,7 +2311,7 @@ var SonosPlayer = function () {
                 callback({"CurrentLoudness":xmlDoc.getElementsByTagName("CurrentLoudness")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2293,7 +2337,7 @@ var SonosPlayer = function () {
                 callback({"CurrentSupportsFixed":xmlDoc.getElementsByTagName("CurrentSupportsFixed")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2311,7 +2355,7 @@ var SonosPlayer = function () {
                 callback({"CurrentFixed":xmlDoc.getElementsByTagName("CurrentFixed")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2337,7 +2381,7 @@ var SonosPlayer = function () {
                 callback({"CurrentHeadphoneConnected":xmlDoc.getElementsByTagName("CurrentHeadphoneConnected")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2355,7 +2399,7 @@ var SonosPlayer = function () {
                 callback({"RampTime":xmlDoc.getElementsByTagName("RampTime")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2389,7 +2433,7 @@ var SonosPlayer = function () {
                 callback({"Source":xmlDoc.getElementsByTagName("Source")[0].textContent, "Sink":xmlDoc.getElementsByTagName("Sink")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2407,7 +2451,7 @@ var SonosPlayer = function () {
                 callback({"ConnectionIDs":xmlDoc.getElementsByTagName("ConnectionIDs")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2425,7 +2469,7 @@ var SonosPlayer = function () {
                 callback({"RcsID":xmlDoc.getElementsByTagName("RcsID")[0].textContent, "AVTransportID":xmlDoc.getElementsByTagName("AVTransportID")[0].textContent, "ProtocolInfo":xmlDoc.getElementsByTagName("ProtocolInfo")[0].textContent, "PeerConnectionManager":xmlDoc.getElementsByTagName("PeerConnectionManager")[0].textContent, "PeerConnectionID":xmlDoc.getElementsByTagName("PeerConnectionID")[0].textContent, "Direction":xmlDoc.getElementsByTagName("Direction")[0].textContent, "Status":xmlDoc.getElementsByTagName("Status")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2435,7 +2479,7 @@ var SonosPlayer = function () {
         var url = '/MediaRenderer/AVTransport/Control';
         var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#SetAVTransportURI';
         var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><CurrentURI>' + Utils.escape(CurrentURI) + '</CurrentURI><CurrentURIMetaData>' + Utils.escape(CurrentURIMetaData) + '</CurrentURIMetaData></u:SetAVTransportURI></s:Body></s:Envelope>';
-        CF.log("SOAPBody for SetURI is:" + SOAPBody);
+        Utils.debugLog("SOAPBody for SetURI is:" + SOAPBody);
         self.sendSoapRequest(url, SOAPBody, SOAPAction, callback);
     }
 
@@ -2445,7 +2489,7 @@ var SonosPlayer = function () {
         var SOAPAction = 'urn:schemas-upnp-org:service:AVTransport:1#AddURIToQueue';
         var SOAPBody = '<?xml version="1.0" encoding="utf-8"?><s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:AddURIToQueue xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>' + InstanceID + '</InstanceID><EnqueuedURI>' + Utils.escape(EnqueuedURI) + '</EnqueuedURI><EnqueuedURIMetaData>' + Utils.escape(EnqueuedURIMetaData) + '</EnqueuedURIMetaData><DesiredFirstTrackNumberEnqueued>' + DesiredFirstTrackNumberEnqueued + '</DesiredFirstTrackNumberEnqueued><EnqueueAsNext>' + EnqueueAsNext + '</EnqueueAsNext></u:AddURIToQueue></s:Body></s:Envelope>';
         var url = self.host + url;
-        CF.log("SOAPBody for AddURI is:" + SOAPBody);
+        Utils.debugLog("SOAPBody for AddURI is:" + SOAPBody);
         CF.request(url, 'POST', {'SOAPAction':SOAPAction}, SOAPBody, function (status, headers, body) {
             if (status == 200) {
                 var parser = new DOMParser();
@@ -2453,7 +2497,7 @@ var SonosPlayer = function () {
                 callback({"FirstTrackNumberEnqueued":xmlDoc.getElementsByTagName("FirstTrackNumberEnqueued")[0].textContent, "NumTracksAdded":xmlDoc.getElementsByTagName("NumTracksAdded")[0].textContent, "NewQueueLength":xmlDoc.getElementsByTagName("NewQueueLength")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2471,7 +2515,7 @@ var SonosPlayer = function () {
                 callback({"FirstTrackNumberEnqueued":xmlDoc.getElementsByTagName("FirstTrackNumberEnqueued")[0].textContent, "NumTracksAdded":xmlDoc.getElementsByTagName("NumTracksAdded")[0].textContent, "NewQueueLength":xmlDoc.getElementsByTagName("NewQueueLength")[0].textContent, "NewUpdateID":xmlDoc.getElementsByTagName("NewUpdateID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2505,7 +2549,7 @@ var SonosPlayer = function () {
                 callback({"NewUpdateID":xmlDoc.getElementsByTagName("NewUpdateID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2531,7 +2575,7 @@ var SonosPlayer = function () {
                 callback({"AssignedObjectID":xmlDoc.getElementsByTagName("AssignedObjectID")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2557,7 +2601,7 @@ var SonosPlayer = function () {
                 callback({"NrTracks":xmlDoc.getElementsByTagName("NrTracks")[0].textContent, "MediaDuration":xmlDoc.getElementsByTagName("MediaDuration")[0].textContent, "CurrentURI":xmlDoc.getElementsByTagName("CurrentURI")[0].textContent, "CurrentURIMetaData":xmlDoc.getElementsByTagName("CurrentURIMetaData")[0].textContent, "NextURI":xmlDoc.getElementsByTagName("NextURI")[0].textContent, "NextURIMetaData":xmlDoc.getElementsByTagName("NextURIMetaData")[0].textContent, "PlayMedium":xmlDoc.getElementsByTagName("PlayMedium")[0].textContent, "RecordMedium":xmlDoc.getElementsByTagName("RecordMedium")[0].textContent, "WriteStatus":xmlDoc.getElementsByTagName("WriteStatus")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2575,7 +2619,7 @@ var SonosPlayer = function () {
                 callback({"CurrentTransportState":xmlDoc.getElementsByTagName("CurrentTransportState")[0].textContent, "CurrentTransportStatus":xmlDoc.getElementsByTagName("CurrentTransportStatus")[0].textContent, "CurrentSpeed":xmlDoc.getElementsByTagName("CurrentSpeed")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2593,7 +2637,7 @@ var SonosPlayer = function () {
                 callback({"Track":xmlDoc.getElementsByTagName("Track")[0].textContent, "TrackDuration":xmlDoc.getElementsByTagName("TrackDuration")[0].textContent, "TrackMetaData":xmlDoc.getElementsByTagName("TrackMetaData")[0].textContent, "TrackURI":xmlDoc.getElementsByTagName("TrackURI")[0].textContent, "RelTime":xmlDoc.getElementsByTagName("RelTime")[0].textContent, "AbsTime":xmlDoc.getElementsByTagName("AbsTime")[0].textContent, "RelCount":xmlDoc.getElementsByTagName("RelCount")[0].textContent, "AbsCount":xmlDoc.getElementsByTagName("AbsCount")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2611,7 +2655,7 @@ var SonosPlayer = function () {
                 callback({"PlayMedia":xmlDoc.getElementsByTagName("PlayMedia")[0].textContent, "RecMedia":xmlDoc.getElementsByTagName("RecMedia")[0].textContent, "RecQualityModes":xmlDoc.getElementsByTagName("RecQualityModes")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2629,7 +2673,7 @@ var SonosPlayer = function () {
                 callback({"PlayMode":xmlDoc.getElementsByTagName("PlayMode")[0].textContent, "RecQualityMode":xmlDoc.getElementsByTagName("RecQualityMode")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2647,7 +2691,7 @@ var SonosPlayer = function () {
                 callback({"CrossfadeMode":xmlDoc.getElementsByTagName("CrossfadeMode")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2761,7 +2805,7 @@ var SonosPlayer = function () {
                 callback({"Actions":xmlDoc.getElementsByTagName("Actions")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2827,7 +2871,7 @@ var SonosPlayer = function () {
                 callback({"RemainingSleepTimerDuration":xmlDoc.getElementsByTagName("RemainingSleepTimerDuration")[0].textContent, "CurrentSleepTimerGeneration":xmlDoc.getElementsByTagName("CurrentSleepTimerGeneration")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }
@@ -2861,7 +2905,7 @@ var SonosPlayer = function () {
                 callback({"AlarmID":xmlDoc.getElementsByTagName("AlarmID")[0].textContent, "GroupID":xmlDoc.getElementsByTagName("GroupID")[0].textContent, "LoggedStartTime":xmlDoc.getElementsByTagName("LoggedStartTime")[0].textContent})
             }
             else {
-                CF.log('POST failed with status ' + status);
+                Utils.debugLog('POST failed with status ' + status);
             }
         });
     }

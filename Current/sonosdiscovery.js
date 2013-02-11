@@ -34,9 +34,9 @@ var SonosDiscovery = function (params) {
 	};
 
 	self.init = function () {
-		CF.log("SonosDiscovery: init()");
+		Utils.debugLog("SonosDiscovery: init()");
         CF.getJoin(CF.GlobalTokensJoin, function (j, v, tokens) {
-            //CF.logObject(tokens);
+            //Utils.debugLogObject(tokens);
             self.autoDiscoveryFlag = tokens["[autoDiscoveryFlag]"];
             if (self.autoDiscoveryFlag === "1") {		// Listens for SSDP responses from sonos compoents and processes them
                 CF.watch(CF.FeedbackMatchedEvent, self.systemName, self.feedbackName, self.parseFeedbackSSDP);
@@ -52,11 +52,11 @@ var SonosDiscovery = function (params) {
             }
             else {
                 playerList = JSON.parse(tokens["[playerIPAddresses]"]);
-                //CF.log("player list is:");
-                //CF.logObject(playerList);
+                //Utils.debugLog("player list is:");
+                //Utils.debugLogObject(playerList);
 
                 for (var i = 0; i < playerList.length; i++) {
-                    CF.log("Player IP is: " + playerList[i].s400.value);
+                    Utils.debugLog("Player IP is: " + playerList[i].s400.value);
                     self.getDeviceDetails("http://" + playerList[i].s400.value + ":1400/xml/device_description.xml");
                 }
             }
@@ -67,7 +67,7 @@ var SonosDiscovery = function (params) {
 
 	self.parseFeedbackSSDP = function (regex, data) {
 		var isSonos = false;
-		//CF.log("SonosDiscovery SSDP Returned:\n" + data);
+		//Utils.debugLog("SonosDiscovery SSDP Returned:\n" + data);
 
 		/* SAMPLE SONOS RESPONSE:
 		 HTTP/1.1 200 OK
@@ -97,7 +97,7 @@ var SonosDiscovery = function (params) {
 		}
 
 		if (deviceResponse["ST"] == self.ST) {
-			//CF.log("FOUND SONOS ZONE - " + deviceResponse["LOCATION"]);
+			//Utils.debugLog("FOUND SONOS ZONE - " + deviceResponse["LOCATION"]);
 			//self.devices.push(deviceResponse);
 			// Now retrieve the device description from it's XML if one was given
 			if (deviceResponse["LOCATION"]) {
@@ -108,11 +108,11 @@ var SonosDiscovery = function (params) {
 
     self.getDeviceDetails = function (location) {
         deviceResponse = {};
-        //CF.log("location is: " + location);
+        //Utils.debugLog("location is: " + location);
         CF.request(location, function (status, headers, body) {
             if (status == 200) {
                 // Read the XML data
-                //CF.log("discovery response is: " + body);
+                //Utils.debugLog("discovery response is: " + body);
                 var parser = new DOMParser();
                 var xmlDoc = parser.parseFromString(body, 'text/xml');
                 deviceResponse.location = location;
@@ -120,11 +120,11 @@ var SonosDiscovery = function (params) {
                 deviceResponse.zoneType = xmlDoc.getElementsByTagName("zoneType")[0].childNodes[0].nodeValue;
                 deviceResponse.RINCON = /uuid:(.*)/.exec(xmlDoc.getElementsByTagName("UDN")[0].childNodes[0].nodeValue)[1];
                 deviceResponse.IP = /([0-9]+(?:\.[0-9]+){3})/.exec(location)[1];
-                //CF.log("device IP is: " + deviceResponse.IP);
+                //Utils.debugLog("device IP is: " + deviceResponse.IP);
                 deviceResponse.displayName = xmlDoc.getElementsByTagName("displayName")[0].childNodes[0].nodeValue;
                 deviceResponse.sonosIconPath = xmlDoc.getElementsByTagName("url")[0].childNodes[0].nodeValue;
                 deviceResponse.modelName = xmlDoc.getElementsByTagName("modelName")[0].childNodes[0].nodeValue;
-                //CF.logObject(deviceResponse);
+                //Utils.debugLogObject(deviceResponse);
                 if (self.SonosDiscoveredCallback !== null) {
                     self.SonosDiscoveredCallback(deviceResponse);
                 }
