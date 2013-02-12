@@ -458,7 +458,7 @@ var SonosMusicSources2 = function () {
         }
         if (self.currentMusicSource === "ML") {
             // Have to check now to see whether we are getting a radio type in here as is the case for a Sonos Favourite
-            if (self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].uPNPClass = "object.item.audioItem.audioBroadcast") {
+            if (self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].uPNPClass === "object.item.audioItem.audioBroadcast") {
                 // Must be a radio item
                 // Must be a radio item.  Since you can't queue radio we call SETAVTransport not AddURIToQueue
                 Utils.debugLog("Got a Radio Item");
