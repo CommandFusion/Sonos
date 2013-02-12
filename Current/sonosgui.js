@@ -479,12 +479,17 @@ var SONOS_GUI = function () {
                 CF.setJoin("s" + self.joinTxtTimeFromBeginning, "00:00:00");
             }
             else {
-                CF.setJoin("a" + self.joinSliderAnalTime, timeDifference / self.currentPlayer.trackDurationSecs * 65536);
-                CF.setJoin("s" + self.joinTxtTimeToEnd, self.turnSecondstoSonosString(self.currentPlayer.trackDurationSecs - timeDifference));
-                CF.setJoin("s" + self.joinTxtTimeFromBeginning, self.turnSecondstoSonosString(timeDifference));
-                setTimeout(function () {
-                    self.updateTimerWithoutGetPosInfo();
-                }, 1000);
+                if (self.currentPlayer.trackDurationSecs !== 0) {
+                    Utils.debugLog("trackDuration is: "+self.currentPlayer.trackDurationSecs +" and time difference is: " + timeDifference);
+                    CF.setJoin("a" + self.joinSliderAnalTime, timeDifference / self.currentPlayer.trackDurationSecs * 65536);
+                    CF.setJoin("s" + self.joinTxtTimeToEnd, self.turnSecondstoSonosString(self.currentPlayer.trackDurationSecs - timeDifference));
+                    CF.setJoin("s" + self.joinTxtTimeFromBeginning, self.turnSecondstoSonosString(timeDifference));
+                    setTimeout(function () {
+                        self.updateTimerWithoutGetPosInfo();
+                    }, 1000);
+                }
+
+
             }
 
         }

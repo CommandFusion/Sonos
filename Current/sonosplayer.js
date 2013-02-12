@@ -436,7 +436,7 @@ var SonosPlayer = function () {
             var xmlCurrentTrackMetaData = parser.parseFromString(currentTrackMetaData, 'text/xml');
             self.radioShowMD = Utils.unescape(xmlCurrentTrackMetaData.getElementsByTagNameNS("urn:schemas-rinconnetworks-com:metadata-1-0/", 'radioShowMd')[0].textContent);
             self.streamContent = Utils.unescape(xmlCurrentTrackMetaData.getElementsByTagNameNS("urn:schemas-rinconnetworks-com:metadata-1-0/", 'streamContent')[0].textContent);
-            if (self.radioShowMD != "") {// Must be a radio show
+            if (self.radioShowMD !== "") {// Must be a radio show
                 self.radioPlaying = true;
                 Utils.debugLog("A radio channel is playing on player" + self.roomName);
                 self.currentTrackAlbum = self.streamContent;
@@ -467,11 +467,26 @@ var SonosPlayer = function () {
                     self.currentTrackName = "Unknown";
                 }
                 var nextTrackMetaData = Utils.xmlUnescapeTransportNotify(xmlDoc.getElementsByTagNameNS("urn:schemas-rinconnetworks-com:metadata-1-0/", 'NextTrackMetaData')[0].getAttribute("val"));
-                if (nextTrackMetaData != "") { // If there is nothing playing or in the queue will get "" back in this section
+                if (nextTrackMetaData !== "") { // If there is nothing playing or in the queue will get "" back in this section
                     var xmlNextTrackMetaData = parser.parseFromString(nextTrackMetaData, 'text/xml');
-                    self.nextTrackArtist = Utils.unescape(xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'creator')[0].textContent);
-                    self.nextTrackAlbum = Utils.unescape(xmlNextTrackMetaData.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", 'album')[0].textContent);
-                    self.nextTrackName = Utils.unescape(xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'title')[0].textContent);
+                    if ((xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'creator') !== undefined) && (xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'creator')[0] !== undefined)) {
+                        self.nextTrackArtist = Utils.unescape(xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'creator')[0].textContent);
+                    }
+                    else {
+                        self.nextTrackArtist = "Unknown";
+                    }
+                    if ((xmlNextTrackMetaData.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", 'album') !== undefined) && (xmlNextTrackMetaData.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", 'album')[0] !== undefined)) {
+                        self.nextTrackAlbum = Utils.unescape(xmlNextTrackMetaData.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", 'album')[0].textContent);
+                    }
+                    else {
+                        self.nextTrackAlbum = "Unknown";
+                    }
+                    if ((xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'title') !== undefined) && (xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'title')[0] !== undefined)) {
+                        self.nextTrackName = Utils.unescape(xmlNextTrackMetaData.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", 'title')[0].textContent);
+                    }
+                    else {
+                        self.nextTrackName = "Unknown";
+                    }
                 }
                 else {
                     self.nextTrackArtist = "Nothing Playing Next";
