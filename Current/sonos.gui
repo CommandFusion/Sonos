@@ -1114,7 +1114,7 @@ CommandFusion guiDesigner allows you to create custom interfaces for controlling
       <inactive s="204">Queue Song</inactive>
       <active s="204">Queue Song</active>
     </btn>
-    <img x="1" y="0" w="48" h="44" j="701" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="0">coverart_blank.png</img>
+    <img x="1" y="0" w="48" h="44" j="701" clickthrough="0" refresh="0" l="0" noCache="0" downloadIndicator="0" clearOnURLChange="1">coverart_blank.png</img>
     <btn j="0" x="45" y="23" w="303" h="21" t="queue_artist_listitem" flip="None" sim="1" l="0" s="1" js="sonosGUI.queueActionSelected(join, list, listIndex);">
       <inactive s="205">Queue Artist</inactive>
       <active s="205">Queue Artist</active>

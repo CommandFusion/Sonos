@@ -272,9 +272,9 @@ var SONOS_GUI = function () {
                     //Utils.debugLog("Got a content directory event at the GUI level");
                     if (self.selectedZoneCoordinator === notificationObj) {
                         //Utils.debugLog("Processing a change in the queue");
-                        CF.listRemove("l" + self.joinListQueue);
-                        self.currentPlayer.resetQueueNumberReturned();
-                        self.currentPlayer.getQueueForCurrentZone();
+                        //CF.listRemove("l" + self.joinListQueue);
+                        //self.currentPlayer.resetQueueNumberReturned();
+                        //self.currentPlayer.getQueueForCurrentZone();
                     }
                     break;
                 default:
@@ -402,14 +402,19 @@ var SONOS_GUI = function () {
                 self.currentPlayer.getPositionInfo();
                 self.trackStartTime = new Date().getTime();
                 //Utils.debugLog("Updating the playing indicator in the queue and the length of the queue is:" + self.currentPlayer.queueData.length);
-                if (self.currentPlayer.queueData.length > 0 && (self.currentPlayer.lastTrackNbr - 1) <= self.currentPlayer.queueData.length) {
+                /*if (self.currentPlayer.queueData.length > 0 && (self.currentPlayer.lastTrackNbr - 1) <= self.currentPlayer.queueData.length) {
                     if (self.currentPlayer.lastTrackNbr != -1) {
                         CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.lastTrackNbr - 1) + ":s" + self.joinImgQueueAlbumIcon, self.currentPlayer.queueData[self.currentPlayer.lastTrackNbr - 1].art);
                     }
                     CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.currentTrackNbr - 1) + ":s" + self.joinImgQueueAlbumIcon, "transports_grey_play_on_20.png");
                     CF.listScroll("l" + self.joinListQueue, self.currentPlayer.currentTrackNbr - 1, CF.MiddlePosition, true);
 
+                }*/
+                if (self.currentPlayer.queueData[self.currentPlayer.lastTrackNbr - 1] !== undefined) {
+                    CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.lastTrackNbr - 1) + ":s" + self.joinImgQueueAlbumIcon, self.currentPlayer.queueData[self.currentPlayer.lastTrackNbr - 1].art);
                 }
+
+                CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.currentTrackNbr - 1) + ":s" + self.joinImgQueueAlbumIcon, "transports_grey_play_on_20.png");
                 self.updateTimerWithoutGetPosInfo();
                 //self.updateTimerWithGetPosInfo();
                 self.updateNowPlayingGUI();
@@ -735,8 +740,8 @@ var SONOS_GUI = function () {
         self.currentPlayer = self.discoveredPlayerList[self.selectedZoneCoordinator];
         //Utils.debugLog("The new zone selected is: " + self.currentPlayer.roomName);
         CF.listRemove("l" + self.joinListQueue);
-        self.currentPlayer.resetQueueNumberReturned();
-        self.currentPlayer.getQueueForCurrentZone();
+        //self.currentPlayer.resetQueueNumberReturned();
+        self.zoneQueueReturnedCallback(0,true); // tell it to display the queue from the beginning and clear the queue list box
         self.currentPlayer.getPositionInfo();
         self.trackStartTime = new Date().getTime();
         //self.firstZoneDisplayTrue = true;
@@ -746,26 +751,35 @@ var SONOS_GUI = function () {
 
     // Because retrieving of queue information will be asynchroous have to use a call back from the player when the data
     // is ready
-    self.zoneQueueReturnedCallback = function (joinData, reset) {
-        var displayQueue = []; // temp object used to build the list object.  Quicker than individual list adds
+    self.zoneQueueReturnedCallback = function (startIndex, reset) {
         if (reset) {
             CF.listRemove("l" + self.joinListQueue);
         }
-        for (var i = 0; i < joinData.length; i++) { // loop around for the number of grouped zones
-            if (joinData[i].art === undefined) {
-                joinData[i].art = "";
+        if (self.currentPlayer.queueData !== undefined) { // undefined will mean there is nothing in the queue
+            var displayQueue = []; // temp object used to build the list object.  Quicker than individual list adds
+            Utils.debugLog("Displaying queue information");
+            for (var i = startIndex; i < self.currentPlayer.queueData.length; i++) { // loop around for the number of grouped zones
+                /*if (self.currentPlayer.queueData[i].art === undefined) {
+                    joinData[i].art = "";
+                }*/
+                displayQueue.push({s701:self.currentPlayer.queueData[i].art, s205:self.currentPlayer.queueData[i].artist, s204:self.currentPlayer.queueData[i].title, s305:self.currentPlayer.queueData[i].trackNo});
             }
-            displayQueue.push({s701:joinData[i].art, s205:joinData[i].artist, s204:joinData[i].title, s305:joinData[i].trackNo});
-        }
-        CF.listAdd("l" + self.joinListQueue, displayQueue);
-        Utils.debugLog("Updating the playing indicator in the queue and the length of the queue is:" + self.currentPlayer.queueData.length);
-        if (self.currentPlayer.queueData.length > 0 && (self.currentPlayer.lastTrackNbr - 1) <= self.currentPlayer.queueData.length) {
-            if (self.currentPlayer.lastTrackNbr != -1) {
-                CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.lastTrackNbr - 1) + ":s" + self.joinImgQueueAlbumIcon, self.currentPlayer.queueData[self.currentPlayer.lastTrackNbr - 1].art);
-            }
-            CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.currentTrackNbr - 1) + ":s" + self.joinImgQueueAlbumIcon, "transports_grey_play_on_20.png");
-            //CF.listScroll("l" + self.joinListQueue, self.currentPlayer.lastTrackNbr-1, CF.MiddlePosition, true);
+            CF.listAdd("l" + self.joinListQueue, displayQueue);
+            Utils.debugLog("Updating the playing indicator in the queue and the length of the queue is:" + self.currentPlayer.queueData.length);
+            //if (self.currentPlayer.queueData.length > 0 && (self.currentPlayer.lastTrackNbr - 1) <= self.currentPlayer.queueData.length) {
+            /*if (self.currentPlayer.queueData.length > 0 {
+                if (self.currentPlayer.lastTrackNbr === ) {
+                    CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.lastTrackNbr - 1) + ":s" + self.joinImgQueueAlbumIcon, self.currentPlayer.queueData[self.currentPlayer.lastTrackNbr - 1].art);
+                }
+                CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.currentTrackNbr - 1) + ":s" + self.joinImgQueueAlbumIcon, "transports_grey_play_on_20.png");
+                //CF.listScroll("l" + self.joinListQueue, self.currentPlayer.lastTrackNbr-1, CF.MiddlePosition, true);
 
+            }*/
+            CF.setJoin("l" + self.joinListQueue + ":" + (self.currentPlayer.currentTrackNbr - 1) + ":s" + self.joinImgQueueAlbumIcon, "transports_grey_play_on_20.png");
+        }
+        else
+        {
+            Utils.debugLog("There is no queue information");
         }
     }
 

@@ -22,6 +22,7 @@ var SonosMusicSources2 = function () {
         // musicSources will be an object which holds all the musicSource info
         // the '0' represents the level you are in the music sources tree, i.e. 0 is the main menu
         musicSources:{0:[
+            {Name:"Sonos Favourites", type:"ML", id:"FV:2", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://maisonbisson.com/files/2011/08/apple-itunes-9-icon.png", creator:"", album:"", originalTrackNumber:"", userID:""},
             {Name:"Music Library", type:"ML", id:"A:", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://maisonbisson.com/files/2011/08/apple-itunes-9-icon.png", creator:"", album:"", originalTrackNumber:"", userID:""},
             //{Name:"Docked iPods", type:"DiPod", id:"A:", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://icdn.pro/images/en/i/p/ipod-dock-icone-9168-96.png", creator:"", album:"", originalTrackNumber:"", userID:""},
             {Name:"Radio", type:"Radio", id:"root", parentID:"", restricted:"", title:"", uPNPClass:"", res:"", protocolInfo:"", albumArtURI:"http://d3bwsr3zpy54hy.cloudfront.net/201301171700/img/products/appicon-free.png", creator:"", album:"", originalTrackNumber:"", userID:""},
@@ -443,7 +444,33 @@ var SonosMusicSources2 = function () {
         var enqueuedURI = "";
         var enqueuedURIMetaData = "";
         Utils.debugLog("Processing a play command for source: " + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].res);
+        if (self.currentMusicSource === "Radio") {
+            // Must be a radio item.  Since you can't queue radio we call SETAVTransport not AddURIToQueue
+            Utils.debugLog("Got a Radio Item");
+            sourceToAdd = self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id
+            var currentURI = "x-sonosapi-stream:" + sourceToAdd + "?sid=254&flags=32";
+            var currentURIMetaData = self.metaDataHeader + '<item id="F00090020' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id + '" parentID="F00080064' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].parentID.replace(/:/g, "%3a") + '" restricted="true"><dc:title>' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].title + '</dc:title><upnp:class>object.item.audioItem.audioBroadcast</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">SA_RINCON65031_</desc></item></DIDL-Lite>';
+            //self.currentPlayer.AVTransportSetAVTransportURI(self.sendPlayPostSetAVTransport, 0, currentURI, currentURIMetaData);
+            self.currentPlayer.AVTransportSetAVTransportURI(self.sendPostRadio, 0, currentURI, currentURIMetaData);
+            //self.currentPlayer.getQueueForCurrentZone();
+            self.lastPlayedSource = "Radio";
+            return;
+        }
         if (self.currentMusicSource === "ML") {
+            // Have to check now to see whether we are getting a radio type in here as is the case for a Sonos Favourite
+            if (self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].uPNPClass = "object.item.audioItem.audioBroadcast") {
+                // Must be a radio item
+                // Must be a radio item.  Since you can't queue radio we call SETAVTransport not AddURIToQueue
+                Utils.debugLog("Got a Radio Item");
+                sourceToAdd = self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].res
+                var currentURI = sourceToAdd;
+                var currentURIMetaData = self.metaDataHeader + '<item id="F00090020' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id + '" parentID="F00080064' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].parentID.replace(/:/g, "%3a") + '" restricted="true"><dc:title>' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].title + '</dc:title><upnp:class>object.item.audioItem.audioBroadcast</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">SA_RINCON65031_</desc></item></DIDL-Lite>';
+                //self.currentPlayer.AVTransportSetAVTransportURI(self.sendPlayPostSetAVTransport, 0, currentURI, currentURIMetaData);
+                self.currentPlayer.AVTransportSetAVTransportURI(self.sendPostRadio, 0, currentURI, currentURIMetaData);
+                //self.currentPlayer.getQueueForCurrentZone();
+                self.lastPlayedSource = "Radio";
+                return;
+            }
             // Must be a single library item
             Utils.debugLog("Got a music library item");
             //sourceToAdd = sourceToAdd.replace("S://","x-file-cifs://");
@@ -495,18 +522,7 @@ var SonosMusicSources2 = function () {
          <s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/"><s:Body><u:SetAVTransportURI xmlns:u="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID>0</InstanceID><CurrentURI>x-sonosapi-stream:s117787?sid=254&amp;flags=32</CurrentURI><CurrentURIMetaData>&lt;DIDL-Lite xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot; xmlns:upnp=&quot;urn:schemas-upnp-org:metadata-1-0/upnp/&quot; xmlns:r=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot; xmlns=&quot;urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/&quot;&gt;&lt;item id=&quot;F00090020s117787&quot; parentID=&quot;F00080064c481372%3alocal&quot; restricted=&quot;true&quot;&gt;&lt;dc:title&gt;Absolute 80s&lt;/dc:title&gt;&lt;upnp:class&gt;object.item.audioItem.audioBroadcast&lt;/upnp:class&gt;&lt;desc id=&quot;cdudn&quot; nameSpace=&quot;urn:schemas-rinconnetworks-com:metadata-1-0/&quot;&gt;SA_RINCON65031_&lt;/desc&gt;&lt;/item&gt;&lt;/DIDL-Lite&gt;</CurrentURIMetaData></u:SetAVTransportURI></s:Body></s:Envelope>
 
          */
-        if (self.currentMusicSource === "Radio") {
-            // Must be a radio item.  Since you can't queue radio we call SETAVTransport not AddURIToQueue
-            Utils.debugLog("Got a Radio Item");
-            sourceToAdd = self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id
-            var currentURI = "x-sonosapi-stream:" + sourceToAdd + "?sid=254&flags=32";
-            var currentURIMetaData = self.metaDataHeader + '<item id="F00090020' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].id + '" parentID="F00080064' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].parentID.replace(/:/g, "%3a") + '" restricted="true"><dc:title>' + self.musicSources[self.musicSourceLevel][self.musicSourcesIndex].title + '</dc:title><upnp:class>object.item.audioItem.audioBroadcast</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/">SA_RINCON65031_</desc></item></DIDL-Lite>';
-            //self.currentPlayer.AVTransportSetAVTransportURI(self.sendPlayPostSetAVTransport, 0, currentURI, currentURIMetaData);
-            self.currentPlayer.AVTransportSetAVTransportURI(self.sendPostRadio, 0, currentURI, currentURIMetaData);
-            //self.currentPlayer.getQueueForCurrentZone();
-            self.lastPlayedSource = "Radio";
-            return;
-        }
+
 
     }
 
@@ -561,7 +577,7 @@ var SonosMusicSources2 = function () {
         var body = response.Result//.replace('xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"',"");;
         var parser = new DOMParser();
         var xmlDoc = parser.parseFromString(body, 'text/xml');
-        //Utils.debugLog("The music library response is:" + body);
+        Utils.debugLog("The music library response is:" + body);
         // Check to see whether we have reached the track level.  tracks have an item tag and others have a container tag
         if (body.indexOf('</container>') > 0) {
             var results = xmlDoc.getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/", 'container');
@@ -623,6 +639,9 @@ var SonosMusicSources2 = function () {
             ;
             if (results[i].getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", "albumArtURI")[0] !== undefined) {
                 albumArt = Utils.xmlUnescape(self.currentPlayer.host + results[i].getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", "albumArtURI")[0].textContent)
+            }
+            else {
+                albumArt = "coverart_blank.png";
             }
             ;
             if (results[i].getElementsByTagNameNS("urn:schemas-upnp-org:metadata-1-0/upnp/", "upnp:originalTrackNumber")[0] !== undefined) {
